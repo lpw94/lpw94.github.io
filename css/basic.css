@@ -1,0 +1,50 @@
+@CHARSET "UTF-8";
+article,
+aside,
+details,
+figcaption,
+figure,
+footer,
+header,
+hgroup,
+main,
+menu,
+nav,
+section,
+summary {
+  display: block;
+}
+audio,
+canvas,
+progress,
+video {
+  display: inline-block;
+  vertical-align: baseline;
+}
+body,div,h1,h2,h3,h4,h5,h6,figure,figcaption,p,select,option,ul,li,span,ol,dl,dt,dd,img {
+	margin: 0;
+	padding: 0;
+}
+ul,ol{
+	list-style: none;
+}
+img{
+	border: none;
+}
+a{
+	text-decoration: none;
+}
+a:hover{
+	text-decoration: none;
+}
+html, body { height:auto; background-color: #fff;}
+body {
+    font-size: 14px;
+    font-family: "Microsoft YaHei","微软雅黑", Helvetica, tahoma,arial,simsun,"宋体", sans-serif;
+    line-height: 1.5;
+}
+.fl{float: left;}
+.fr{float: right;}
+.clearfix:after {visibility:hidden;display:block;font-size:0;content:" ";clear:both;height:0;}
+.clearfix {zoom:1;}
+
