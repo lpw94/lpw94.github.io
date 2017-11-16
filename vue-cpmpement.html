@@ -1,0 +1,54 @@
+
+<!DOCTYPE html>
+<html>
+
+	<head>
+		<meta charset="UTF-8">
+		<title></title>
+		<style type="text/css">
+			.botton {
+				cursor: pointer;
+				display: inline-block;
+				text-align: center;
+				font-size: 20px;
+				color: #FFFFFF;
+				padding: 0 30px;
+				height: 30px;
+				line-height: 30px;
+				border: 1px solid #EA6197;
+				background-color: #EA6197;
+				border-radius: 15px;
+			}
+		</style>
+		
+		<!-- 引入样式 -->
+		<link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-default/index.css">
+		<!-- 引入组件库 -->
+		<script src="https://unpkg.com/element-ui/lib/index.js"></script>
+	</head>
+
+	<body>
+		<div id="app">
+			<v-botton text="我是第一个按钮"></v-botton>
+			<v-botton text="我是第二个按钮"></v-botton>
+			<v-botton></v-botton>
+		</div>
+		
+	</body>
+	<script src="js/vue.min.js"></script>
+	<script>
+		Vue.component("v-botton", Vue.extend({
+			props : {
+				text : {
+					type: String,
+					default: "Button"
+				}
+			},
+			template: '<div class="botton">{{text}}</div>'
+		}))
+		var vm = new Vue({
+			el: "#app"
+		})
+	</script>
+
+</html>

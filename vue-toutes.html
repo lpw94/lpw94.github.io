@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>vue路由</title>
+    <script src="js/vue.min.js"></script>
+    <script src="js/vue-router.min.js"></script>
+    <style>
+        .router-link-active{
+            background: #ccc;
+            padding: 5px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="box">
+        <div>
+            <router-link to="/home">主页</router-link>
+            <router-link to="/news">新闻</router-link>
+            <router-link to='/about'>关于</router-link>
+        </div>
+        <div>
+            <router-view></router-view>
+        </div>
+    </div>
+
+    <script>
+        //组件
+        const Home = {
+            template:'<h3>我是主页</h3>'
+        };
+        const News = {
+            template:'<h3>我是新闻</h3>'
+        }
+        const About = {
+            template:'<h3>我是关于</h3>'
+        }
+        //配置路由
+        const routes = [ 
+            {path:'/home', component :Home},
+            {path:'/news', component:News},
+            {path:'/about',component:About},
+            //重定向
+            {path:'*',redirect:'/home'}
+        ]
+        //生成路由实例
+        const router = new VueRouter({
+            routes
+        })
+        //挂载到vue上
+        new Vue({
+            router,
+            el:'#box'
+        })
+    </script>
+</body>
+</html>

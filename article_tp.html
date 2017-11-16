@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8">
+		<title>文章详情aaa</title>
+		<meta name="referrer" content="never">
+		<!--忽略电话号码和email识别-->
+		<meta name="format-detection" content="telephone=no" />
+		<meta name="format-detection" content="email=no" />
+		<!--当网站添加到主屏幕快速启动方式，将网站添加到主屏幕快速启动方式-->
+		<meta name="apple-mobile-web-app-capable" content="yes" />
+		<!--隐藏ios上的浏览器地址栏-->
+		<meta name="apple-mobile-web-app-status-bar-style" content="black" />
+		<!-- UC默认竖屏 ，UC强制全屏 -->
+		<meta name="full-screen" content="yes">
+		<meta name="browsermode" content="application">
+		<!-- QQ强制竖屏 QQ强制全屏 -->
+		<meta name="x5-orientation" content="portrait">
+		<meta name="x5-fullscreen" content="true">
+		<meta name="x5-page-mode" content="app">
+		<meta name="viewport" content="width=device-width,initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no,minimal-ui">
+		<link rel="stylesheet" href="css/reset.css" />
+		<link rel="stylesheet" href="css/article.css" />
+		
+		<script src="js/vue.min.js"></script>
+		<script src="js/axios.min.js"></script>
+		<script src="js/rem.js"></script>
+	</head>
+	<body>
+		<!--文章部分-->
+		<div id="app">
+		<div class="article">
+			<h1 id="title" @click="add()">{{msg.title}}</h1>
+			<div class="time">{{msg.dateTime | date}}<a href="#">{{msg.author}}</a></div>
+			<div id="" class="exhibitionImg">
+				<img src="#" alt="" />
+			</div>
+			<!--文章主体-->
+			<div class="content">
+				<div v-html="msg.content"></div>
+				<ul id="videoList" class="videoList">
+					<li v-for="val in msg.videoContent" >
+						<a :href="val.link"> 
+							<img :src="val.image" alt="" data-val="">
+							<img class="player" src="static/images/video_play.png" alt="">
+							<p class="line_tlt">{{val.title}}</p>
+						</a>
+					</li>
+
+				</ul>
+			</div>
+			<!--点赞-->
+			<div class="like">
+				<div class="linkButton">
+					<i class="icon-xin">
+						<img src="img/xin.png" alt="" />
+					</i>
+					<em id="num">{{msg.likeTotals}} 0000</em>
+					
+				</div>
+				<p class="linkText">喜欢就赞一个吧！</p>
+			</div>
+		</div>
+		<!--分享部分-->
+		<div class="share">
+			<div class="head">
+				<div>分享至</div>
+			</div>
+			<!--分享图标-->
+			<ul class="ul-share clearfix">
+				<li>
+					<a href="#">
+						<img src="img/wx.png" alt="" />
+					</a>
+				</li>
+				<li>
+					<a href="#">
+						<img src="img/wb.png" alt="" />
+					</a>
+				</li>
+				<li>
+					<a href="#">
+						<img src="img/qq.png" alt="" />
+					</a>
+				</li>
+				<li>
+					<a href="#">
+						<img src="img/rr.png" alt="" />
+					</a>
+				</li>
+				<li>
+					<a href="#">
+						<img src="img/db.png" alt="" />
+					</a>
+				</li>
+			</ul>
+			
+			<!--广告-->
+			<div class="advertisement">
+				<div class="pic">
+					<a href="#">
+						<img src="#" alt="" /> 
+					</a>
+				</div>
+				<div class="advertisementText clearfix">
+					<div class="ms fl"><a :href="msg.advert.url">{{msg.advert.title}}</a></div>
+					<div class="ico fr">广告</div>
+				</div>
+			</div>
+		</div>
+		<!--推荐-->
+		<div class="recommend">
+			<div class="recommendHead">相关推荐</div>
+			<ul>
+				<li class="clearfix">
+					<div class="recommendImg fl"><a href="#"><img src="#" alt="" /></a></div>
+					<div class="recommendText fl">
+						<a href="#">阿森纳有望卫冕阿森纳有望卫冕阿森纳有望卫冕</a>
+						<div class="recommendTime clearfix">
+							<div class="fl">
+								<span>新华网</span>
+								<span>10分钟前</span>
+							</div>
+							<div class="fr clearfix">
+								<div class="ico fl">专题</div>
+								<div class="fl">
+									<a href="#">
+										<img src="img/comment.png" alt="" />
+									999
+									</a>
+									
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+				<li class="clearfix">
+					<div class="recommendImg fl"><a href="#"><img src="#" alt="" /></a></div>
+					<div class="recommendText fl">
+						<a href="#">阿森纳有望卫冕阿森纳有望卫冕阿森纳有望卫冕</a>
+						<div class="recommendTime clearfix">
+							<div class="fl">
+								<span>新华网</span>
+								<span>10分钟前</span>
+							</div>
+							<div class="fr clearfix">
+								<div class="ico fl">专题</div>
+								<div class="fl">
+									<a href="#">
+										<img src="img/comment.png" alt="" />
+										999
+									</a>
+								</div>
+							</div>
+						</div>
+					</div>
+				</li>
+			</ul>
+		</div>
+		<!--热评区域-->
+		<div class="comment">
+			<div class="head">
+				<div>
+					<img src="img/fire.png" alt="" />
+					热评区
+				</div>
+			</div>
+			<ul>
+				<li>
+					<div class="portraitBox clearfix">
+						<div class="portrait fl" onclick="androidFn()"><img src="img/wb.png" alt="" /></div>
+						<div class="nameBox fl">
+							<div class="name" onclick="androidFn()"><a href="#">小月亮小月亮</a></div>
+							<div class="commentTime">1小时前</div>
+						</div>
+					</div>
+					<div class="text">我想说内马尔和c罗关系挺好啊</div>
+					<div class="thumb"><img src="img/like2.png" alt="" />999</div>
+				</li>
+			</ul>
+			<div class="more">
+				<a href="#">
+					查看更多评论 >
+				</a>
+			</div>
+		</div>
+		<!--评论文本框部分-->
+		<div class="send" v-show="show">
+			<ul class="clearfix">
+				<li class="sendInp">
+					<input type="text" placeholder="发表您的言论"/>
+				</li>
+				<li class="comment">
+					<a href="#"><img src="img/comment.png" alt="" />999</a>
+				</li>
+				<li id="collect">
+					<img src="img/collect.png" alt="" />
+				</li>
+				<li id="share">
+					<a href="#"><img src="img/share.png" alt="" /></a>
+				</li>
+			</ul>
+		</div>
+
+
+	</div>
+
+
+		<script type="text/javascript">
+		    function sum(a,b){
+		    	return a+b;
+		    }
+		    function androidFn(){
+			    var result =window.android.back();
+			    console.log(result)
+			    return result;
+			    //document.getElementById("p").innerHTML=result;
+		    }
+		</script>
+
+
+
+		<script>
+		Vue.filter('date',function(input){
+            var oDate=new Date(input);
+
+            var month = (oDate.getMonth()+1)>10 ? oDate.getMonth()+1 : '0' + (oDate.getMonth()+1);
+            var day = oDate.getDate()>10 ? oDate.getDate() : '0' + oDate.getDate();
+            var hours = oDate.getHours()>10 ? oDate.getHours() : '0' + oDate.getHours();
+            var minutes = oDate.getMinutes()>10 ? oDate.getMinutes() : '0' + oDate.getMinutes();
+            var seconds = oDate.getSeconds()>10 ? oDate.getSeconds() : '0' + oDate.getSeconds();
+
+            return oDate.getFullYear()+'-'+ month +'-'+day+' '+hours+':'+minutes+':'+seconds;
+        });
+
+        var url = window.location.href;
+
+
+		var vm = new Vue({
+			el: '#app',
+			data: {
+				msg: {
+					advert:{},
+					videoContent:{}
+				},
+				status : false,
+				show: false
+			},
+			methods:{
+				read: function(){
+					var This =this;
+					var type  = 2;//this.getUrl('uid');
+					var id = 40;
+					//console.log("000")
+					axios.post('http://192.168.3.100:8080/yys-api/appNews/getDetail?type='+type+'&nId='+id+'', {
+					    
+					  })
+					  .then(function (response) {
+					  	//console.log(response.data.result);
+					  	This.msg = response.data.result
+					  })
+					  .catch(function (error) {
+					    console.log(error);
+					  });
+				},
+				addlike: function(){
+					if (!this.status) {
+						this.msg.likeTotals = this.msg.likeTotals + 1;
+						this.status = true;
+					}
+				},
+
+				getUrl: function(name){
+				     var reg = new RegExp("(^|&)"+ name +"=([^&]*)(&|$)");
+				     var r = window.location.search.substr(1).match(reg);
+				     if(r!=null)return  unescape(r[2]); return null;
+				},
+				add: function(){
+					//alert(this.getUrl('uid'));
+					
+				}, 
+				fnAndroid: function(a){
+					//var result =window.android.back();
+					console.log(a)
+			        //return result;
+				}
+				
+			},
+			mounted:function(){
+				this.read();
+				console.log(this.getUrl('uid'))
+				if (this.getUrl('uid')==0) {
+					this.show = false;
+				}else{
+					this.show = true;
+				}
+			}
+
+		})
+	</script>
+	</body>
+</html>
