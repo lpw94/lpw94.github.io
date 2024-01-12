@@ -1,0 +1,1 @@
+(window.webpackJsonp=window.webpackJsonp||[]).push([[38],{362:function(t,n,s){"use strict";s.r(n);var i={name:"CustomPage"},e=s(0),u=Object(e.a)(i,(function(){this._self._c;return this._m(0)}),[function(){var t=this._self._c;return t("div",[t("h1",[this._v("这是一个自定义页面")]),this._v(" "),t("p",[this._v("欢迎来到我的博客！")])])}],!1,null,null,null);n.default=u.exports}}]);

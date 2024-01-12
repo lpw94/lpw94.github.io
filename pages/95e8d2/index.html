@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en-US">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>JavaScript响应式原理 | 技术学习</title>
+    <meta name="generator" content="VuePress 1.9.10">
+    
+    <meta name="description" content="ES6, JavaScript, typyscript, vue2, vue3, react, HTML技术学习。">
+    
+    <link rel="preload" href="/assets/css/0.styles.d4927894.css" as="style"><link rel="preload" href="/assets/js/app.fc5d288f.js" as="script"><link rel="preload" href="/assets/js/3.85c2f061.js" as="script"><link rel="preload" href="/assets/js/2.a32bdd97.js" as="script"><link rel="preload" href="/assets/js/43.1f2fe5a9.js" as="script"><link rel="prefetch" href="/assets/js/1.34c236db.js"><link rel="prefetch" href="/assets/js/10.17d2c9ea.js"><link rel="prefetch" href="/assets/js/11.88eec5d6.js"><link rel="prefetch" href="/assets/js/12.cbe963cf.js"><link rel="prefetch" href="/assets/js/13.0b290c45.js"><link rel="prefetch" href="/assets/js/14.48c4375d.js"><link rel="prefetch" href="/assets/js/15.63d9b6c4.js"><link rel="prefetch" href="/assets/js/16.e0140c7e.js"><link rel="prefetch" href="/assets/js/17.c0a63381.js"><link rel="prefetch" href="/assets/js/18.b3c7945a.js"><link rel="prefetch" href="/assets/js/19.e4a6e666.js"><link rel="prefetch" href="/assets/js/20.5734ded8.js"><link rel="prefetch" href="/assets/js/21.feb1869b.js"><link rel="prefetch" href="/assets/js/22.7f9ce4c6.js"><link rel="prefetch" href="/assets/js/23.4790c132.js"><link rel="prefetch" href="/assets/js/24.7b1dcc14.js"><link rel="prefetch" href="/assets/js/25.d3e2fe5b.js"><link rel="prefetch" href="/assets/js/26.e9dcf75f.js"><link rel="prefetch" href="/assets/js/27.429368d4.js"><link rel="prefetch" href="/assets/js/28.cdc1c5ee.js"><link rel="prefetch" href="/assets/js/29.c78c1068.js"><link rel="prefetch" href="/assets/js/30.424b9d89.js"><link rel="prefetch" href="/assets/js/31.4a7c267b.js"><link rel="prefetch" href="/assets/js/32.1548324c.js"><link rel="prefetch" href="/assets/js/33.dda0f563.js"><link rel="prefetch" href="/assets/js/34.478d7787.js"><link rel="prefetch" href="/assets/js/35.39db6484.js"><link rel="prefetch" href="/assets/js/36.b8bb9580.js"><link rel="prefetch" href="/assets/js/37.e99fc3ef.js"><link rel="prefetch" href="/assets/js/38.f600f275.js"><link rel="prefetch" href="/assets/js/39.bed03bd1.js"><link rel="prefetch" href="/assets/js/4.ea9c9602.js"><link rel="prefetch" href="/assets/js/40.bcb5d1ab.js"><link rel="prefetch" href="/assets/js/41.d5cc3c54.js"><link rel="prefetch" href="/assets/js/42.1b1038ae.js"><link rel="prefetch" href="/assets/js/44.48078cda.js"><link rel="prefetch" href="/assets/js/45.31e0b721.js"><link rel="prefetch" href="/assets/js/46.fc6ac1cb.js"><link rel="prefetch" href="/assets/js/47.9235ad8b.js"><link rel="prefetch" href="/assets/js/48.aa3895cc.js"><link rel="prefetch" href="/assets/js/49.a516096a.js"><link rel="prefetch" href="/assets/js/5.40f3a2b6.js"><link rel="prefetch" href="/assets/js/6.9bb49952.js"><link rel="prefetch" href="/assets/js/9.c40389f4.js"><link rel="prefetch" href="/assets/js/vendors~docsearch.01cde460.js">
+    <link rel="stylesheet" href="/assets/css/0.styles.d4927894.css">
+  </head>
+  <body class="theme-mode-light">
+    <div id="app" data-server-rendered="true"><div class="theme-container sidebar-open no-sidebar"><header class="navbar blur"><div title="目录" class="sidebar-button"><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" role="img" viewBox="0 0 448 512" class="icon"><path fill="currentColor" d="M436 124H12c-6.627 0-12-5.373-12-12V80c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12zm0 160H12c-6.627 0-12-5.373-12-12v-32c0-6.627 5.373-12 12-12h424c6.627 0 12 5.373 12 12v32c0 6.627-5.373 12-12 12z"></path></svg></div> <a href="/" class="home-link router-link-active"><!----> <span class="site-name">技术学习</span></a> <div class="links"><div class="search-box"><input aria-label="Search" autocomplete="off" spellcheck="false" value=""> <!----></div> <nav class="nav-links can-hide"><div class="nav-item"><a href="/" class="nav-link">首页</a></div><div class="nav-item"><a href="/about/" class="nav-link">个人简介</a></div><div class="nav-item"><a href="https://github.com/lpw94" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  GitHub
+  <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></div> <!----></nav></div></header> <div class="sidebar-mask"></div> <div class="sidebar-hover-trigger"></div> <aside class="sidebar" style="display:none;"><!----> <nav class="nav-links"><div class="nav-item"><a href="/" class="nav-link">首页</a></div><div class="nav-item"><a href="/about/" class="nav-link">个人简介</a></div><div class="nav-item"><a href="https://github.com/lpw94" target="_blank" rel="noopener noreferrer" class="nav-link external">
+  GitHub
+  <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></div> <!----></nav>  <!----> </aside> <div><main class="page"><div class="theme-vdoing-wrapper "><div class="articleInfo-wrap" data-v-06225672><div class="articleInfo" data-v-06225672><ul class="breadcrumbs" data-v-06225672><li data-v-06225672><a href="/" title="首页" class="iconfont icon-home router-link-active" data-v-06225672></a></li> <li data-v-06225672><a href="/categories/?category=blog" title="分类" data-v-06225672>blog</a></li></ul> <div class="info" data-v-06225672><!----> <div title="创建时间" class="date iconfont icon-riqi" data-v-06225672><a href="javascript:;" data-v-06225672>2024-01-08</a></div> <!----></div></div></div> <!----> <div class="content-wrapper"><!----> <h1><img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAAeCAYAAAA7MK6iAAAAAXNSR0IArs4c6QAABGpJREFUSA3tVVtoXFUU3fvOI53UlmCaKIFmwEhsE7QK0ipFEdHEKpXaZGrp15SINsXUWvBDpBgQRKi0+KKoFeJHfZA+ED9KKoIU2gYD9UejTW4rVIzm0VSTziPzuNu1z507dibTTjL4U/DAzLn3nL3X2o91ziX6f9wMFdh6Jvbm9nNSV0msViVO6tN1Rm7NMu2OpeJ9lWBUTDxrJbYTS0hInuwciu9eLHlFxCLCZEk3MegsJmZ5K/JD6t7FkFdEvGUo1g7qJoG3MHImqRIn8/nzY1K9UPKKiJmtnUqHVE3Gbuay6vJE/N2FEmuxFjW2nUuE0yQXRRxLiTUAzs36zhZvOXJPdX850EVnnLZkB8prodQoM5JGj7Xk2mvC7JB8tG04Ef5PiXtG0UtxupRQSfTnBoCy554x18yJHI6I+G5Eru4LHmPJZEQsrvPUbMiA8G/WgMK7w7I+ez7++o2ANfbrjvaOl1tFMs+htG3IrZH9/hDX1Pr8Tc0UvH8tcX29KzAgIGcEkINyW5BF9x891hw6VYqgJHEk0huccS7vh3C6gTiODL+26huuBtbct8eZnqLML8PkxGYpuPZBqtqwkSjgc4mB5gbgig5i+y0UDK35LMxXisn9xQtK+nd26gTIHsHe/oblK/b29fUmN/8Y+9jAQrnBp56m1LcDlDp9irKTExSKduXJVWSqdBMA08pEJnEIOB3FPPMybu/oeV8zFeYN3xx576Q6RH+VmplE4ncQV5v+5rzSoyOU7PuEAg8g803PwBJ0CExno/jcMbN8tONYeOmHiuUNryvm3fRUy4tMPVLdAGkUhNWuggGrJcXPv+ouCjz0MKUHz1J2/E8IC9nqTabcxgaBYM0hPhD5Y65FsbxRQKxCQrDjDctW7PUM3HuZunFyifSAqEfuzCp48Il24luWUWZoyJCaPR82jE0+kFA643wRFVni4RYSq3ohJO2pZ7B5dO4xkDWbEpossJPLSrPjYID8rS2UHTlvyNxqIGsg674XJJ7vnh5L7PNwC4hh2sjCI96mzszOTpxLF0T7l88Yz7lAuK6OnL8gXLOnTvpzSb22YG8W7us3jSebFHeeqnXRG1vt+MoUM84LQIBmMsCTAcOauTh0T0l0neQK7m2bLMt2mGxU3HYssS0J2cdv5wljlPsrIuZLAG/2DOZIXgCYT8uMGZN+e2kSirfxZOPCsC0f24nTZzspnVn9VePS1Z5vubmAGGXG8ZFno9Hel0yfA5ZPhF7Dh972BQJ2qCpgH67lmWtBYbvk6sz02wjky2vXyz0XErP/kFB619js1BtwfOV4OPRqOQBjy3Qbk18vigUPPSD5ceHnwck7W9bhAqZdd7SuG7w4/P2F/GaJh8c7e9qgow+Q7cGBo+98WsLkuktFqiZabtXuQTu/Y5ETbR0v7tNSFnvrmu6pjdoan2KjMu8q/Hmj1EfCO2ZGfEIbIXKUlw8qaX9/b2oeSJmFksSeT/Fn0V3nSypChh4Gjh74ybO9aeZ/AN2dwciu2/MhAAAAAElFTkSuQmCC">JavaScript响应式原理<!----></h1> <!----> <div class="theme-vdoing-content content__default"><h1 id="javascript响应式原理"><a href="#javascript响应式原理" class="header-anchor">#</a> JavaScript响应式原理</h1> <div class="language- extra-class"><pre class="language-text"><code>class Observer {
+  constructor() {
+    this.subscribers = [];
+  }
+
+  // 注册观察者
+  subscribe(callback) {
+    this.subscribers.push(callback);
+  }
+
+  // 通知观察者更新
+  notify(data) {
+    this.subscribers.forEach(callback =&gt; {
+      callback(data);
+    });
+  }
+}
+
+// 定义可观察对象
+class Observable {
+  constructor() {
+    this.observers = new Observer();
+  }
+
+  // 添加观察者
+  addObserver(callback) {
+    this.observers.subscribe(callback);
+  }
+
+  // 通知观察者更新
+  notifyObservers(data) {
+    this.observers.notify(data);
+  }
+}
+
+// 定义响应式对象
+class ReactiveObject {
+  constructor(data) {
+    this.data = data;
+    this.observe(this.data);
+  }
+
+  // 监听数据，实现响应式
+
+  observe(data) {
+    if (!data || typeof data !== 'object') {
+      return;
+    }
+
+    Object.keys(data).forEach(key =&gt; {
+      let val = data[key];
+
+      // 递归监听子对象
+      this.observe(val);
+
+      // 为每个属性定义getter和setter
+      Object.defineProperty(data, key, {
+        enumerable: true,
+        configurable: true,
+        get: function() {
+          console.log(`访问属性：${key}，值为：${val}`);
+          return val;
+        },
+        set: function(newVal) {
+          console.log(`设置属性：${key}，新值为：${newVal}`);
+          if (val === newVal)
+            return;
+          val = newVal;
+          // 通知观察者更新
+          this.notifyObservers();
+        }
+      });
+    });
+  }
+}
+
+// 使用示例
+const data = {
+  name: 'John',
+  age: 25
+};
+
+const reactiveObj = new ReactiveObject(data);
+
+reactiveObj.addObserver(() =&gt; {
+  console.log('观察者1被通知更新');
+});
+
+reactiveObj.addObserver(() =&gt; {
+  console.log('观察者2被通知更新');
+});
+
+reactiveObj.data.name = 'Alice';
+</code></pre></div></div></div> <!----> <div class="page-edit"><!----> <!----> <!----></div> <div class="page-nav-wapper"><!----> <!----></div></div> <div class="article-list"><div class="article-title"><a href="/archives/" class="iconfont icon-bi">最近更新</a></div> <div class="article-wrapper"><dl><dd>01</dd> <dt><a href="/" class="router-link-active"><div>
+            
+            <!----></div></a> <span class="date"></span></dt></dl><dl><dd>02</dd> <dt><a href="/about/"><div>
+            
+            <!----></div></a> <span class="date"></span></dt></dl><dl><dd>03</dd> <dt><a href="/pages/379b41/"><div>
+            es6  Map对象
+            <!----></div></a> <span class="date">01-11</span></dt></dl> <dl><dd></dd> <dt><a href="/archives/" class="more">更多文章&gt;</a></dt></dl></div></div></main></div> <div class="footer"><!----> 
+  Theme by
+  <a href="https://github.com/xugaoyi/vuepress-theme-vdoing" target="_blank" title="本站主题">Vdoing</a> <!----></div> <div class="buttons"><div title="返回顶部" class="button blur go-to-top iconfont icon-fanhuidingbu" style="display:none;"></div> <div title="去评论" class="button blur go-to-comment iconfont icon-pinglun" style="display:none;"></div> <div title="主题模式" class="button blur theme-mode-but iconfont icon-zhuti"><ul class="select-box" style="display:none;"><li class="iconfont icon-zidong">
+          跟随系统
+        </li><li class="iconfont icon-rijianmoshi">
+          浅色模式
+        </li><li class="iconfont icon-yejianmoshi">
+          深色模式
+        </li><li class="iconfont icon-yuedu">
+          阅读模式
+        </li></ul></div></div> <!----> <!----> <!----></div><div class="global-ui"><canvas id="vuepress-canvas-ribbon"></canvas><canvas id="vuepress-canvas-cursor"></canvas></div></div>
+    <script src="/assets/js/app.fc5d288f.js" defer></script><script src="/assets/js/3.85c2f061.js" defer></script><script src="/assets/js/2.a32bdd97.js" defer></script><script src="/assets/js/43.1f2fe5a9.js" defer></script>
+  </body>
+</html>
