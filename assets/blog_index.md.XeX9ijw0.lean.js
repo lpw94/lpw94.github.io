@@ -1,0 +1,1 @@
+import{_ as p,c as e,o as t,U as a}from"./chunks/framework.F-SyL-18.js";const x=JSON.parse('{"title":"","description":"","frontmatter":{},"headers":[],"relativePath":"blog/index.md","filePath":"blog/index.md"}'),o={name:"blog/index.md"},_=a("",26),s=[_];function c(n,r,i,d,l,m){return t(),e("div",null,s)}const f=p(o,[["render",c]]);export{x as __pageData,f as default};

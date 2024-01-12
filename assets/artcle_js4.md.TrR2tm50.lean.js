@@ -1,0 +1,1 @@
+import{_ as n,c as s,o as a,U as p}from"./chunks/framework.F-SyL-18.js";const h=JSON.parse('{"title":"闭包函数","description":"","frontmatter":{},"headers":[],"relativePath":"artcle/js4.md","filePath":"artcle/js4.md"}'),e={name:"artcle/js4.md"},l=p("",5),c=[l];function t(o,i,r,u,_,d){return a(),s("div",null,c)}const f=n(e,[["render",t]]);export{h as __pageData,f as default};
