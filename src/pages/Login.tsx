@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 export default function Login() {
-  const [email, setEmail] = useState('')
+  const [email, setEmail] = useState('lpw94@qq.com')
   const [msg, setMsg] = useState('')
 
   const send = async (e: React.FormEvent) => {

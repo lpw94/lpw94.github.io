@@ -50,8 +50,8 @@ blog/
 2. 打开 Supabase **SQL Editor**，执行 `supabase/schema.sql` 建表、开 RLS、建封面桶及策略。
 3. 复制 `.env.example` 为 `.env`，填入配置：
    ```
-   VITE_SUPABASE_URL=https://xxxx.supabase.co
-   VITE_SUPABASE_ANON_KEY=eyJ...
+   VITE_SUPABASE_URL=https://grinllviahukzgbxvmhz.supabase.co
+   VITE_SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdyaW5sbHZpYWh1a3pnYnh2bWh6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk1Mzc4NzgsImV4cCI6MjEwNTExMzg3OH0.M1toGO1pE3NJErblxhNLkK6p2bzfKapRUzyaxvWy5Uk
    VITE_SITE_URL=https://lpw94.github.io   # 用于 RSS/SEO/OG，GitHub Pages 用户页地址
    ```
 4. 安装依赖并启动：
@@ -82,6 +82,17 @@ blog/
 - **SPA 路由**：脚本同时把 `dist/index.html` 复制为 `dist/404.html`，解决 GitHub Pages 上刷新 `/post/xxx` 返回 404 的问题，深链可正常访问。
 - **环境变量**：`VITE_` 前缀变量在构建时内联进前端，必须通过仓库 Secrets 提供（不要写进前端可见的明文，anon key 本身公开安全但仍建议走 Secrets）。
 - 免费数据库闲置 1 周会被 Supabase 暂停，届时列表/详情会拉不到数据，登录 Supabase 控制台恢复即可。
+
+### 常见部署故障排查
+
+| 现象 | 原因 | 解决 |
+|------|------|------|
+| `deploy` 报 `HttpError: Not Found` + `Ensure GitHub Pages has been enabled` | 仓库未以 Actions 方式开启 Pages | `Settings → Pages → Source` 选 **GitHub Actions**，再 Re-run |
+| `deploy` 报 `Branch "main" is not allowed to deploy to github-pages due to environment protection rules` | `github-pages` environment 限制了部署分支 | `Settings → Environments → github-pages → Deployment branches and tags` 改为 **No restriction**，再 Re-run |
+| 页面能打开，但列表请求打到 `https://placeholder.supabase.co/...`（`ERR_NAME_NOT_RESOLVED`） | 仓库 Secrets 未配置，或名称少了 `VITE_` 前缀；构建落到代码兜底占位符 | 按上面第 2 步补全 3 个 Secrets，**必须 Re-run 重新构建**（`VITE_` 变量在构建时内联） |
+| 页面白屏、控制台资源 404 | 仓库名与 `base` 不匹配（用户页须叫 `lpw94.github.io` 且 `base: '/'`） | 核对仓库名与 `vite.config.ts` 的 `base` 是否对应 |
+
+> `Node 20 is deprecated`、`punycode`、`ubuntu-latest → 26` 均为无害告警，不影响部署。
 
 ## 安全提示
 - 后台写入、封面图上传统一依赖 Supabase RLS；anon key 本身公开安全。
