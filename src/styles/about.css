@@ -1,0 +1,414 @@
+/* 个人简历页样式（从 VuePress 版移植，去掉 scoped，改用 .about-page 作用域 */
+.about-page {
+  position: relative;
+  max-width: 960px;
+  margin: 0 auto;
+  padding-bottom: 40px;
+  overflow: hidden;
+}
+
+/* ---------- 背景光斑 ---------- */
+.orbs {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+.orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  opacity: 0.45;
+  animation: float 14s ease-in-out infinite;
+}
+.orb-1 {
+  width: 320px;
+  height: 320px;
+  top: -80px;
+  left: -100px;
+  background: #6366f1;
+}
+.orb-2 {
+  width: 280px;
+  height: 280px;
+  top: 180px;
+  right: -120px;
+  background: #ec4899;
+  animation-delay: -4s;
+}
+.orb-3 {
+  width: 240px;
+  height: 240px;
+  bottom: 60px;
+  left: 20%;
+  background: #22d3ee;
+  animation-delay: -8s;
+}
+@keyframes float {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -40px) scale(1.12); }
+}
+
+/* ---------- 头部 ---------- */
+.hero {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 28px;
+  padding: 46px 24px 38px;
+  border-radius: 20px;
+  background: linear-gradient(120deg, #4f46e5, #7c3aed, #db2777, #4f46e5);
+  background-size: 300% 300%;
+  animation: gradientMove 14s ease infinite;
+  color: #fff;
+  text-align: center;
+  box-shadow: 0 18px 40px rgba(79, 70, 229, 0.28);
+  overflow: hidden;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 20%, rgba(255, 255, 255, 0.25), transparent 55%);
+}
+.hero-inner {
+  position: relative;
+  z-index: 1;
+}
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.avatar-wrap {
+  position: relative;
+  width: 128px;
+  height: 128px;
+  margin: 0 auto 18px;
+}
+.avatar-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: 50%;
+  background: conic-gradient(#fff, #22d3ee, #a78bfa, #f472b6, #fff);
+  animation: spin 6s linear infinite;
+}
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.avatar {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.9);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.avatar-text {
+  font-size: 30px;
+  font-weight: 700;
+  color: #4f46e5;
+  letter-spacing: 2px;
+}
+
+.name {
+  margin: 0 0 8px;
+  font-size: 34px;
+  letter-spacing: 1px;
+  color: #fff;
+  border: none;
+}
+.role {
+  margin: 0 0 18px;
+  font-size: 15px;
+  opacity: 0.92;
+  min-height: 22px;
+}
+.caret {
+  display: inline-block;
+  width: 2px;
+  height: 15px;
+  margin-left: 3px;
+  background: #fff;
+  vertical-align: -2px;
+  animation: blink 1s step-end infinite;
+}
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: #fff;
+  text-decoration: none;
+  background: rgba(255, 255, 255, 0.16);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  backdrop-filter: blur(6px);
+  transition: transform 0.25s ease, background 0.25s ease;
+}
+.chip:hover {
+  transform: translateY(-3px);
+  background: rgba(255, 255, 255, 0.28);
+  color: #fff;
+}
+.icon {
+  width: 15px;
+  height: 15px;
+  fill: currentColor;
+}
+
+/* ---------- 数据 ---------- */
+.stats {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 22px;
+}
+.stat {
+  padding: 18px 10px;
+  text-align: center;
+  border-radius: 14px;
+  background: rgba(127, 127, 127, 0.07);
+  border: 1px solid rgba(127, 127, 127, 0.18);
+  backdrop-filter: blur(8px);
+  transition: transform 0.3s ease;
+}
+.stat:hover {
+  transform: translateY(-5px);
+}
+.stat-num {
+  font-size: 26px;
+  font-weight: 700;
+  background: linear-gradient(90deg, #6366f1, #ec4899);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+.stat-num i {
+  font-style: normal;
+  font-size: 14px;
+  margin-left: 2px;
+}
+.stat-label {
+  margin-top: 4px;
+  font-size: 13px;
+  opacity: 0.7;
+}
+
+/* ---------- 卡片 ---------- */
+.card {
+  position: relative;
+  z-index: 1;
+  margin-bottom: 22px;
+  padding: 24px;
+  border-radius: 16px;
+  background: rgba(127, 127, 127, 0.07);
+  border: 1px solid rgba(127, 127, 127, 0.18);
+  backdrop-filter: blur(8px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 14px 32px rgba(0, 0, 0, 0.1);
+}
+.card-title {
+  margin: 0 0 18px;
+  padding-left: 12px;
+  font-size: 18px;
+  border: none;
+  position: relative;
+}
+.card-title::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 4px;
+  height: 18px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, #6366f1, #ec4899);
+}
+
+/* 基本信息 */
+.info-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(127, 127, 127, 0.06);
+  transition: background 0.25s ease;
+}
+.info-item:hover {
+  background: rgba(99, 102, 241, 0.14);
+}
+.info-label {
+  min-width: 44px;
+  font-size: 13px;
+  opacity: 0.65;
+}
+.info-value {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 求职意向 */
+.intent {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.intent-item {
+  flex: 1 1 160px;
+  padding: 14px;
+  border-radius: 12px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(99, 102, 241, 0.14), rgba(236, 72, 153, 0.14));
+  border: 1px solid rgba(127, 127, 127, 0.16);
+  transition: transform 0.25s ease;
+}
+.intent-item:hover {
+  transform: scale(1.04);
+}
+.intent-label {
+  display: block;
+  font-size: 12px;
+  opacity: 0.65;
+}
+.intent-value {
+  display: block;
+  margin-top: 6px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* 自我评价 */
+.desc {
+  margin: 0 0 16px;
+  line-height: 1.9;
+  font-size: 15px;
+  opacity: 0.85;
+}
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.tag {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  background: rgba(99, 102, 241, 0.16);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  transition: transform 0.2s ease;
+}
+.tag:hover {
+  transform: translateY(-2px);
+}
+
+/* 技能 */
+.skills {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px 26px;
+}
+.skill-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 6px;
+  font-size: 14px;
+}
+.skill-percent {
+  opacity: 0.6;
+}
+.skill-track {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(127, 127, 127, 0.2);
+  overflow: hidden;
+}
+.skill-bar {
+  height: 100%;
+  width: var(--w, 0);
+  border-radius: 999px;
+  background: linear-gradient(90deg, #6366f1, #a855f7, #ec4899);
+  background-size: 200% 100%;
+  animation: grow 1.1s cubic-bezier(0.25, 0.8, 0.25, 1) both,
+    barFlow 3s linear infinite;
+}
+@keyframes grow {
+  from { width: 0; }
+  to { width: var(--w, 0); }
+}
+@keyframes barFlow {
+  to { background-position: 200% 0; }
+}
+
+.about-footer {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  font-size: 13px;
+  opacity: 0.5;
+  padding-top: 8px;
+}
+
+/* ---------- 入场动画 ---------- */
+.reveal {
+  animation: revealUp 0.6s cubic-bezier(0.25, 0.8, 0.25, 1) both;
+}
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 720px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .info-grid,
+  .skills { grid-template-columns: 1fr; }
+  .name { font-size: 26px; }
+  .hero { padding: 34px 16px 28px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb,
+  .avatar-ring,
+  .hero,
+  .skill-bar,
+  .caret,
+  .reveal {
+    animation: none;
+  }
+}

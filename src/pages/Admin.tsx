@@ -10,16 +10,26 @@ type FormState = {
   status: 'draft' | 'published'
 }
 
+// 默认 slug 规则：my-log + 当前时间（精确到秒）。
+// 中文标题没法自动转成英文路径，所以用带时间戳的可读路径兜底；用户仍可手动改成更短的地址。
+function makeDefaultSlug() {
+  const d = new Date()
+  const p = (n: number) => String(n).padStart(2, '0')
+  return `my-log-${d.getFullYear()}${p(d.getMonth() + 1)}${p(d.getDate())}${p(d.getHours())}${p(d.getMinutes())}${p(d.getSeconds())}`
+}
+
+const emptyForm = (): FormState => ({
+  title: '',
+  slug: makeDefaultSlug(),
+  content: '',
+  cover_url: null,
+  status: 'draft',
+})
+
 export default function Admin() {
   const [user, setUser] = useState<unknown>(null)
   const [posts, setPosts] = useState<Post[]>([])
-  const [form, setForm] = useState<FormState>({
-    title: '',
-    slug: '',
-    content: '',
-    cover_url: null,
-    status: 'draft',
-  })
+  const [form, setForm] = useState<FormState>(emptyForm)
   const [uploading, setUploading] = useState(false)
 
   useEffect(() => {
@@ -87,7 +97,7 @@ export default function Admin() {
       alert(error.message)
       return
     }
-    setForm({ title: '', slug: '', content: '', cover_url: null, status: 'draft' })
+    setForm(emptyForm())
     load()
   }
 
@@ -110,7 +120,7 @@ export default function Admin() {
           required
         />
         <input
-          placeholder="slug（英文路径，如 my-first-post）"
+          placeholder="slug（英文路径，默认 my-log+时间，可修改）"
           value={form.slug}
           onChange={(e) => setForm({ ...form, slug: e.target.value })}
           required

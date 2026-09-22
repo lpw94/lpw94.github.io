@@ -15,14 +15,24 @@ body {
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
-.container { max-width: 760px; margin: 0 auto; padding: 0 20px; }
+.container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
 .site-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 0; border-bottom: 1px solid var(--border);
 }
 .logo { font-weight: 700; font-size: 18px; color: var(--fg); }
 nav a { margin-left: 16px; color: var(--muted); }
-main { padding: 32px 0; min-height: 60vh; }
+/* 左：个人信息栏，右：正文 */
+.layout {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 32px;
+  align-items: start;
+  padding: 32px 0;
+}
+main { min-height: 60vh; }
+/* 无侧栏页面（如简历页）：正文占满整行 */
+.layout.no-sidebar { grid-template-columns: minmax(0, 1fr); }
 footer { padding: 24px 0; border-top: 1px solid var(--border); text-align: center; }
 .muted { color: var(--muted); font-size: 14px; }
 .post-list { display: grid; gap: 20px; }
@@ -53,3 +63,45 @@ button:hover { opacity: 0.9; }
 .comments li p { margin: 4px 0 0; }
 .comment-form { display: flex; flex-direction: column; gap: 10px; max-width: 480px; margin-top: 12px; }
 .comment-form button { align-self: flex-start; }
+
+/* 左侧个人信息栏 */
+.profile-card {
+  position: sticky;
+  top: 24px;
+  padding: 20px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  text-align: center;
+}
+.profile-avatar {
+  display: block;
+  width: 96px;
+  height: 96px;
+  margin: 0 auto 12px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: var(--border);
+}
+.profile-name { margin: 0 0 8px; font-size: 17px; }
+.profile-bio { margin: 0; font-size: 13px; color: var(--muted); }
+.profile-links {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
+  font-size: 13px;
+  text-align: left;
+}
+.profile-links li { display: flex; gap: 8px; justify-content: space-between; }
+.profile-link-label { flex: none; color: var(--muted); }
+.profile-links a { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 窄屏：个人信息栏移到正文上方 */
+@media (max-width: 720px) {
+  .layout { grid-template-columns: 1fr; gap: 24px; }
+  .profile-card { position: static; }
+  .profile-links li { justify-content: flex-start; }
+}
