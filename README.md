@@ -11,21 +11,22 @@
 - **评论**：读者无需登录即可留言（昵称 + 内容）
 - **SEO**：每篇文章动态注入 title / description / OG / canonical（react-helmet-async）
 - **RSS 订阅**（`/rss.xml`）与 **Sitemap**（`/sitemap.xml`）、`robots.txt`
-- 一键部署 **Vercel** 配置
+- 一键部署 **GitHub Pages** 配置（GitHub Actions）
 
 ## 目录结构
 ```
 blog/
 ├─ index.html
 ├─ package.json
-├─ vite.config.ts
-├─ vercel.json            # Vercel 构建 + SPA fallback + rss/sitemap 路由
+├─ vite.config.ts        # base: '/'，适配 GitHub Pages 用户页根路径
 ├─ .env.example          # 复制为 .env 后填入密钥
 ├─ supabase/
-│  └─ schema.sql         # 建表 + RLS + 评论表 + 封面桶策略
-├─ api/
-│  ├─ rss.js             # 动态生成 RSS
-│  └─ sitemap.js         # 动态生成站点地图
+│  ├─ schema.sql         # 建表 + RLS + 评论表 + 封面桶策略
+│  └─ seed.sql           # 2 篇示例文章（$$ 美元引号，避免反引号截断）
+├─ scripts/
+│  └─ gh-pages.mjs       # 构建后：生成 dist/404.html(SPA fallback) + rss.xml/sitemap.xml
+├─ .github/workflows/
+│  └─ deploy.yml         # GitHub Actions 构建并部署到 Pages
 ├─ public/
 │  └─ robots.txt
 └─ src/
@@ -51,7 +52,7 @@ blog/
    ```
    VITE_SUPABASE_URL=https://xxxx.supabase.co
    VITE_SUPABASE_ANON_KEY=eyJ...
-   VITE_SITE_URL=https://your-domain.com   # 用于 RSS/SEO/OG，部署后改成正式域名
+   VITE_SITE_URL=https://lpw94.github.io   # 用于 RSS/SEO/OG，GitHub Pages 用户页地址
    ```
 4. 安装依赖并启动：
    ```bash
@@ -60,16 +61,27 @@ blog/
    ```
 5. 访问 `/login` 用邮箱登录 → 跳转 `/admin` 写文章（可上传封面）；首页 `/` 查看已发布文章；文章页底部可发表评论。
 
-## 部署到 Vercel（一键）
-1. 推送代码到 GitHub 仓库。
-2. 在 Vercel 导入该仓库，构建命令 `npm run build`、输出目录 `dist`（已写入 `vercel.json`，可自动识别）。
-3. 在 Vercel **Environment Variables** 配置与 `.env` 相同的三个变量：
-   - `VITE_SUPABASE_URL`、`VITE_SUPABASE_ANON_KEY`、`VITE_SITE_URL`（改成正式域名）。
-4. 部署完成后：
-   - `/rss.xml`、`/sitemap.xml` 由 `api/` 无服务器函数实时生成；
-   - `vercel.json` 已配置 SPA fallback，深链 `/post/xxx` 可正常访问。
+## 部署到 GitHub Pages（一键）
+目标地址：`https://lpw94.github.io/`（GitHub Pages **用户页**，部署在站点根路径）。
 
-> 本地预览 `api/` 函数需用 `vercel dev`；纯 `npm run dev` 不会启动这些函数，属正常。
+1. 在 GitHub 新建仓库 **`lpw94.github.io`**（仓库名必须与用户名一致，用户页才会发布到根路径）。
+2. 仓库 **Settings → Secrets and variables → Actions → New repository secret**，添加 3 个密钥（与 `.env` 一致）：
+   - `VITE_SUPABASE_URL`
+   - `VITE_SUPABASE_ANON_KEY`
+   - `VITE_SITE_URL` = `https://lpw94.github.io`
+3. 仓库 **Settings → Pages → Build and deployment → Source** 选择 **GitHub Actions**。
+4. 把代码推送到 `main` 分支，Actions 会自动构建并部署；首次部署完需在 Pages 设置里确认站点已发布。
+   ```bash
+   git add .
+   git commit -m "deploy blog"
+   git push origin main
+   ```
+
+### 部署原理与注意
+- **纯静态托管**：GitHub Pages 不能运行服务端函数，因此 RSS/Sitemap 改为**构建时生成**——`scripts/gh-pages.mjs` 在 `vite build` 后从 Supabase 拉已发布文章，写出静态 `dist/rss.xml` / `dist/sitemap.xml`（best-effort，拉取失败不阻断部署）。
+- **SPA 路由**：脚本同时把 `dist/index.html` 复制为 `dist/404.html`，解决 GitHub Pages 上刷新 `/post/xxx` 返回 404 的问题，深链可正常访问。
+- **环境变量**：`VITE_` 前缀变量在构建时内联进前端，必须通过仓库 Secrets 提供（不要写进前端可见的明文，anon key 本身公开安全但仍建议走 Secrets）。
+- 免费数据库闲置 1 周会被 Supabase 暂停，届时列表/详情会拉不到数据，登录 Supabase 控制台恢复即可。
 
 ## 安全提示
 - 后台写入、封面图上传统一依赖 Supabase RLS；anon key 本身公开安全。
