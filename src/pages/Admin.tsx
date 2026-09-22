@@ -94,7 +94,7 @@ export default function Admin() {
   if (!user) {
     return (
       <p className="muted">
-        请先 <a href="/login">登录</a> 后访问后台。
+        用户请先 <a href="/login">登录</a> 后访问后台。 
       </p>
     )
   }
