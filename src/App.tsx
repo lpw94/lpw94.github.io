@@ -6,6 +6,7 @@ import PostDetail from './pages/PostDetail'
 import About from './pages/About'
 import Login from './pages/Login'
 import Admin from './pages/Admin'
+import ResetPassword from './pages/ResetPassword'
 
 export default function App() {
   return (
@@ -22,6 +23,7 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/login" element={<Login />} />
           <Route path="/admin" element={<Admin />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </Layout>
     </BrowserRouter>
