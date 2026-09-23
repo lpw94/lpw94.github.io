@@ -21,7 +21,27 @@ a:hover { text-decoration: underline; }
   padding: 20px 0; border-bottom: 1px solid var(--border);
 }
 .logo { font-weight: 700; font-size: 18px; color: var(--fg); }
-nav a { margin-left: 16px; color: var(--muted); }
+nav { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; }
+nav a { margin-left: 0; color: var(--muted); }
+/* 顶部栏右侧：登录邮箱 + 退出登录 */
+.nav-user { display: inline-flex; align-items: center; gap: 10px; }
+.nav-email {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  color: var(--muted);
+}
+.nav-logout {
+  padding: 4px 10px;
+  font-size: 12px;
+  color: var(--fg);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.nav-logout:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
 /* 左：个人信息栏，右：正文 */
 .layout {
   display: grid;
@@ -407,4 +427,7 @@ button:hover { opacity: 0.9; }
   .layout { grid-template-columns: 1fr; gap: 24px; }
   .profile-card { position: static; }
   .profile-links li { justify-content: flex-start; }
+  /* 窄屏下顶部栏允许换行，邮箱过长时截断 */
+  .site-header { flex-wrap: wrap; gap: 10px; }
+  .nav-email { max-width: 120px; }
 }
