@@ -1,0 +1,78 @@
+name: Keep Supabase awake
+
+# 背景：Supabase 免费版项目「连续 7 天数据库活动不足」会被自动暂停，
+# 暂停后博客的文章列表 / 详情页会拉不到数据，需要到 Dashboard 手动点 Resume。
+#
+# 这里每天发起一次真实的 REST 查询，产生一次数据库活动，避免被判定为不活跃。
+# 之所以放在 GitHub Actions（而不是本机定时任务）：
+#   本机任务只在你电脑开着时才跑，而需要防的场景恰恰是「你一周没来」——
+#   那时电脑很可能就是关着的；GitHub 的机器则始终在跑。
+
+on:
+  schedule:
+    # 注意：GitHub 的 cron 一律按 UTC 计算，与仓库/runner 时区无关。
+    # 17 1 * * * = 北京时间每天 09:17 左右（刻意避开整点，整点常有排队延迟）。
+    - cron: '17 1 * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+concurrency:
+  group: keep-supabase-awake
+  cancel-in-progress: true
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ping Supabase REST API
+        env:
+          # 复用仓库里已有的 Secrets，不需要额外配置
+          SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+        run: |
+          if [ -z "$SUPABASE_URL" ] || [ -z "$SUPABASE_ANON_KEY" ]; then
+            echo "::warning::未配置 VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY，跳过本次唤醒"
+            exit 0
+          fi
+
+          code=$(curl -sS -o /tmp/body.json -w '%{http_code}' --max-time 30 \
+            "$SUPABASE_URL/rest/v1/posts?select=id&limit=1" \
+            -H "apikey: $SUPABASE_ANON_KEY" \
+            -H "Authorization: Bearer $SUPABASE_ANON_KEY")
+
+          echo "HTTP $code"
+          head -c 300 /tmp/body.json || true
+          echo
+
+          # 返回 200 即成功；空数组也算成功，关键是产生了真实的数据库查询活动
+          if [ "$code" != "200" ]; then
+            echo "::error::Supabase 返回 $code，项目可能已被暂停。请到 Supabase Dashboard 检查项目状态，必要时点 Resume project。"
+            exit 1
+          fi
+          echo "唤醒成功：已产生一次数据库查询活动"
+
+      # GitHub 会在公开仓库「60 天没有任何提交」时自动禁用定时工作流，
+      # 而且不会发任何通知。这里在距离上次提交超过 45 天时补一个空提交，
+      # 让定时任务永远保持启用。提交信息带 [skip ci]，不会触发部署工作流。
+      - name: Heartbeat commit
+        if: always()
+        run: |
+          last=$(git log -1 --format=%ct)
+          now=$(date +%s)
+          days=$(( (now - last) / 86400 ))
+          echo "距上次提交 $days 天"
+
+          if [ "$days" -lt 45 ]; then
+            echo "未到 45 天，跳过心跳提交"
+            exit 0
+          fi
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git commit --allow-empty -m "chore: keep-alive heartbeat [skip ci]"
+          git push
+          echo "已补发心跳提交，重置 60 天计时"
