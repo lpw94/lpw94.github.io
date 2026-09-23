@@ -82,7 +82,7 @@ export default function PostDetail() {
   return (
     <article className="post-detail">
       <Helmet>
-        <title>{post.title} · 我的博客</title>
+        <title>{post.title} · 博客</title>
         <meta name="description" content={description} />
         <meta property="og:type" content="article" />
         <meta property="og:title" content={post.title} />
