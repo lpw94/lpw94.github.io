@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { looksLikeHtml, toPlainText } from '../lib/content'
 import { CATEGORY_LABEL, type Post, type Comment } from '../types'
@@ -14,6 +15,7 @@ export default function PostDetail() {
   const [post, setPost] = useState<Post | null>(null)
   const [loading, setLoading] = useState(true)
   const [comments, setComments] = useState<Comment[]>([])
+  const [user, setUser] = useState<User | null>(null)
   const [author, setAuthor] = useState('')
   const [content, setContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -45,6 +47,20 @@ export default function PostDetail() {
     loadComments()
   }, [post])
 
+  // 订阅登录状态：登录后评论昵称默认填邮箱
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null))
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
+  // 用邮箱预填昵称，但不覆盖用户已手动输入的内容（prev || email）
+  useEffect(() => {
+    if (user?.email) setAuthor((prev) => prev || user.email!)
+  }, [user])
+
   const submitComment = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!post || !author.trim() || !content.trim()) return
@@ -59,7 +75,8 @@ export default function PostDetail() {
       alert(error.message)
       return
     }
-    setAuthor('')
+    // 提交后清空正文；昵称若为登录用户则回填邮箱
+    setAuthor(user?.email ?? '')
     setContent('')
     const { data } = await supabase
       .from('comments')
