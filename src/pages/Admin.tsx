@@ -4,6 +4,7 @@ import { looksLikeHtml, toPlainText } from '../lib/content'
 import RichTextEditor from '../components/RichTextEditor'
 import LoginModal from '../components/LoginModal'
 import { CATEGORIES, CATEGORY_LABEL, type Category, type Post } from '../types'
+import { formatDateTime } from '../lib/date'
 
 type FormState = {
   /** 编辑中的文章 id；null 表示新建 */
@@ -34,10 +35,9 @@ const emptyForm = (): FormState => ({
   status: 'published',
 })
 
-// 列表里显示的时间：已发布用发布时间，草稿退回创建时间
+// 列表里显示的时间：已发布用发布时间，草稿退回创建时间；统一转本地时区
 function formatTime(post: Post) {
-  const raw = post.published_at ?? post.created_at
-  return raw ? raw.slice(0, 16).replace('T', ' ') : '—'
+  return formatDateTime(post.published_at ?? post.created_at) || '—'
 }
 
 export default function Admin() {

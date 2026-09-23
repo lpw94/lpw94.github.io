@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import { CATEGORY_LABEL, type Post } from '../types'
+import { formatDate } from '../lib/date'
 
 export default function PostCard({ post }: { post: Post }) {
   return (
@@ -11,7 +12,7 @@ export default function PostCard({ post }: { post: Post }) {
             {CATEGORY_LABEL[post.category] ?? post.category}
           </span>
         )}
-        <time className="muted">{post.published_at?.slice(0, 10)}</time>
+        <time className="muted">{formatDate(post.published_at)}</time>
       </div>
       <h2>{post.title}</h2>
     </Link>

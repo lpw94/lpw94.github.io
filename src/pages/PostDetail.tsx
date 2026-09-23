@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { looksLikeHtml, toPlainText } from '../lib/content'
+import { formatDate } from '../lib/date'
 import { CATEGORY_LABEL, type Post, type Comment } from '../types'
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://your-domain.com'
@@ -116,7 +117,7 @@ export default function PostDetail() {
             {CATEGORY_LABEL[post.category] ?? post.category}
           </span>
         )}
-        <time className="muted">{post.published_at?.slice(0, 10)}</time>
+        <time className="muted">{formatDate(post.published_at)}</time>
       </div>
 
       {post.cover_url && (
@@ -141,7 +142,7 @@ export default function PostDetail() {
           {comments.map((c) => (
             <li key={c.id}>
               <strong>{c.author_name}</strong>
-              <span className="muted"> · {c.created_at.slice(0, 10)}</span>
+              <span className="muted"> · {formatDate(c.created_at)}</span>
               <p>{c.content}</p>
             </li>
           ))}
