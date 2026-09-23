@@ -93,6 +93,9 @@ footer { padding: 24px 0; border-top: 1px solid var(--border); text-align: cente
 .post-card img { width: 100%; height: 180px; object-fit: cover; border-radius: 8px; }
 .post-detail .content { margin-top: 16px; }
 .auth-form, .admin form { display: flex; flex-direction: column; gap: 12px; max-width: 480px; }
+/* 登录弹窗内的表单布局（复用以 .auth-* 的视觉） */
+.login-modal form { display: flex; flex-direction: column; gap: 12px; margin-top: 12px; }
+.login-modal .muted { margin: 0; }
 /* 登录页：魔法链接 / 密码登录 切换 */
 .auth-tabs { display: inline-flex; gap: 0; margin-bottom: 4px; }
 .auth-tabs button {

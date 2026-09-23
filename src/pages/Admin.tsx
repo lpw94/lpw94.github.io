@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { looksLikeHtml, toPlainText } from '../lib/content'
 import RichTextEditor from '../components/RichTextEditor'
+import LoginModal from '../components/LoginModal'
 import { CATEGORIES, CATEGORY_LABEL, type Category, type Post } from '../types'
 
 type FormState = {
@@ -45,6 +46,7 @@ export default function Admin() {
   const [form, setForm] = useState<FormState>(emptyForm)
   /** 新建 / 编辑表单的弹窗开关 */
   const [open, setOpen] = useState(false)
+  const [showLogin, setShowLogin] = useState(false)
   /** 正文编辑模式：true = 富文本（存 HTML），false = 纯文本 / Markdown */
   const [richMode, setRichMode] = useState(true)
   const [uploading, setUploading] = useState(false)
@@ -62,6 +64,11 @@ export default function Admin() {
 
     return () => sub.subscription.unsubscribe()
   }, [])
+
+  // 未登录时自动弹出登录弹窗；一旦拿到会话立即收起
+  useEffect(() => {
+    setShowLogin(!user)
+  }, [user])
 
   const load = async () => {
     const { data } = await supabase
@@ -216,9 +223,23 @@ export default function Admin() {
 
   if (!user) {
     return (
-      <p className="muted">
-        用户请先 <a href="/login">登录</a> 后访问后台。 
-      </p>
+      <div className="login-gate">
+        {showLogin && <LoginModal onClose={() => setShowLogin(false)} />}
+        <p className="muted">
+          请先登录后访问后台。
+          {!showLogin && (
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                setShowLogin(true)
+              }}
+            >
+              点击登录
+            </a>
+          )}
+        </p>
+      </div>
     )
   }
 

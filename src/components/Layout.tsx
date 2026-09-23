@@ -6,9 +6,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // 登录页是纯表单，信息栏也没有意义 —— 这几种页面都隐藏左侧栏
   const { pathname } = useLocation()
   const showProfile =
-    pathname !== '/about' &&
-    pathname !== '/login' &&
-    !pathname.startsWith('/post/')
+    pathname !== '/about' && !pathname.startsWith('/post/')
 
   return (
     <div className="container">
