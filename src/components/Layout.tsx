@@ -16,7 +16,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <Link to="/" className="logo">WO的网络世界</Link>
         <nav>
           <Link to="/">首页</Link>
-          <Link to="/about">关于</Link>
+          <Link to="/about">简历</Link>
           <Link to="/admin">后台</Link>
           <Link to="/login">登录</Link>
         </nav>

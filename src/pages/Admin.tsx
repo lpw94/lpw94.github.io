@@ -29,7 +29,7 @@ const emptyForm = (): FormState => ({
   slug: makeDefaultSlug(),
   content: '',
   cover_url: null,
-  category: 'tech',
+  category: 'frontend',
   status: 'published',
 })
 
@@ -174,7 +174,7 @@ export default function Admin() {
       slug: post.slug,
       content: post.content,
       cover_url: post.cover_url,
-      category: post.category ?? 'tech',
+      category: post.category ?? 'frontend',
       status: post.status,
     })
     setRichMode(looksLikeHtml(post.content))

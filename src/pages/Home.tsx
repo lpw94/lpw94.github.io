@@ -32,11 +32,15 @@ export default function Home() {
     load()
   }, [])
 
-  // 各分类的篇数，显示在过滤按钮上
+  // 各分类的篇数，显示在过滤按钮上。按 CATEGORIES 动态初始化，
+  // 以后增删分类只需要改 types.ts，这里不用动。
   const counts = useMemo(() => {
-    const base: Record<Filter, number> = { all: posts.length, tech: 0, news: 0, essay: 0 }
+    const base: Record<string, number> = { all: posts.length }
+    CATEGORIES.forEach((c) => {
+      base[c.value] = 0
+    })
     posts.forEach((p) => {
-      if (p.category && p.category in base) base[p.category] += 1
+      if (p.category) base[p.category] = (base[p.category] ?? 0) + 1
     })
     return base
   }, [posts])

@@ -5,8 +5,8 @@ create table if not exists posts (
   title        text not null,
   content      text not null,                              -- Markdown / HTML 正文
   cover_url    text,                                       -- 封面图（存 Supabase Storage）
-  category     text not null default 'tech'                -- tech | news | essay
-               check (category in ('tech', 'news', 'essay')),
+  category     text not null default 'frontend'            -- frontend | backend | database | industry | other
+               check (category in ('frontend', 'backend', 'database', 'industry', 'other')),
   status       text not null default 'draft',              -- draft | published
   created_at   timestamptz not null default now(),
   published_at timestamptz                                  -- 发布时间
