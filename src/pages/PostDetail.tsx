@@ -4,7 +4,8 @@ import { Helmet } from 'react-helmet-async'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { supabase } from '../lib/supabase'
-import type { Post, Comment } from '../types'
+import { looksLikeHtml, toPlainText } from '../lib/content'
+import { CATEGORY_LABEL, type Post, type Comment } from '../types'
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://your-domain.com'
 
@@ -71,7 +72,12 @@ export default function PostDetail() {
   if (loading) return <p className="muted">加载中…</p>
   if (!post) return <p className="muted">文章不存在。</p>
 
-  const description = post.content.replace(/[#>*`_~\-]/g, '').slice(0, 120)
+  // 富文本文章存的是 HTML，先剥掉标签再截取，避免把标签写进 meta 描述
+  const description = toPlainText(post.content)
+    .replace(/[#>*`_~\-]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 120)
 
   return (
     <article className="post-detail">
@@ -87,14 +93,29 @@ export default function PostDetail() {
       </Helmet>
 
       <h1>{post.title}</h1>
-      <time className="muted">{post.published_at?.slice(0, 10)}</time>
+      <div className="post-meta">
+        {post.category && (
+          <span className={`post-category cat-${post.category}`}>
+            {CATEGORY_LABEL[post.category] ?? post.category}
+          </span>
+        )}
+        <time className="muted">{post.published_at?.slice(0, 10)}</time>
+      </div>
 
       {post.cover_url && (
         <img className="cover" src={post.cover_url} alt={post.title} />
       )}
 
+      {/* 富文本文章存 HTML，Markdown 文章存纯文本，按内容自动选择渲染方式 */}
       <div className="content">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+        {looksLikeHtml(post.content) ? (
+          <div
+            className="rich-content"
+            dangerouslySetInnerHTML={{ __html: post.content }}
+          />
+        ) : (
+          <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+        )}
       </div>
 
       <section className="comments">

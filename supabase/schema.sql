@@ -5,6 +5,8 @@ create table if not exists posts (
   title        text not null,
   content      text not null,                              -- Markdown / HTML 正文
   cover_url    text,                                       -- 封面图（存 Supabase Storage）
+  category     text not null default 'tech'                -- tech | news | essay
+               check (category in ('tech', 'news', 'essay')),
   status       text not null default 'draft',              -- draft | published
   created_at   timestamptz not null default now(),
   published_at timestamptz                                  -- 发布时间
@@ -12,6 +14,10 @@ create table if not exists posts (
 
 create index if not exists posts_published_idx
   on posts (status, published_at desc);
+
+-- 首页按分类筛选
+create index if not exists posts_category_idx
+  on posts (category, published_at desc);
 
 -- 开启行级安全（RLS）
 alter table posts enable row level security;

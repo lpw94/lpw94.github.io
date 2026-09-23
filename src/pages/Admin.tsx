@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import type { Post } from '../types'
+import { looksLikeHtml, toPlainText } from '../lib/content'
+import RichTextEditor from '../components/RichTextEditor'
+import { CATEGORIES, CATEGORY_LABEL, type Category, type Post } from '../types'
 
 type FormState = {
   /** 编辑中的文章 id；null 表示新建 */
@@ -9,6 +11,7 @@ type FormState = {
   slug: string
   content: string
   cover_url: string | null
+  category: Category
   status: 'published' | 'draft'
 }
 
@@ -26,6 +29,7 @@ const emptyForm = (): FormState => ({
   slug: makeDefaultSlug(),
   content: '',
   cover_url: null,
+  category: 'tech',
   status: 'published',
 })
 
@@ -41,6 +45,8 @@ export default function Admin() {
   const [form, setForm] = useState<FormState>(emptyForm)
   /** 新建 / 编辑表单的弹窗开关 */
   const [open, setOpen] = useState(false)
+  /** 正文编辑模式：true = 富文本（存 HTML），false = 纯文本 / Markdown */
+  const [richMode, setRichMode] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
 
@@ -114,6 +120,14 @@ export default function Admin() {
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (saving) return
+
+    // 富文本模式下正文是 contentEditable，不是表单控件，HTML 的 required 对它无效，
+    // 所以两种模式统一在这里兜一道非空校验
+    if (!toPlainText(form.content).trim()) {
+      alert('正文不能为空')
+      return
+    }
+
     setSaving(true)
 
     // 编辑已发布的文章时沿用原发布时间，否则每次保存都会把它刷成当前时间
@@ -123,6 +137,7 @@ export default function Admin() {
       slug: form.slug,
       content: form.content,
       cover_url: form.cover_url,
+      category: form.category,
       status: form.status,
       published_at:
         form.status === 'published'
@@ -143,13 +158,15 @@ export default function Admin() {
     load()
   }
 
-  // 打开空白弹窗新建
+  // 打开空白弹窗新建，新文章默认走富文本
   const openCreate = () => {
     setForm(emptyForm())
+    setRichMode(true)
     setOpen(true)
   }
 
-  // 把某篇文章载入弹窗编辑
+  // 载入某篇文章编辑：正文本身是 HTML 的用富文本打开，是 Markdown 的用纯文本打开，
+  // 避免把 Markdown 原文丢进富文本里破坏排版
   const startEdit = (post: Post) => {
     setForm({
       id: post.id,
@@ -157,8 +174,10 @@ export default function Admin() {
       slug: post.slug,
       content: post.content,
       cover_url: post.cover_url,
+      category: post.category ?? 'tech',
       status: post.status,
     })
+    setRichMode(looksLikeHtml(post.content))
     setOpen(true)
   }
 
@@ -219,6 +238,7 @@ export default function Admin() {
           <thead>
             <tr>
               <th>标题</th>
+              <th>分类</th>
               <th>时间</th>
               <th>状态</th>
               <th>操作</th>
@@ -228,6 +248,11 @@ export default function Admin() {
             {posts.map((p) => (
               <tr key={p.id}>
                 <td className="post-table-title">{p.title}</td>
+                <td>
+                  <span className={`post-category cat-${p.category}`}>
+                    {CATEGORY_LABEL[p.category] ?? '—'}
+                  </span>
+                </td>
                 <td className="muted">{formatTime(p)}</td>
                 <td>
                   <span className={`status status-${p.status}`}>
@@ -288,13 +313,40 @@ export default function Admin() {
                 onChange={(e) => setForm({ ...form, slug: e.target.value })}
                 required
               />
-              <textarea
-                placeholder="正文（支持 Markdown）"
-                rows={8}
-                value={form.content}
-                onChange={(e) => setForm({ ...form, content: e.target.value })}
-                required
-              />
+              <div className="editor-head">
+                <span className="muted">正文</span>
+                <div className="editor-modes">
+                  <button
+                    type="button"
+                    className={richMode ? 'active' : ''}
+                    onClick={() => setRichMode(true)}
+                  >
+                    富文本
+                  </button>
+                  <button
+                    type="button"
+                    className={richMode ? '' : 'active'}
+                    onClick={() => setRichMode(false)}
+                  >
+                    纯文本
+                  </button>
+                </div>
+              </div>
+
+              {richMode ? (
+                <RichTextEditor
+                  value={form.content}
+                  onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
+                  placeholder="正文 · 可加粗、设标题、插列表"
+                />
+              ) : (
+                <textarea
+                  placeholder="正文（支持 Markdown）"
+                  rows={8}
+                  value={form.content}
+                  onChange={(e) => setForm({ ...form, content: e.target.value })}
+                />
+              )}
 
               <label className="cover-label">
                 封面图
@@ -317,6 +369,19 @@ export default function Admin() {
                   </button>
                 </div>
               )}
+
+              <select
+                value={form.category}
+                onChange={(e) =>
+                  setForm({ ...form, category: e.target.value as Category })
+                }
+              >
+                {CATEGORIES.map((c) => (
+                  <option key={c.value} value={c.value}>
+                    {c.label}
+                  </option>
+                ))}
+              </select>
 
               <select
                 value={form.status}
