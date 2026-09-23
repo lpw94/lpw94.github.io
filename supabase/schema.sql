@@ -12,6 +12,14 @@ create table if not exists posts (
   published_at timestamptz                                  -- 发布时间
 );
 
+-- 分类约束显式对齐前端 CATEGORIES。
+-- 表若在早期版本创建过，可能残留一套旧的 posts_category_check（缺少 other/industry 等），
+-- 而 create table if not exists 不会更新它 —— 这里 drop + add 保证重复执行也能修正。
+-- 注意：若已有数据的 category 不在下列集合内，add 会失败，需先 UPDATE 规范历史数据。
+alter table posts drop constraint if exists posts_category_check;
+alter table posts add constraint posts_category_check
+  check (category in ('frontend', 'backend', 'database', 'industry', 'other'));
+
 create index if not exists posts_published_idx
   on posts (status, published_at desc);
 
