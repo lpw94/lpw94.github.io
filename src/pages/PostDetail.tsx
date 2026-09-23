@@ -176,13 +176,13 @@ export default function PostDetail() {
         <img className="cover" src={post.cover_url} alt={post.title} />
       )}
 
-      {/* 富文本文章存 HTML，Markdown 文章存纯文本，按内容自动选择渲染方式 */}
-      <div className="content">
+      {/* 富文本文章存 HTML，Markdown 文章存纯文本，按内容自动选择渲染方式。
+          两种情况都套 rich-content，让两条渲染路径共用同一套正文排版
+          （标题 / 段落 / 列表 / 引用 / 代码 / 表格），否则 Markdown 表格和
+          代码块会完全没有样式，看起来像「没有格式」。 */}
+      <div className="content rich-content">
         {looksLikeHtml(post.content) ? (
-          <div
-            className="rich-content"
-            dangerouslySetInnerHTML={{ __html: post.content }}
-          />
+          <div dangerouslySetInnerHTML={{ __html: post.content }} />
         ) : (
           <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
         )}
