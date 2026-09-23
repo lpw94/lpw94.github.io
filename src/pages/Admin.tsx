@@ -3,11 +3,13 @@ import { supabase } from '../lib/supabase'
 import type { Post } from '../types'
 
 type FormState = {
+  /** 编辑中的文章 id；null 表示新建 */
+  id: string | null
   title: string
   slug: string
   content: string
   cover_url: string | null
-  status: 'draft' | 'published'
+  status: 'published' | 'draft'
 }
 
 // 默认 slug 规则：my-log + 当前时间（精确到秒）。
@@ -19,18 +21,28 @@ function makeDefaultSlug() {
 }
 
 const emptyForm = (): FormState => ({
+  id: null,
   title: '',
   slug: makeDefaultSlug(),
   content: '',
   cover_url: null,
-  status: 'draft',
+  status: 'published',
 })
+
+// 列表里显示的时间：已发布用发布时间，草稿退回创建时间
+function formatTime(post: Post) {
+  const raw = post.published_at ?? post.created_at
+  return raw ? raw.slice(0, 16).replace('T', ' ') : '—'
+}
 
 export default function Admin() {
   const [user, setUser] = useState<unknown>(null)
   const [posts, setPosts] = useState<Post[]>([])
   const [form, setForm] = useState<FormState>(emptyForm)
+  /** 新建 / 编辑表单的弹窗开关 */
+  const [open, setOpen] = useState(false)
   const [uploading, setUploading] = useState(false)
+  const [saving, setSaving] = useState(false)
 
   useEffect(() => {
     // 先用本地已有会话恢复一次（普通刷新场景）
@@ -57,6 +69,22 @@ export default function Admin() {
     if (user) load()
   }, [user])
 
+  const closeModal = () => {
+    setOpen(false)
+    setForm(emptyForm())
+  }
+
+  // 弹窗打开期间锁住背景滚动。
+  // 只允许通过右上角 × 或底部「取消」按钮关闭：不响应 Esc、也不响应点击遮罩，避免误触丢失已填内容。
+  useEffect(() => {
+    if (!open) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prevOverflow
+    }
+  }, [open])
+
   const uploadCover = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -80,24 +108,90 @@ export default function Admin() {
     }
 
     const { data } = supabase.storage.from('covers').getPublicUrl(path)
-    setForm({ ...form, cover_url: data.publicUrl })
+    setForm((prev) => ({ ...prev, cover_url: data.publicUrl }))
   }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
-    const { error } = await supabase.from('posts').insert({
+    if (saving) return
+    setSaving(true)
+
+    // 编辑已发布的文章时沿用原发布时间，否则每次保存都会把它刷成当前时间
+    const existing = posts.find((p) => p.id === form.id)
+    const payload = {
       title: form.title,
       slug: form.slug,
       content: form.content,
       cover_url: form.cover_url,
       status: form.status,
-      published_at: form.status === 'published' ? new Date().toISOString() : null,
-    })
+      published_at:
+        form.status === 'published'
+          ? existing?.published_at ?? new Date().toISOString()
+          : null,
+    }
+
+    const { error } = form.id
+      ? await supabase.from('posts').update(payload).eq('id', form.id)
+      : await supabase.from('posts').insert(payload)
+
+    setSaving(false)
     if (error) {
       alert(error.message)
       return
     }
+    closeModal()
+    load()
+  }
+
+  // 打开空白弹窗新建
+  const openCreate = () => {
     setForm(emptyForm())
+    setOpen(true)
+  }
+
+  // 把某篇文章载入弹窗编辑
+  const startEdit = (post: Post) => {
+    setForm({
+      id: post.id,
+      title: post.title,
+      slug: post.slug,
+      content: post.content,
+      cover_url: post.cover_url,
+      status: post.status,
+    })
+    setOpen(true)
+  }
+
+  // 草稿 <-> 已发布 一键切换
+  const togglePublish = async (post: Post) => {
+    const nextStatus = post.status === 'published' ? 'draft' : 'published'
+    const { error } = await supabase
+      .from('posts')
+      .update({
+        status: nextStatus,
+        published_at: nextStatus === 'published' ? new Date().toISOString() : null,
+      })
+      .eq('id', post.id)
+
+    if (error) {
+      alert(error.message)
+      return
+    }
+    // 正在编辑这篇的话，同步弹窗里的状态，避免显示不一致
+    if (form.id === post.id) setForm((prev) => ({ ...prev, status: nextStatus }))
+    load()
+  }
+
+  const removePost = async (post: Post) => {
+    if (!window.confirm(`确定删除《${post.title}》？删除后无法恢复。`)) return
+
+    const { error } = await supabase.from('posts').delete().eq('id', post.id)
+    if (error) {
+      alert(error.message)
+      return
+    }
+    // 删掉的正是弹窗里这篇，就顺手关掉
+    if (form.id === post.id) closeModal()
     load()
   }
 
@@ -111,62 +205,141 @@ export default function Admin() {
 
   return (
     <div className="admin">
-      <h2>写文章</h2>
-      <form onSubmit={submit}>
-        <input
-          placeholder="标题"
-          value={form.title}
-          onChange={(e) => setForm({ ...form, title: e.target.value })}
-          required
-        />
-        <input
-          placeholder="slug（英文路径，默认 my-log+时间，可修改）"
-          value={form.slug}
-          onChange={(e) => setForm({ ...form, slug: e.target.value })}
-          required
-        />
-        <textarea
-          placeholder="正文（支持 Markdown）"
-          rows={8}
-          value={form.content}
-          onChange={(e) => setForm({ ...form, content: e.target.value })}
-          required
-        />
+      <div className="admin-head">
+        <h2>文章列表</h2>
+        <button type="button" onClick={openCreate}>
+          添加文章
+        </button>
+      </div>
 
-        <label className="cover-label">
-          封面图
-          <input type="file" accept="image/*" onChange={uploadCover} disabled={uploading} />
-        </label>
-        {uploading && <p className="muted">上传中…</p>}
-        {form.cover_url && (
-          <div className="cover-preview">
-            <img src={form.cover_url} alt="封面预览" />
-            <button type="button" onClick={() => setForm({ ...form, cover_url: null })}>
-              移除封面
-            </button>
+      {posts.length === 0 ? (
+        <p className="muted">还没有文章。</p>
+      ) : (
+        <table className="post-table">
+          <thead>
+            <tr>
+              <th>标题</th>
+              <th>时间</th>
+              <th>状态</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            {posts.map((p) => (
+              <tr key={p.id}>
+                <td className="post-table-title">{p.title}</td>
+                <td className="muted">{formatTime(p)}</td>
+                <td>
+                  <span className={`status status-${p.status}`}>
+                    {p.status === 'published' ? '已发布' : '草稿'}
+                  </span>
+                </td>
+                <td className="post-table-actions">
+                  <button type="button" onClick={() => startEdit(p)}>
+                    编辑
+                  </button>
+                  <button type="button" onClick={() => togglePublish(p)}>
+                    {p.status === 'published' ? '撤回' : '发布'}
+                  </button>
+                  <button
+                    type="button"
+                    className="danger"
+                    onClick={() => removePost(p)}
+                  >
+                    删除
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      )}
+
+      {open && (
+        <div className="modal-backdrop">
+          <div
+            className="modal"
+            role="dialog"
+            aria-modal="true"
+            aria-label={form.id ? '编辑文章' : '添加文章'}
+          >
+            <div className="modal-head">
+              <h2>{form.id ? '编辑文章' : '添加文章'}</h2>
+              <button
+                type="button"
+                className="modal-close"
+                onClick={closeModal}
+                aria-label="关闭"
+              >
+                ×
+              </button>
+            </div>
+
+            <form onSubmit={submit}>
+              <input
+                placeholder="标题"
+                value={form.title}
+                onChange={(e) => setForm({ ...form, title: e.target.value })}
+                required
+              />
+              <input
+                placeholder="slug（英文路径，默认 my-log+时间，可修改）"
+                value={form.slug}
+                onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                required
+              />
+              <textarea
+                placeholder="正文（支持 Markdown）"
+                rows={8}
+                value={form.content}
+                onChange={(e) => setForm({ ...form, content: e.target.value })}
+                required
+              />
+
+              <label className="cover-label">
+                封面图
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={uploadCover}
+                  disabled={uploading}
+                />
+              </label>
+              {uploading && <p className="muted">上传中…</p>}
+              {form.cover_url && (
+                <div className="cover-preview">
+                  <img src={form.cover_url} alt="封面预览" />
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, cover_url: null })}
+                  >
+                    移除封面
+                  </button>
+                </div>
+              )}
+
+              <select
+                value={form.status}
+                onChange={(e) =>
+                  setForm({ ...form, status: e.target.value as FormState['status'] })
+                }
+              >
+                <option value="draft">草稿</option>
+                <option value="published">发布</option>
+              </select>
+
+              <div className="form-actions">
+                <button type="submit" disabled={saving}>
+                  {saving ? '保存中…' : form.id ? '保存修改' : '保存'}
+                </button>
+                <button type="button" onClick={closeModal}>
+                  取消
+                </button>
+              </div>
+            </form>
           </div>
-        )}
-
-        <select
-          value={form.status}
-          onChange={(e) =>
-            setForm({ ...form, status: e.target.value as FormState['status'] })
-          }
-        >
-          <option value="draft">草稿</option>
-          <option value="published">发布</option>
-        </select>
-        <button type="submit">保存</button>
-      </form>
-
-      <h2>已有文章</h2>
-      <ul>
-        {posts.map((p) => (
-          <li key={p.id}>
-            {p.title} <span className="muted">[{p.status}]</span>
-          </li>
-        ))}
-      </ul>
+        </div>
+      )}
     </div>
   )
 }
