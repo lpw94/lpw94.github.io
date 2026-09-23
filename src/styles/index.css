@@ -23,25 +23,8 @@ a:hover { text-decoration: underline; }
 .logo { font-weight: 700; font-size: 18px; color: var(--fg); }
 nav { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; }
 nav a { margin-left: 0; color: var(--muted); }
-/* 顶部栏右侧：登录邮箱 + 退出登录 */
-.nav-user { display: inline-flex; align-items: center; gap: 10px; }
-.nav-email {
-  max-width: 180px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 13px;
-  color: var(--muted);
-}
-.nav-logout {
-  padding: 4px 10px;
-  font-size: 12px;
-  color: var(--fg);
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 6px;
-}
-.nav-logout:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
+/* 顶部栏右侧的登录邮箱下拉、退出确认弹窗：样式集中在文件末尾的「顶部栏用户菜单」一节，
+   因为它们需要排在全局 button / .modal 规则之后才能生效 */
 /* 左：个人信息栏，右：正文 */
 .layout {
   display: grid;
@@ -540,4 +523,112 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   /* 上下篇改为上下堆叠，右对齐改回左对齐 */
   .post-nav { grid-template-columns: 1fr; }
   .post-nav-item.align-right { align-items: flex-start; text-align: left; }
+}
+
+/* ============ 顶部栏用户菜单（邮箱下拉 + 退出确认） ============
+   放在文件末尾：需要覆盖全局 input/button 与 .modal 的默认样式 */
+.nav-user {
+  position: relative; /* 下拉菜单的定位基准 */
+  display: inline-flex;
+  align-items: center;
+}
+.nav-trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  max-width: 220px;
+  padding: 4px 10px;
+  font-size: 13px;
+  color: var(--muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+}
+.nav-trigger:hover,
+.nav-trigger.open {
+  color: var(--fg);
+  background: #fff;
+  border-color: var(--border);
+  opacity: 1;
+}
+.nav-email {
+  min-width: 0; /* 允许在 flex 容器内被压缩，配合 ellipsis 生效 */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-caret { flex: none; font-size: 10px; line-height: 1; transition: transform 0.15s ease; }
+.nav-trigger.open .nav-caret { transform: rotate(180deg); }
+.nav-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 90; /* 高于正文，低于 .modal-backdrop(100) */
+  min-width: 200px;
+  padding: 6px;
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.12);
+  animation: menuIn 0.14s ease-out both;
+}
+@keyframes menuIn {
+  from { opacity: 0; transform: translateY(-4px); }
+  to { opacity: 1; transform: none; }
+}
+.nav-menu-head {
+  padding: 6px 10px 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+  color: var(--muted);
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.nav-menu-item {
+  display: block;
+  width: 100%;
+  padding: 8px 10px;
+  font-size: 13px;
+  text-align: left;
+  color: var(--fg);
+  background: transparent;
+  border-radius: 6px;
+}
+.nav-menu-item:hover { background: #f5f5f5; opacity: 1; }
+.nav-menu-item.danger { color: #dc2626; }
+.nav-menu-item.danger:hover { background: #fef2f2; }
+
+/* 退出登录二次确认弹窗（复用 .modal-backdrop / .modal 骨架） */
+.modal.confirm-modal { max-width: 380px; }
+.confirm-text { margin: 0; font-size: 14px; line-height: 1.7; }
+.confirm-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 20px;
+}
+.btn-ghost,
+.btn-danger {
+  padding: 8px 16px;
+  font-size: 14px;
+  border-radius: 8px;
+}
+.btn-ghost {
+  color: var(--fg);
+  background: #fff;
+  border: 1px solid var(--border);
+}
+.btn-ghost:hover { border-color: var(--fg); opacity: 1; }
+.btn-danger {
+  color: #fff;
+  background: #dc2626;
+  border: 1px solid #dc2626;
+}
+.btn-danger:hover { background: #b91c1c; border-color: #b91c1c; opacity: 1; }
+
+/* 窄屏：邮箱触发器收窄（必须写在基础规则之后才不会被覆盖） */
+@media (max-width: 720px) {
+  .nav-trigger { max-width: 160px; }
 }
