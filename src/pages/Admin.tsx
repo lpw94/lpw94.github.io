@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
+import { uploadImage } from '../lib/storage'
 import { looksLikeHtml, toPlainText } from '../lib/content'
 import RichTextEditor from '../components/RichTextEditor'
 import LoginModal from '../components/LoginModal'
@@ -103,26 +104,22 @@ export default function Admin() {
     if (!file) return
     setUploading(true)
 
-    // 不要把原始文件名拼进存储路径：中文、空格、#、? 等字符会让对象 key 非法，
-    // Storage 会直接以 "Invalid key" 拒绝。统一改用「时间戳 + 随机串 + 扩展名」。
-    const rawExt = file.name.includes('.') ? file.name.split('.').pop()! : ''
-    const ext = rawExt.toLowerCase().replace(/[^a-z0-9]/g, '') || 'png'
-    const path = `covers/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`
-
-    const { error } = await supabase.storage
-      .from('covers')
-      .upload(path, file, { contentType: file.type || undefined })
-
-    setUploading(false)
-    if (error) {
-      console.error('封面图上传失败', error)
-      alert(`上传失败：${error.message}`)
-      return
+    try {
+      // 路径规范与「Invalid key」相关注意事项见 lib/storage.ts
+      const url = await uploadImage(file, 'covers')
+      setForm((prev) => ({ ...prev, cover_url: url }))
+    } catch (err) {
+      console.error('封面图上传失败', err)
+      alert(`上传失败：${(err as Error).message}`)
+    } finally {
+      setUploading(false)
+      // 清空 value，否则再次选择同一个文件不会触发 change 事件
+      e.target.value = ''
     }
-
-    const { data } = supabase.storage.from('covers').getPublicUrl(path)
-    setForm((prev) => ({ ...prev, cover_url: data.publicUrl }))
   }
+
+  /** 正文内嵌图片：放在 content/ 子目录，与封面区分开 */
+  const uploadContentImage = (file: File) => uploadImage(file, 'content')
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -358,7 +355,8 @@ export default function Admin() {
                 <RichTextEditor
                   value={form.content}
                   onChange={(html) => setForm((prev) => ({ ...prev, content: html }))}
-                  placeholder="正文 · 可加粗、设标题、插列表"
+                  placeholder="正文 · 可加粗、设标题、插列表、传图"
+                  onUploadImage={uploadContentImage}
                 />
               ) : (
                 <textarea

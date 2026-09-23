@@ -389,6 +389,21 @@ button:hover { opacity: 0.9; }
   padding: 0;
   border-radius: 3px;
 }
+/* 正文内嵌图片（富文本「图片」按钮上传）：独占一行 + 上下留白。
+   选择器同时覆盖前台 .rich-content 与编辑器 .rte-body，保证编辑与发布后观感一致。 */
+.rich-content p.post-img,
+.rte-body p.post-img {
+  margin: 24px 0;
+  text-align: center;
+}
+.rich-content p.post-img img,
+.rte-body p.post-img img {
+  display: block; /* 块级化，确保不与相邻文字同行 */
+  margin: 0 auto; /* 图宽小于正文时居中 */
+  max-width: 100%;
+  height: auto;
+  border-radius: 8px;
+}
 
 /* 文章封面 */
 .post-detail .cover { width: 100%; max-height: 360px; object-fit: cover; border-radius: 10px; margin: 16px 0; }
