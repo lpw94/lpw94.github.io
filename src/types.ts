@@ -25,6 +25,7 @@ export interface Post {
   cover_url: string | null
   category: Category
   status: 'draft' | 'published'
+  views: number
   created_at: string
   published_at: string | null
 }

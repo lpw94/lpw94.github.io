@@ -10,6 +10,8 @@ import TimeWidget from './TimeWidget'
 import FortuneWidget from './FortuneWidget'
 import ReactionGame from './ReactionGame'
 import AdSlot from './AdSlot'
+import KonamiCode from './KonamiCode'
+import VisitorWidget from './VisitorWidget'
 import FloatingPet from './FloatingPet'
 import { THEMES } from '../lib/themes'
 
@@ -165,9 +167,11 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         {showProfile && (
           <div className="sidebar">
             <ProfileCard />
+            <VisitorWidget />
             <TimeWidget />
             <FortuneWidget />
             <ReactionGame />
+            <KonamiCode />
             <AdSlot />
           </div>
         )}

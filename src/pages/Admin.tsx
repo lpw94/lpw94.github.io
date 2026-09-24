@@ -161,10 +161,19 @@ export default function Admin() {
     return url
   }
 
-  const submit = async (e: React.FormEvent) => {
-    e.preventDefault()
+  const submit = async (status: FormState['status']) => {
     if (saving) return
 
+    // 保存/发布按钮是 type="button"，不走原生表单提交，所以 required 不会自动拦截；
+    // 这里手动兜必填校验（标题、路径、正文）。
+    if (!form.title.trim()) {
+      alert('标题不能为空')
+      return
+    }
+    if (!form.slug.trim()) {
+      alert('路径 (slug) 不能为空')
+      return
+    }
     // 富文本模式下正文是 contentEditable，不是表单控件，HTML 的 required 对它无效，
     // 所以两种模式统一在这里兜一道非空校验
     if (!toPlainText(form.content).trim()) {
@@ -182,9 +191,9 @@ export default function Admin() {
       content: form.content,
       cover_url: form.cover_url,
       category: form.category,
-      status: form.status,
+      status,
       published_at:
-        form.status === 'published'
+        status === 'published'
           ? existing?.published_at ?? new Date().toISOString()
           : null,
     }
@@ -408,7 +417,7 @@ export default function Admin() {
               </button>
             </div>
 
-            <form onSubmit={submit}>
+            <form onSubmit={(e) => { e.preventDefault(); submit(form.status) }}>
               <div className="field">
                 <label htmlFor="post-title">标题</label>
                 <input
@@ -446,20 +455,6 @@ export default function Admin() {
                         {c.label}
                       </option>
                     ))}
-                  </select>
-                </div>
-
-                <div className="field">
-                  <label htmlFor="post-status">状态</label>
-                  <select
-                    id="post-status"
-                    value={form.status}
-                    onChange={(e) =>
-                      setForm({ ...form, status: e.target.value as FormState['status'] })
-                    }
-                  >
-                    <option value="draft">草稿</option>
-                    <option value="published">发布</option>
                   </select>
                 </div>
               </div>
@@ -515,18 +510,30 @@ export default function Admin() {
                 />
               ) : (
                 <textarea
+                  className="editor-textarea"
                   placeholder="正文（支持 Markdown）"
-                  rows={8}
                   value={form.content}
                   onChange={(e) => setForm({ ...form, content: e.target.value })}
                 />
               )}
 
               <div className="form-actions">
-                <button type="submit" disabled={saving}>
-                  {saving ? '保存中…' : form.id ? '保存修改' : '保存'}
+                <button
+                  type="button"
+                  onClick={() => submit('draft')}
+                  disabled={saving}
+                >
+                  {saving ? '保存中…' : form.id ? '存为草稿' : '保存草稿'}
                 </button>
-                <button type="button" onClick={closeModal}>
+                <button
+                  type="button"
+                  className="btn-primary"
+                  onClick={() => submit('published')}
+                  disabled={saving}
+                >
+                  {saving ? '保存中…' : form.id ? '发布更新' : '发布'}
+                </button>
+                <button type="button" className="btn-ghost" onClick={closeModal}>
                   取消
                 </button>
               </div>

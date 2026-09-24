@@ -27,6 +27,10 @@ create index if not exists posts_published_idx
 create index if not exists posts_category_idx
   on posts (category, published_at desc);
 
+-- 浏览次数：每打开一次文章详情页面 +1（由 bump_post_views RPC 自增）。
+-- if not exists 保证对已有库重复执行时不会报错。
+alter table posts add column if not exists views bigint not null default 0;
+
 -- 开启行级安全（RLS）
 alter table posts enable row level security;
 
@@ -114,3 +118,60 @@ create policy "Auth can delete covers"
   on storage.objects for delete
   to authenticated
   using (bucket_id = 'covers');
+
+-- ============================================================
+-- 全站访客计数（单行走全局计数器，RPC 原子自增）
+-- ============================================================
+create table if not exists site_stats (
+  key        text primary key,
+  visitors   bigint not null default 0,
+  updated_at timestamptz not null default now()
+);
+
+-- 初始化全局计数行（重复执行幂等）
+insert into site_stats (key, visitors) values ('global', 0)
+on conflict (key) do nothing;
+
+-- 原子自增并返回最新值：security definer 让匿名访客也能调用，无需为表开写策略。
+-- 表启用 RLS 且不给 anon 直接访问策略，访客只能经由本函数自增，不能直接读写整张表。
+create or replace function bump_visitors()
+returns bigint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v bigint;
+begin
+  update site_stats set visitors = visitors + 1, updated_at = now()
+   where key = 'global'
+   returning visitors into v;
+  return v;
+end;
+$$;
+
+alter table site_stats enable row level security;
+grant execute on function public.bump_visitors() to anon, authenticated, service_role;
+
+-- ============================================================
+-- 文章浏览次数：每打开一次文章详情页面 +1
+-- ============================================================
+-- 原子自增指定文章的 views 并返回最新值：security definer 让匿名访客也能调用，
+-- 无需为 posts 表给 anon 开更新策略（anon 仍只能经本函数自增，不能直接改整张表）。
+create or replace function bump_post_views(p_post_id uuid)
+returns bigint
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v bigint;
+begin
+  update posts set views = views + 1
+   where id = p_post_id
+   returning views into v;
+  return v;
+end;
+$$;
+
+grant execute on function public.bump_post_views(uuid) to anon, authenticated, service_role;

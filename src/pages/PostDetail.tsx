@@ -38,6 +38,8 @@ export default function PostDetail() {
   const contentRef = useRef<HTMLDivElement>(null)
   /** 全站已发布文章（按时间倒序），用于上下篇与推荐 */
   const [allPosts, setAllPosts] = useState<PostRef[]>([])
+  /** 已计数的文章 id：防止同一挂载内（如 React StrictMode 双调用）重复 +1 */
+  const countedRef = useRef<string | null>(null)
 
   useEffect(() => {
     const load = async () => {
@@ -52,6 +54,27 @@ export default function PostDetail() {
     }
     load()
   }, [slug])
+
+  // 每次打开文章详情（slug 变化）就调一次接口请求，浏览次数 +1。
+  // 用 ref 去重：同一篇在同一挂载内只计一次，避免开发环境 StrictMode 双调用造成多计；
+  // 切换文章（新 id）会重新计数，符合「每次打开页面就算一次」。
+  useEffect(() => {
+    if (!post) return
+    if (countedRef.current === post.id) return
+    countedRef.current = post.id
+    supabase
+      .rpc('bump_post_views', { p_post_id: post.id })
+      .then(({ data, error }) => {
+        if (error) {
+          console.warn('浏览计数（Supabase）不可用：', error.message)
+          return
+        }
+        const n = Number(data)
+        if (Number.isFinite(n)) {
+          setPost((p) => (p ? { ...p, views: n } : p))
+        }
+      })
+  }, [post?.id])
 
   useEffect(() => {
     if (!post) return
@@ -186,6 +209,9 @@ export default function PostDetail() {
           </span>
         )}
         <time className="muted">{formatDate(post.published_at)}</time>
+        <span className="post-views muted" title="浏览次数">
+          👁 {(post.views ?? 0).toLocaleString('zh-CN')} 次浏览
+        </span>
       </div>
 
       {post.cover_url && (

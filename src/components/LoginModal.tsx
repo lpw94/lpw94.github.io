@@ -106,13 +106,12 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
   }
 
   return createPortal(
-    <div className="modal-backdrop" onClick={onClose}>
+    <div className="modal-backdrop">
       <div
         className="modal login-modal"
         role="dialog"
         aria-modal="true"
         aria-label="后台登录"
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="modal-head">
           <h2>后台登录</h2>
