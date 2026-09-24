@@ -20,23 +20,25 @@ export default function VisitorWidget() {
       setCount(n)
     }
 
-    const fetchOrLocal = () => {
-      supabase
-        .rpc('bump_visitors')
-        .then(({ data, error }) => {
-          if (error) {
-            console.warn('访客计数（Supabase）不可用，已降级为本地计数：', error.message)
-            fallbackLocal()
-            return
-          }
-          const n = Number(data)
-          if (!Number.isFinite(n)) {
-            fallbackLocal()
-            return
-          }
-          setCount(n)
-        })
-        .catch(() => fallbackLocal())
+    // supabase.rpc() 返回的是 PromiseLike（只有 then，没有 catch），
+    // 所以这里用 async/await + try/catch，而不是 .then().catch()（后者 tsc 会报 TS2339）。
+    const fetchOrLocal = async () => {
+      try {
+        const { data, error } = await supabase.rpc('bump_visitors')
+        if (error) {
+          console.warn('访客计数（Supabase）不可用，已降级为本地计数：', error.message)
+          fallbackLocal()
+          return
+        }
+        const n = Number(data)
+        if (!Number.isFinite(n)) {
+          fallbackLocal()
+          return
+        }
+        setCount(n)
+      } catch {
+        fallbackLocal()
+      }
     }
 
     if (already) {
@@ -47,12 +49,12 @@ export default function VisitorWidget() {
         return
       }
       // 本地无记录（例如从未走 fallback）仍拉一次真实值，保证有显示而不是「—」
-      fetchOrLocal()
+      void fetchOrLocal()
       return
     }
 
     sessionStorage.setItem(flag, '1')
-    fetchOrLocal()
+    void fetchOrLocal()
   }, [])
 
   return (
