@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { uploadImage } from '../lib/storage'
+import { uploadImage, deleteImage } from '../lib/storage'
 import { looksLikeHtml, toPlainText } from '../lib/content'
 import RichTextEditor from '../components/RichTextEditor'
 import LoginModal from '../components/LoginModal'
@@ -41,6 +41,15 @@ function formatTime(post: Post) {
   return formatDateTime(post.published_at ?? post.created_at) || '—'
 }
 
+// 从 HTML 正文里提取全部 <img> 的 src（用于统计一篇文章引用了哪些图片）
+function extractImageUrls(html: string): string[] {
+  const urls: string[] = []
+  const re = /<img[^>]+src=["']([^"']+)["']/gi
+  let m: RegExpExecArray | null
+  while ((m = re.exec(html))) urls.push(m[1])
+  return urls
+}
+
 export default function Admin() {
   const [user, setUser] = useState<unknown>(null)
   const [posts, setPosts] = useState<Post[]>([])
@@ -52,6 +61,17 @@ export default function Admin() {
   const [richMode, setRichMode] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
+
+  /** 本次表单会话里新上传的图片公开地址（封面 + 正文图）。
+      上传即落盘，但只有保存成功后才真正被文章引用；
+      被替换/被删掉/放弃编辑的，都要从 Storage 清掉，避免垃圾文件占额度。 */
+  const sessionUploads = useRef<Set<string>>(new Set())
+  /** 打开表单时文章的原始图片引用（原封面 + 原正文图）。
+      编辑已有文章保存成功后，凡是"原来有、现在没了"的旧图都要删。 */
+  const originalImages = useRef<{ coverUrl: string | null; images: string[] }>({
+    coverUrl: null,
+    images: [],
+  })
 
   useEffect(() => {
     // 先用本地已有会话恢复一次（普通刷新场景）
@@ -83,9 +103,23 @@ export default function Admin() {
     if (user) load()
   }, [user])
 
+  /** 删除不再被引用的图片；失败只记日志（外链地址会被 deleteImage 自动跳过），
+      不阻断保存/关闭流程 —— 图片清理是锦上添花，不能因为它把发文搞挂。 */
+  const cleanupImages = async (urls: Iterable<string>, keep: Set<string>) => {
+    for (const url of urls) {
+      if (keep.has(url)) continue
+      const ok = await deleteImage(url)
+      if (!ok) console.warn('图片清理失败（可稍后在 Supabase Storage 手动删除）', url)
+    }
+  }
+
   const closeModal = () => {
     setOpen(false)
     setForm(emptyForm())
+    // 直接关闭（未保存）：本次会话上传的图片尚未被任何已保存文章引用，全部清掉。
+    // 保存成功路径会先清空 sessionUploads 再调 closeModal，所以不会误删已引用的图。
+    void cleanupImages(sessionUploads.current, new Set())
+    sessionUploads.current = new Set()
   }
 
   // 弹窗打开期间锁住背景滚动。
@@ -107,6 +141,7 @@ export default function Admin() {
     try {
       // 路径规范与「Invalid key」相关注意事项见 lib/storage.ts
       const url = await uploadImage(file, 'covers')
+      sessionUploads.current.add(url)
       setForm((prev) => ({ ...prev, cover_url: url }))
     } catch (err) {
       console.error('封面图上传失败', err)
@@ -119,7 +154,11 @@ export default function Admin() {
   }
 
   /** 正文内嵌图片：放在 content/ 子目录，与封面区分开 */
-  const uploadContentImage = (file: File) => uploadImage(file, 'content')
+  const uploadContentImage = async (file: File) => {
+    const url = await uploadImage(file, 'content')
+    sessionUploads.current.add(url)
+    return url
+  }
 
   const submit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -156,16 +195,45 @@ export default function Admin() {
     setSaving(false)
     if (error) {
       alert(error.message)
+      // 保存失败：不动已上传的图片，用户改完可直接重试
       return
     }
+
+    // —— 保存成功后清理不再被引用的图片 ——
+    // keep：保存后的文章实际引用的图片地址
+    const keep = new Set<string>()
+    if (payload.cover_url) keep.add(payload.cover_url)
+    for (const u of extractImageUrls(payload.content)) keep.add(u)
+
+    // removed：需要从 Storage 删掉的
+    const removed = new Set<string>()
+    // ① 本次会话上传、最终没被引用的（被替换掉的封面、编辑器里删掉的图）
+    for (const u of sessionUploads.current) removed.add(u)
+    // ② 编辑已有文章时被移除的旧资源（换了封面 / 删了正文图）
+    if (
+      originalImages.current.coverUrl &&
+      !keep.has(originalImages.current.coverUrl)
+    ) {
+      removed.add(originalImages.current.coverUrl)
+    }
+    for (const u of originalImages.current.images) {
+      if (!keep.has(u)) removed.add(u)
+    }
+
+    // 会话集合已按引用情况分好类，先清空，避免 closeModal 把仍被引用的图一并清掉
+    sessionUploads.current = new Set()
     closeModal()
     load()
+    // 后台静默清理，不阻塞界面
+    void cleanupImages(removed, keep)
   }
 
   // 打开空白弹窗新建，新文章默认走富文本
   const openCreate = () => {
     setForm(emptyForm())
     setRichMode(true)
+    sessionUploads.current = new Set()
+    originalImages.current = { coverUrl: null, images: [] }
     setOpen(true)
   }
 
@@ -182,6 +250,11 @@ export default function Admin() {
       status: post.status,
     })
     setRichMode(looksLikeHtml(post.content))
+    sessionUploads.current = new Set()
+    originalImages.current = {
+      coverUrl: post.cover_url,
+      images: extractImageUrls(post.content),
+    }
     setOpen(true)
   }
 
@@ -216,6 +289,21 @@ export default function Admin() {
     // 删掉的正是弹窗里这篇，就顺手关掉
     if (form.id === post.id) closeModal()
     load()
+
+    // —— 清理这篇文章的图片：只删"没有其它文章还在引用"的 ——
+    // keep：其余文章（含草稿）仍引用的图片地址；万一两张文章用了同一张图，就不会误删
+    const keep = new Set<string>()
+    for (const p of posts) {
+      if (p.id === post.id) continue
+      if (p.cover_url) keep.add(p.cover_url)
+      for (const u of extractImageUrls(p.content)) keep.add(u)
+    }
+    const removed = new Set<string>()
+    if (post.cover_url && !keep.has(post.cover_url)) removed.add(post.cover_url)
+    for (const u of extractImageUrls(post.content)) {
+      if (!keep.has(u)) removed.add(u)
+    }
+    void cleanupImages(removed, keep)
   }
 
   if (!user) {
@@ -301,7 +389,7 @@ export default function Admin() {
       {open && (
         <div className="modal-backdrop">
           <div
-            className="modal"
+            className="modal post-modal"
             role="dialog"
             aria-modal="true"
             aria-label={form.id ? '编辑文章' : '添加文章'}

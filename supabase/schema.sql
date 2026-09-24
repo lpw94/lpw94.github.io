@@ -89,3 +89,11 @@ create policy "Auth can upload covers"
   on storage.objects for insert
   to authenticated
   with check (bucket_id = 'covers');
+
+-- 登录用户可删除：用于自动清理被替换的旧封面、编辑器里删掉的正文图。
+-- 注意：schema.sql 只在手动执行时生效，已有库需在 SQL Editor 单独跑这一段。
+drop policy if exists "Auth can delete covers" on storage.objects;
+create policy "Auth can delete covers"
+  on storage.objects for delete
+  to authenticated
+  using (bucket_id = 'covers');

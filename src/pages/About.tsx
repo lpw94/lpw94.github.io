@@ -69,7 +69,7 @@ export default function About() {
   return (
     <>
       <Helmet>
-        <title>关于WO的网络世界</title>
+        <title>沃哥博客</title>
         <meta name="description" content={`${resume.name} · ${resume.role}`} />
       </Helmet>
 

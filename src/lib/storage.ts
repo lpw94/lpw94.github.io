@@ -30,3 +30,32 @@ export async function uploadImage(file: File, folder = ''): Promise<string> {
 
   return supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl
 }
+
+/**
+ * 从公开 URL 反解出 covers 桶内的对象路径。
+ * 只认本项目的 Storage 地址（…/storage/v1/object/public/covers/…），
+ * 外链或其它桶的地址返回 null，调用方据此跳过清理。
+ */
+export function bucketPathFromUrl(url: string | null | undefined): string | null {
+  if (!url) return null
+  const marker = `/storage/v1/object/public/${BUCKET}/`
+  const i = url.indexOf(marker)
+  if (i === -1) return null
+  try {
+    return decodeURIComponent(url.slice(i + marker.length).split('?')[0]) || null
+  } catch {
+    return null
+  }
+}
+
+/**
+ * 删除 covers 桶里的一张图（传入公开地址）。
+ * 返回值含义：true = 已删除或不属于本桶（无需处理）；false = 删除失败（如 RLS 未放开）。
+ */
+export async function deleteImage(publicUrl: string): Promise<boolean> {
+  const path = bucketPathFromUrl(publicUrl)
+  if (!path) return true
+
+  const { error } = await supabase.storage.from(BUCKET).remove([path])
+  return !error
+}

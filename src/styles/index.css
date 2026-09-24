@@ -238,6 +238,13 @@ button:hover { opacity: 0.9; }
 /* 弹窗内的表单不受 .admin form 的 480px 宽度限制 */
 .admin .modal form { max-width: none; }
 
+/* 文章弹窗（添加/编辑）：约占视口宽度 60%，给正文编辑留足横向空间。
+   下限保持 640px，避免窄窗口反而比通用弹窗更小；上限 1400px 防止超宽屏被拉得过长。
+   窄屏时 .modal 的 width:100% 生效，此处不会造成溢出。 */
+.modal.post-modal {
+  max-width: clamp(640px, 60vw, 1400px);
+}
+
 @media (max-width: 720px) {
   .modal-backdrop { padding: 12px; }
   .modal { padding: 18px; max-height: calc(100vh - 24px); }
@@ -390,11 +397,12 @@ button:hover { opacity: 0.9; }
   border-radius: 3px;
 }
 /* 正文内嵌图片（富文本「图片」按钮上传）：独占一行 + 上下留白。
-   选择器同时覆盖前台 .rich-content 与编辑器 .rte-body，保证编辑与发布后观感一致。 */
+   选择器同时覆盖前台 .rich-content 与编辑器 .rte-body，保证编辑与发布后观感一致。
+   注意：不要给 p 加 text-align:center —— 编辑器里回车会克隆段落类名，
+   新段落会继承居中；居中交给 img 自身的 display:block + margin:auto 即可。 */
 .rich-content p.post-img,
 .rte-body p.post-img {
   margin: 24px 0;
-  text-align: center;
 }
 .rich-content p.post-img img,
 .rte-body p.post-img img {

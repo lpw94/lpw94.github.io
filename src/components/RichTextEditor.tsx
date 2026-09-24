@@ -29,6 +29,8 @@ const COMMANDS: Command[] = [
   { label: '1. 列表', title: '有序列表', cmd: 'insertOrderedList' },
   { label: '引用', title: '引用', cmd: 'formatBlock', arg: 'blockquote' },
   { label: '代码块', title: '代码块', cmd: 'formatBlock', arg: 'pre' },
+  { label: '居中', title: '文本居中', cmd: 'justifyCenter' },
+  { label: '左对齐', title: '左对齐（取消居中）', cmd: 'justifyLeft' },
   { label: '清格式', title: '清除格式', cmd: 'removeFormat' },
   { label: '撤销', title: '撤销', cmd: 'undo' },
   { label: '重做', title: '重做', cmd: 'redo' },
@@ -61,7 +63,54 @@ export default function RichTextEditor({ value, onChange, placeholder, onUploadI
     if (el && el.innerHTML !== value) el.innerHTML = value || ''
   }, [value])
 
-  const sync = () => onChange(bodyRef.current?.innerHTML ?? '')
+  /**
+   * 输出前做一次自愈：编辑器回车时会克隆当前段落的类名，
+   * 可能产生没有图片却带 post-img 的段落；把这种残留类名摘掉，
+   * 避免「图片下面新起的段落」带着图片段落的边距样式。
+   */
+  const sync = () => {
+    const el = bodyRef.current
+    if (el) {
+      el.querySelectorAll('p.post-img').forEach((p) => {
+        if (!p.querySelector('img')) p.classList.remove('post-img')
+      })
+    }
+    onChange(el?.innerHTML ?? '')
+  }
+
+  /**
+   * 光标落在图片段落（p.post-img）里时，在其后新建一个干净的普通段落
+   * 并把光标移过去 —— 这样图片后继续输入/回车都是左对齐的普通段落。
+   * 返回是否做了修正。
+   */
+  const moveCaretToPlainBlock = (): boolean => {
+    const el = bodyRef.current
+    const sel = window.getSelection()
+    if (!el || !sel || sel.rangeCount === 0) return false
+    const range = sel.getRangeAt(0)
+
+    // 从光标位置向上找最近的块级段落
+    let node: Node | null = range.startContainer
+    let block: HTMLElement | null = null
+    while (node && node !== el) {
+      if (node instanceof HTMLElement && node.tagName === 'P') {
+        block = node
+        break
+      }
+      node = node.parentNode
+    }
+    if (!block || !block.classList.contains('post-img')) return false
+
+    const p = document.createElement('p')
+    p.appendChild(document.createElement('br'))
+    block.after(p)
+    const r = document.createRange()
+    r.setStart(p, 0)
+    r.collapse(true)
+    sel.removeAllRanges()
+    sel.addRange(r)
+    return true
+  }
 
   const exec = (cmd: string, arg?: string) => {
     // 工具栏按钮用 onMouseDown preventDefault 保住了焦点与选区，这里再兜底一次
@@ -113,7 +162,31 @@ export default function RichTextEditor({ value, onChange, placeholder, onUploadI
   const insertHtml = (html: string) => {
     restoreSelection()
     document.execCommand('insertHTML', false, html)
+    // 插入图片后光标可能停在图片段落里，把它挪到后面干净的普通段落，
+    // 否则接着打字/回车都会落在居中的图片段落里。
+    moveCaretToPlainBlock()
     sync()
+  }
+
+  /**
+   * 回车处理：光标在图片段落里时拦截默认行为（浏览器会克隆段落类名，
+   * 新段落继承 post-img 的居中/边距样式），改为在其后开一个普通段落。
+   */
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key !== 'Enter') return
+    const sel = window.getSelection()
+    const el = bodyRef.current
+    if (!el || !sel || sel.rangeCount === 0) return
+    let node: Node | null = sel.getRangeAt(0).startContainer
+    while (node && node !== el) {
+      if (node instanceof HTMLElement && node.classList.contains('post-img')) {
+        e.preventDefault()
+        moveCaretToPlainBlock()
+        sync()
+        return
+      }
+      node = node.parentNode
+    }
   }
 
   const insertLink = () => {
@@ -217,6 +290,7 @@ export default function RichTextEditor({ value, onChange, placeholder, onUploadI
         aria-label="正文"
         data-placeholder={placeholder ?? '正文'}
         onInput={sync}
+        onKeyDown={handleKeyDown}
         onBlur={sync}
       />
 

@@ -21,7 +21,7 @@ export const resume = {
     { label: '前端经验', value: 5, suffix: '年' },
     { label: '参与项目', value: 20, suffix: '+' },
     { label: '技术文章', value: 30, suffix: '+' },
-    { label: '掌握技能', value: 8, suffix: '项' },
+    { label: '掌握技能', value: 11, suffix: '项' },
   ] as Stat[],
 
   info: [
@@ -46,12 +46,15 @@ export const resume = {
 
   skills: [
     { name: 'HTML5 + CSS3', value: 95 },
-    { name: 'JavaScript / jQuery', value: 92 },
+    { name: 'JavaScript (ES6+)', value: 92 },
+    { name: 'React / React Hooks', value: 92 },
     { name: 'Vue', value: 90 },
-    { name: 'Ajax / Axios', value: 88 },
-    { name: 'Swiper / Bootstrap', value: 80 },
+    { name: 'TypeScript', value: 88 },
+    { name: 'UI 组件库（Ant Design / Element）', value: 86 },
+    { name: '状态管理（Redux / dva / Pinia）', value: 85 },
+    { name: '数据可视化（ECharts / Three.js）', value: 82 },
+    { name: '前端工程化（Vite / Webpack / UmiJS）', value: 80 },
     { name: 'Angular', value: 75 },
-    { name: 'Node.js / Webpack', value: 65 },
-    { name: '微信小程序', value: 60 },
+    { name: 'Node.js / 微信小程序', value: 70 },
   ] as Skill[],
 }
