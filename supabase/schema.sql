@@ -73,6 +73,23 @@ create policy "Public can insert comments"
   with check (true);
 
 -- ============================================================
+-- Data API 授权（Supabase 2025-10-30 起，public 新建表需显式 GRANT 才能经 Data API 访问）
+-- 此处对所有表统一授权，保证 supabase db reset / 新建分支 / 新项目重跑 schema 后仍可从
+-- supabase-js / PostgREST 访问。已存在表的旧授权不受影响；重复执行仅为幂等重授权。
+-- 授权范围与上方 RLS 策略对齐：anon 仅公开读/写，authenticated 可管理，service_role 全权。
+-- ============================================================
+
+-- posts
+grant select                                   on public.posts to anon;
+grant select, insert, update, delete           on public.posts to authenticated;
+grant select, insert, update, delete           on public.posts to service_role;
+
+-- comments
+grant select, insert                            on public.comments to anon;
+grant select, insert, update, delete           on public.comments to authenticated;
+grant select, insert, update, delete           on public.comments to service_role;
+
+-- ============================================================
 -- 封面图存储桶（公开读、登录用户可上传）
 -- ============================================================
 insert into storage.buckets (id, name, public)

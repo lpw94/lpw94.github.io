@@ -9,13 +9,60 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-  background: var(--bg);
+  /* 深空底色 + 两团蓝紫光晕，作为 3D 粒子背景的兜底（canvas 透明处透出） */
+  background:
+    radial-gradient(1200px 800px at 72% 8%, rgba(56, 82, 168, 0.38), transparent 60%),
+    radial-gradient(1000px 720px at 12% 92%, rgba(120, 52, 160, 0.32), transparent 60%),
+    #060912;
   color: var(--fg);
   line-height: 1.6;
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
-.container { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
+/* 顶部栏背景主题切换 */
+.theme-select {
+  appearance: none;
+  -webkit-appearance: none;
+  font-size: 13px;
+  color: var(--muted);
+  background: #fff;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 5px 14px;
+  cursor: pointer;
+  margin-left: 4px;
+}
+.theme-select:hover { border-color: var(--accent); }
+.theme-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+/* 全屏 3D 背景层：固定视口、置于内容之下、不拦截交互 */
+.bg3d {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+}
+
+/* 自定义鼠标效果叠加层：发光跟随 + 点击涟漪/粒子，不拦截交互 */
+.cursor-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  mix-blend-mode: screen;
+}
+.bg3d canvas { display: block; }
+/* 内容区玻璃拟态：浅色半透明 + 模糊，既保证深字可读，又让边缘透出炫酷 3D */
+.container {
+  max-width: 1000px;
+  margin: 28px auto 48px;
+  padding: 0 22px;
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  border-radius: 10px;
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+}
 .site-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 0; border-bottom: 1px solid var(--border);
@@ -171,7 +218,26 @@ button:hover { opacity: 0.9; }
 }
 
 /* 表单底部按钮：保存 + 取消编辑 并排 */
-.form-actions { display: flex; gap: 10px; }
+.form-row { display: flex; gap: 10px; }
+.form-row > * { flex: 1; min-width: 0; }
+
+/* 弹窗内字段：label 在上、控件在下，控件占满整行 */
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field > label { font-size: 13px; font-weight: 600; color: var(--fg); }
+
+/* 弹窗表单美化：控件占满宽度、聚焦高亮、字段间留白、头部分隔线 */
+.modal form > *:not(:last-child) { margin-bottom: 16px; }
+.modal input, .modal select, .modal textarea { width: 100%; box-sizing: border-box; transition: border-color .15s, box-shadow .15s; }
+.modal input:hover, .modal select:hover, .modal textarea:hover { border-color: #cfcfcf; }
+.modal input:focus, .modal select:focus, .modal textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+}
+.modal .rte { width: 100%; }
+.modal-head { border-bottom: 1px solid var(--border); padding-bottom: 14px; }
+
+.form-actions { display: flex; gap: 10px; justify-content: flex-end; }
 .form-actions button[type='button'] {
   background: #fff;
   color: var(--fg);
@@ -193,7 +259,7 @@ button:hover { opacity: 0.9; }
 .modal-backdrop {
   position: fixed;
   inset: 0;
-  z-index: 100;
+  z-index: 10000;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -238,11 +304,14 @@ button:hover { opacity: 0.9; }
 /* 弹窗内的表单不受 .admin form 的 480px 宽度限制 */
 .admin .modal form { max-width: none; }
 
-/* 文章弹窗（添加/编辑）：约占视口宽度 60%，给正文编辑留足横向空间。
-   下限保持 640px，避免窄窗口反而比通用弹窗更小；上限 1400px 防止超宽屏被拉得过长。
-   窄屏时 .modal 的 width:100% 生效，此处不会造成溢出。 */
+/* 文章弹窗（添加/编辑）：固定尺寸窗口。
+   宽 900px（窄屏自动收窄到视口内），高 82vh；正文/表单超高时在窗口内滚动，
+   不再随内容无限撑高。之前用 clamp(640px,60vw,1400px) 响应式宽度，改为固定大小。 */
 .modal.post-modal {
-  max-width: clamp(640px, 60vw, 1400px);
+  width: 900px;
+  max-width: calc(100vw - 32px);
+  height: 82vh;
+  max-height: none;
 }
 
 @media (max-width: 720px) {
@@ -515,6 +584,7 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   border-radius: 10px;
   background: #fff;
   text-align: center;
+  z-index: 99;
 }
 .profile-avatar {
   display: block;
@@ -540,6 +610,158 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
 .profile-links li { display: flex; gap: 8px; justify-content: space-between; }
 .profile-link-label { flex: none; color: var(--muted); }
 .profile-links a { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+/* 侧边栏容器：ProfileCard + 趣味组件竖向堆叠 */
+.sidebar { display: flex; flex-direction: column; gap: 16px; }
+
+/* ===== 桌面宠物：从内容区两侧随机冒出、走动蹦跳、可点击互动 ===== */
+.pet-layer {
+  position: fixed;
+  inset: 0;
+  z-index: 9998;        /* 仅低于弹窗(modal)，确保盖在所有内容之上、不被卡片遮挡 */
+  pointer-events: none; /* 整层不拦截，避免误挡页面交互 */
+}
+.pet {
+  position: absolute;
+  bottom: 72px;         /* 沿内容区下方“地面”行走 */
+  pointer-events: auto; /* 仅宠物本体可点击 */
+  border: none;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+  font-size: 76px;      /* 放大，确保显眼 */
+  line-height: 1;
+  filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35));
+  transition: left 1.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+  animation: pet-glow 2.6s ease-in-out infinite; /* 呼吸光晕，深空背景上更醒目 */
+}
+.pet:hover { filter: drop-shadow(0 10px 14px rgba(0, 0, 0, 0.45)) brightness(1.08); }
+.pet-flip { display: inline-block; transition: transform 0.2s; }
+.pet-body { display: inline-block; }
+/* 走路 / 待机时原地蹦跳；点击时连蹦两下 */
+.pet.walk .pet-body,
+.pet.idle .pet-body { animation: pet-hop 1.1s ease-in-out infinite; }
+.pet.happy .pet-body { animation: pet-hop 0.35s ease-in-out 2; }
+@keyframes pet-hop {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+@keyframes pet-glow {
+  0%, 100% {
+    filter: drop-shadow(0 6px 8px rgba(0, 0, 0, 0.35))
+            drop-shadow(0 0 0 rgba(96, 165, 250, 0));
+  }
+  50% {
+    filter: drop-shadow(0 8px 12px rgba(0, 0, 0, 0.4))
+            drop-shadow(0 0 16px rgba(96, 165, 250, 0.75));
+  }
+}
+/* 互动气泡 */
+.pet-bubble {
+  position: absolute;
+  bottom: 118%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  color: #111;
+  font-size: 14px;
+  white-space: nowrap;
+  padding: 7px 12px;
+  border-radius: 14px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  animation: bubble-in 0.25s ease;
+}
+.pet-bubble::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 7px solid transparent;
+  border-top-color: #fff;
+}
+@keyframes bubble-in {
+  from { opacity: 0; transform: translate(-50%, 6px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
+/* 减少动态偏好：去掉蹦跳与缓动与呼吸光，保留静态可点 */
+@media (prefers-reduced-motion: reduce) {
+  .pet { transition: left 0.3s linear; animation: none; }
+  .pet.walk .pet-body,
+  .pet.idle .pet-body,
+  .pet.happy .pet-body { animation: none; }
+}
+
+/* 通用侧边栏卡片 */
+.widget-card {
+  padding: 16px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+}
+.ww-title { font-size: 13px; font-weight: 600; color: var(--fg); margin-bottom: 10px; }
+
+/* 时间组件 */
+.time-widget { text-align: center; }
+.tw-greet { font-size: 13px; color: var(--muted); }
+.tw-clock {
+  font-size: 30px; font-weight: 700; line-height: 1.2;
+  font-variant-numeric: tabular-nums; letter-spacing: 1px;
+  color: var(--fg);
+}
+.tw-date { font-size: 12px; color: var(--muted); margin-top: 4px; }
+
+/* 算命组件 */
+.fw-card {
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: 8px;
+  padding: 12px;
+  background: #fafafa;
+  animation: fwIn 0.35s ease-out both;
+}
+@keyframes fwIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+.fw-sign { font-size: 16px; font-weight: 700; }
+.fw-line { font-size: 13px; margin: 8px 0; color: var(--fg); line-height: 1.5; }
+.fw-meta { display: flex; gap: 12px; font-size: 12px; }
+.fw-yi { color: #16a34a; }
+.fw-ji { color: #dc2626; }
+.fw-color { margin-top: 8px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
+.fw-color i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+.fw-btn {
+  margin-top: 10px; width: 100%; padding: 8px;
+  font-size: 13px; cursor: pointer; transition: border-color .15s, color .15s;
+  border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg);
+}
+.fw-btn:hover { border-color: var(--accent); color: var(--accent); }
+
+/* 反应力小游戏 */
+.rg-pad {
+  width: 100%; padding: 18px; border: none; border-radius: 8px;
+  font-size: 16px; font-weight: 600; color: #fff; cursor: pointer;
+  background: var(--accent); transition: background .15s;
+}
+.rg-pad.rg-waiting { background: #eab308; color: #1a1a1a; }
+.rg-pad.rg-go { background: #16a34a; }
+.rg-pad.rg-done { background: #64748b; }
+.rg-foot { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+/* 广告位 */
+.ad-widget { padding: 0; overflow: hidden; }
+.ad-link { display: block; text-decoration: none; }
+.ad-body { padding: 16px; }
+.ad-badge {
+  display: inline-block; font-size: 10px; line-height: 1; color: #fff;
+  background: #cbd5e1; padding: 2px 6px; border-radius: 4px; margin-bottom: 8px;
+}
+.ad-placeholder { text-align: center; }
+.ad-emoji { font-size: 28px; }
+.ad-title { font-weight: 600; margin-top: 6px; color: var(--fg); }
+.ad-desc { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.ad-img { width: 100%; display: block; }
 
 /* 窄屏：个人信息栏移到正文上方 */
 @media (max-width: 720px) {

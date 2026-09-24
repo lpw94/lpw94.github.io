@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
 
 // 回跳地址：优先用构建时注入的正式域名（VITE_SITE_URL），
@@ -104,7 +105,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
     setMsg('重置密码邮件已发送，请按邮件中的链接设置新密码。')
   }
 
-  return (
+  return createPortal(
     <div className="modal-backdrop" onClick={onClose}>
       <div
         className="modal login-modal"
@@ -250,6 +251,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
         {msg && <p className="muted ok">{msg}</p>}
         {err && <p className="err">{err}</p>}
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }

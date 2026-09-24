@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
 import { uploadImage, deleteImage } from '../lib/storage'
 import { looksLikeHtml, toPlainText } from '../lib/content'
@@ -386,8 +387,9 @@ export default function Admin() {
         </table>
       )}
 
-      {open && (
-        <div className="modal-backdrop">
+      {open &&
+        createPortal(
+          <div className="modal-backdrop">
           <div
             className="modal post-modal"
             role="dialog"
@@ -407,18 +409,83 @@ export default function Admin() {
             </div>
 
             <form onSubmit={submit}>
-              <input
-                placeholder="标题"
-                value={form.title}
-                onChange={(e) => setForm({ ...form, title: e.target.value })}
-                required
-              />
-              <input
-                placeholder="slug（英文路径，默认 my-log+时间，可修改）"
-                value={form.slug}
-                onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                required
-              />
+              <div className="field">
+                <label htmlFor="post-title">标题</label>
+                <input
+                  id="post-title"
+                  placeholder="请输入文章标题"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="field">
+                <label htmlFor="post-slug">路径 (slug)</label>
+                <input
+                  id="post-slug"
+                  placeholder="英文路径，默认 my-log+时间，可修改"
+                  value={form.slug}
+                  onChange={(e) => setForm({ ...form, slug: e.target.value })}
+                  required
+                />
+              </div>
+
+              <div className="form-row">
+                <div className="field">
+                  <label htmlFor="post-category">类型</label>
+                  <select
+                    id="post-category"
+                    value={form.category}
+                    onChange={(e) =>
+                      setForm({ ...form, category: e.target.value as Category })
+                    }
+                  >
+                    {CATEGORIES.map((c) => (
+                      <option key={c.value} value={c.value}>
+                        {c.label}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="field">
+                  <label htmlFor="post-status">状态</label>
+                  <select
+                    id="post-status"
+                    value={form.status}
+                    onChange={(e) =>
+                      setForm({ ...form, status: e.target.value as FormState['status'] })
+                    }
+                  >
+                    <option value="draft">草稿</option>
+                    <option value="published">发布</option>
+                  </select>
+                </div>
+              </div>
+
+              <label className="cover-label">
+                封面图
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={uploadCover}
+                  disabled={uploading}
+                />
+              </label>
+              {uploading && <p className="muted">上传中…</p>}
+              {form.cover_url && (
+                <div className="cover-preview">
+                  <img src={form.cover_url} alt="封面预览" />
+                  <button
+                    type="button"
+                    onClick={() => setForm({ ...form, cover_url: null })}
+                  >
+                    移除封面
+                  </button>
+                </div>
+              )}
+
               <div className="editor-head">
                 <span className="muted">正文</span>
                 <div className="editor-modes">
@@ -455,51 +522,6 @@ export default function Admin() {
                 />
               )}
 
-              <label className="cover-label">
-                封面图
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={uploadCover}
-                  disabled={uploading}
-                />
-              </label>
-              {uploading && <p className="muted">上传中…</p>}
-              {form.cover_url && (
-                <div className="cover-preview">
-                  <img src={form.cover_url} alt="封面预览" />
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, cover_url: null })}
-                  >
-                    移除封面
-                  </button>
-                </div>
-              )}
-
-              <select
-                value={form.category}
-                onChange={(e) =>
-                  setForm({ ...form, category: e.target.value as Category })
-                }
-              >
-                {CATEGORIES.map((c) => (
-                  <option key={c.value} value={c.value}>
-                    {c.label}
-                  </option>
-                ))}
-              </select>
-
-              <select
-                value={form.status}
-                onChange={(e) =>
-                  setForm({ ...form, status: e.target.value as FormState['status'] })
-                }
-              >
-                <option value="draft">草稿</option>
-                <option value="published">发布</option>
-              </select>
-
               <div className="form-actions">
                 <button type="submit" disabled={saving}>
                   {saving ? '保存中…' : form.id ? '保存修改' : '保存'}
@@ -510,8 +532,9 @@ export default function Admin() {
               </div>
             </form>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </div>
   )
 }

@@ -1,8 +1,17 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
+import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import ProfileCard from './ProfileCard'
+import Background3D from './Background3D'
+import CursorFX from './CursorFX'
+import TimeWidget from './TimeWidget'
+import FortuneWidget from './FortuneWidget'
+import ReactionGame from './ReactionGame'
+import AdSlot from './AdSlot'
+import FloatingPet from './FloatingPet'
+import { THEMES } from '../lib/themes'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()
@@ -77,19 +86,44 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (pathname === '/admin') navigate('/')
   }
 
+  // 背景主题：从 localStorage 恢复，缺省用第一个主题
+  const [themeId, setThemeId] = useState<string>(
+    () => localStorage.getItem('bg-theme') || THEMES[0].id
+  )
+  const theme = useMemo(() => THEMES.find((t) => t.id === themeId) ?? THEMES[0], [themeId])
+
   // 简历页本身就是个人信息详情；文章详情页需要更宽的正文空间（代码块、图片、表格），
   // 信息栏也没有意义 —— 这几种页面都隐藏左侧栏
   const showProfile =
     pathname !== '/about' && !pathname.startsWith('/post/')
 
   return (
-    <div className="container">
+    <>
+      <Background3D theme={theme} />
+      <CursorFX theme={theme} />
+      <FloatingPet />
+      <div className="container">
       <header className="site-header">
         <Link to="/" className="logo">个人博客</Link>
         <nav>
           <Link to="/">首页</Link>
           <Link to="/about">简历</Link>
           <Link to="/admin">后台</Link>
+          <select
+            className="theme-select"
+            value={themeId}
+            onChange={(e) => {
+              setThemeId(e.target.value)
+              localStorage.setItem('bg-theme', e.target.value)
+            }}
+            aria-label="切换背景主题"
+          >
+            {THEMES.map((t) => (
+              <option key={t.id} value={t.id}>
+                {t.name}
+              </option>
+            ))}
+          </select>
           {user && (
             <div className="nav-user" ref={menuRef}>
               {/* 邮箱本身是下拉触发器，退出登录收进菜单里 */}
@@ -128,19 +162,28 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </nav>
       </header>
       <div className={`layout${showProfile ? '' : ' no-sidebar'}`}>
-        {showProfile && <ProfileCard />}
+        {showProfile && (
+          <div className="sidebar">
+            <ProfileCard />
+            <TimeWidget />
+            <FortuneWidget />
+            <ReactionGame />
+            <AdSlot />
+          </div>
+        )}
         <main>{children}</main>
       </div>
       <footer className="muted">© {new Date().getFullYear()} woge博客</footer>
 
-      {confirmOpen && (
-        <div
-          className="modal-backdrop"
-          onMouseDown={(e) => {
-            // 只有点到遮罩本身才关闭，点弹窗内部不关
-            if (e.target === e.currentTarget) setConfirmOpen(false)
-          }}
-        >
+      {confirmOpen &&
+        createPortal(
+          <div
+            className="modal-backdrop"
+            onMouseDown={(e) => {
+              // 只有点到遮罩本身才关闭，点弹窗内部不关
+              if (e.target === e.currentTarget) setConfirmOpen(false)
+            }}
+          >
           <div
             className="modal confirm-modal"
             role="dialog"
@@ -168,8 +211,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body,
+        )}
     </div>
+    </>
   )
 }
