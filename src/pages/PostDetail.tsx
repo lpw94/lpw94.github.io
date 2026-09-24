@@ -1,8 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import rehypeHighlight from 'rehype-highlight'
+import hljs from '../lib/highlight'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { looksLikeHtml, toPlainText } from '../lib/content'
@@ -32,6 +34,8 @@ export default function PostDetail() {
   const [author, setAuthor] = useState('')
   const [content, setContent] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  /** 正文容器 ref：富文本（HTML）路径不走 react-markdown，需手动跑 hljs 高亮 */
+  const contentRef = useRef<HTMLDivElement>(null)
   /** 全站已发布文章（按时间倒序），用于上下篇与推荐 */
   const [allPosts, setAllPosts] = useState<PostRef[]>([])
 
@@ -90,6 +94,18 @@ export default function PostDetail() {
   useEffect(() => {
     if (user?.email) setAuthor((prev) => prev || user.email!)
   }, [user])
+
+  // 富文本（HTML）路径不经过 react-markdown 的 rehype-highlight，
+  // 这里手动给正文里的代码块跑语法高亮。代码块可能是 <pre><code>（Markdown 路径已带 hljs 类，
+  // 跳过）或 <pre> 裸文本（后台富文本存出的结构），两种情况都要覆盖。
+  useEffect(() => {
+    const root = contentRef.current
+    if (!root) return
+    root.querySelectorAll<HTMLElement>('pre').forEach((pre) => {
+      const target = pre.querySelector('code') ?? pre
+      if (!target.classList.contains('hljs')) hljs.highlightElement(target)
+    })
+  }, [post?.content])
 
   const submitComment = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -180,11 +196,13 @@ export default function PostDetail() {
           两种情况都套 rich-content，让两条渲染路径共用同一套正文排版
           （标题 / 段落 / 列表 / 引用 / 代码 / 表格），否则 Markdown 表格和
           代码块会完全没有样式，看起来像「没有格式」。 */}
-      <div className="content rich-content">
+      <div className="content rich-content" ref={contentRef}>
         {looksLikeHtml(post.content) ? (
           <div dangerouslySetInnerHTML={{ __html: post.content }} />
         ) : (
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{post.content}</ReactMarkdown>
+          <ReactMarkdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
+            {post.content}
+          </ReactMarkdown>
         )}
       </div>
 

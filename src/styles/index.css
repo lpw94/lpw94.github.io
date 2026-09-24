@@ -329,12 +329,17 @@ button:hover { opacity: 0.9; }
   color: var(--muted);
 }
 .rte-body pre {
-  padding: 10px 12px;
-  border-radius: 6px;
-  background: #f4f4f5;
+  padding: 14px 16px;
+  border-radius: 8px;
+  background: #0d1117;
   overflow-x: auto;
   font-size: 13px;
 }
+/* 编辑器里代码块可能是 <pre> 裸文本（无内层 code），深色底下的文字必须给浅色，
+   否则默认深色字会"隐身"；若带内层 code 则内层不再叠底色，避免双层色块。 */
+.rte-body pre,
+.rte-body pre code { color: #c9d1d9; }
+.rte-body pre code { padding: 0; background: transparent; }
 .rte-body img {
   max-width: 100%;
   height: auto;
@@ -355,9 +360,9 @@ button:hover { opacity: 0.9; }
   color: var(--muted);
 }
 .rich-content pre {
-  padding: 12px 14px;
+  padding: 0;
   border-radius: 8px;
-  background: #f4f4f5;
+  background: #0d1117;
   overflow-x: auto;
   font-size: 13px;
 }
@@ -385,8 +390,9 @@ button:hover { opacity: 0.9; }
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
   font-size: 0.9em;
 }
-/* 代码块内的 code 不要再叠一层底色，否则会出现双层色块 */
-.rich-content pre code { padding: 0; background: transparent; font-size: 13px; }
+/* 代码块内的 code 不要再叠一层底色（黑底由外层 pre 提供），否则会出现双层色块。
+   内边距固定，保证 github-dark 主题导入顺序不影响观感。 */
+.rich-content pre code { padding: 14px 16px; background: transparent; font-size: 13px; }
 .rich-content hr { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
 /* remark-gfm 的任务列表会渲染出 checkbox，抵消全局 input 的输入框样式 */
 .rich-content input[type="checkbox"] {

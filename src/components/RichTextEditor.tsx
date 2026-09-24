@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import hljs from '../lib/highlight'
 
 type Props = {
   value: string
@@ -116,6 +117,23 @@ export default function RichTextEditor({ value, onChange, placeholder, onUploadI
     // 工具栏按钮用 onMouseDown preventDefault 保住了焦点与选区，这里再兜底一次
     bodyRef.current?.focus()
     document.execCommand(cmd, false, arg)
+    sync()
+  }
+
+  /**
+   * 给正文里的代码块跑语法高亮（黑底彩字，与发布后观感一致）。
+   * 必须在失焦后调用：highlightElement 会改写 DOM，若在打字过程中执行会打乱光标。
+   * 高亮完再调一次 sync，把带 hljs 类的 HTML 写回，保证存储内容与显示一致。
+   */
+  const highlightCode = () => {
+    const el = bodyRef.current
+    if (!el) return
+    el.querySelectorAll<HTMLElement>('pre').forEach((pre) => {
+      pre.classList.remove('hljs')
+      const target = pre.querySelector('code') ?? pre
+      target.classList.remove('hljs')
+      hljs.highlightElement(target)
+    })
     sync()
   }
 
@@ -291,7 +309,7 @@ export default function RichTextEditor({ value, onChange, placeholder, onUploadI
         data-placeholder={placeholder ?? '正文'}
         onInput={sync}
         onKeyDown={handleKeyDown}
-        onBlur={sync}
+        onBlur={highlightCode}
       />
 
       {/*
