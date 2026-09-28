@@ -140,8 +140,11 @@ export default function Admin() {
     setUploading(true)
 
     try {
-      // 路径规范与「Invalid key」相关注意事项见 lib/storage.ts
-      const url = await uploadImage(file, 'covers')
+      // 路径规范与「Invalid key」相关注意事项见 lib/storage.ts（超 1MB 自动压缩 webp）
+      const { url, compressed } = await uploadImage(file, 'covers')
+      if (compressed) {
+        alert(`图片已自动压缩：${compressed.beforeKB}KB → ${compressed.afterKB}KB（webp）`)
+      }
       sessionUploads.current.add(url)
       setForm((prev) => ({ ...prev, cover_url: url }))
     } catch (err) {
@@ -156,7 +159,10 @@ export default function Admin() {
 
   /** 正文内嵌图片：放在 content/ 子目录，与封面区分开 */
   const uploadContentImage = async (file: File) => {
-    const url = await uploadImage(file, 'content')
+    const { url, compressed } = await uploadImage(file, 'content')
+    if (compressed) {
+      console.info(`正文图片已自动压缩：${compressed.beforeKB}KB → ${compressed.afterKB}KB（webp）`)
+    }
     sessionUploads.current.add(url)
     return url
   }
