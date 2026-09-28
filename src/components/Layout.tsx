@@ -10,6 +10,7 @@ import TimeWidget from './TimeWidget'
 import FortuneWidget from './FortuneWidget'
 import GameCenter from './GameCenter'
 import AdSlot from './AdSlot'
+import DonateWidget from './DonateWidget'
 import KonamiCode from './KonamiCode'
 import VisitorWidget from './VisitorWidget'
 import SiteUptime from './SiteUptime'
@@ -177,6 +178,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <GameCenter />
             <KonamiCode />
             <AdSlot />
+            <DonateWidget />
           </div>
         )}
         <main>{children}</main>

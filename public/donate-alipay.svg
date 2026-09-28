@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200">
+  <rect width="200" height="200" rx="8" fill="#ffffff"/>
+  <rect x="1.5" y="1.5" width="197" height="197" rx="8" fill="none" stroke="#1677ff" stroke-width="3"/>
+  <rect x="22" y="22" width="42" height="42" fill="none" stroke="#1677ff" stroke-width="7"/>
+  <rect x="33" y="33" width="20" height="20" fill="#1677ff"/>
+  <rect x="136" y="22" width="42" height="42" fill="none" stroke="#1677ff" stroke-width="7"/>
+  <rect x="147" y="33" width="20" height="20" fill="#1677ff"/>
+  <rect x="22" y="136" width="42" height="42" fill="none" stroke="#1677ff" stroke-width="7"/>
+  <rect x="33" y="147" width="20" height="20" fill="#1677ff"/>
+  <text x="100" y="98" text-anchor="middle" font-size="16" font-weight="600" fill="#1677ff" font-family="sans-serif">支付宝收款码</text>
+  <text x="100" y="118" text-anchor="middle" font-size="10" fill="#999999" font-family="sans-serif">替换 public/donate-alipay.svg</text>
+</svg>
