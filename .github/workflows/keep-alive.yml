@@ -7,13 +7,14 @@ name: Keep Supabase awake
 # 之所以放在 GitHub Actions（而不是本机定时任务）：
 #   本机任务只在你电脑开着时才跑，而需要防的场景恰恰是「你一周没来」——
 #   那时电脑很可能就是关着的；GitHub 的机器则始终在跑。
+# （2026-09-28 重新提交：强制 GitHub 重新扫描注册本工作流）
 
 on:
   schedule:
     # 注意：GitHub 的 cron 一律按 UTC 计算，与仓库/runner 时区无关。
     # 17 1 * * * = 北京时间每天 09:17 左右（刻意避开整点，整点常有排队延迟）。
     - cron: '17 1 * * *'
-  workflow_dispatch: {}
+  workflow_dispatch:
 
 permissions:
   contents: write
