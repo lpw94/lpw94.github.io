@@ -39,6 +39,8 @@ jobs:
           VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
           VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
           VITE_SITE_URL: ${{ secrets.VITE_SITE_URL }}
+          # 腾讯地图 Key（访客地图组件）；未配置时组件显示配置指引，不影响构建
+          VITE_TMAP_KEY: ${{ secrets.VITE_TMAP_KEY }}
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

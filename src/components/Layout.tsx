@@ -8,11 +8,12 @@ import Background3D from './Background3D'
 import CursorFX from './CursorFX'
 import TimeWidget from './TimeWidget'
 import FortuneWidget from './FortuneWidget'
-import ReactionGame from './ReactionGame'
+import GameCenter from './GameCenter'
 import AdSlot from './AdSlot'
 import KonamiCode from './KonamiCode'
 import VisitorWidget from './VisitorWidget'
 import FloatingPet from './FloatingPet'
+import MusicPlayer from './MusicPlayer'
 import { THEMES } from '../lib/themes'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -97,18 +98,20 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   // 简历页本身就是个人信息详情；文章详情页需要更宽的正文空间（代码块、图片、表格），
   // 信息栏也没有意义 —— 这几种页面都隐藏左侧栏
   const showProfile =
-    pathname !== '/about' && !pathname.startsWith('/post/')
+    pathname !== '/about' && pathname !== '/gallery' && !pathname.startsWith('/post/')
 
   return (
     <>
       <Background3D theme={theme} />
       <CursorFX theme={theme} />
       <FloatingPet />
+      <MusicPlayer />
       <div className="container">
       <header className="site-header">
         <Link to="/" className="logo">个人博客</Link>
         <nav>
           <Link to="/">首页</Link>
+          <Link to="/gallery">展厅</Link>
           <Link to="/about">简历</Link>
           <Link to="/admin">后台</Link>
           <select
@@ -170,7 +173,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <VisitorWidget />
             <TimeWidget />
             <FortuneWidget />
-            <ReactionGame />
+            <GameCenter />
             <KonamiCode />
             <AdSlot />
           </div>

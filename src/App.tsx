@@ -4,6 +4,7 @@ import Layout from './components/Layout'
 import Home from './pages/Home'
 import PostDetail from './pages/PostDetail'
 import About from './pages/About'
+import Gallery from './pages/Gallery'
 import Admin from './pages/Admin'
 import ResetPassword from './pages/ResetPassword'
 
@@ -20,6 +21,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/post/:slug" element={<PostDetail />} />
           <Route path="/about" element={<About />} />
+          <Route path="/gallery" element={<Gallery />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
