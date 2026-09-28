@@ -12,6 +12,7 @@ import GameCenter from './GameCenter'
 import AdSlot from './AdSlot'
 import KonamiCode from './KonamiCode'
 import VisitorWidget from './VisitorWidget'
+import SiteUptime from './SiteUptime'
 import FloatingPet from './FloatingPet'
 import MusicPlayer from './MusicPlayer'
 import { THEMES } from '../lib/themes'
@@ -180,7 +181,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         )}
         <main>{children}</main>
       </div>
-      <footer className="muted">© {new Date().getFullYear()} woge博客</footer>
+      <footer className="muted">
+        <div>© {new Date().getFullYear()} woge博客</div>
+        <SiteUptime />
+      </footer>
 
       {confirmOpen &&
         createPortal(

@@ -84,6 +84,7 @@ main { min-height: 60vh; }
 /* 无侧栏页面（如简历页）：正文占满整行 */
 .layout.no-sidebar { grid-template-columns: minmax(0, 1fr); }
 footer { padding: 24px 0; border-top: 1px solid var(--border); text-align: center; }
+.site-uptime { display: inline-block; margin-top: 6px; font-size: 12px; opacity: 0.75; }
 .muted { color: var(--muted); font-size: 14px; }
 /* 首页分类过滤 */
 .category-filter {
@@ -635,7 +636,7 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   gap: 8px;
   margin: 0;
   padding: 14px 0 0;
-  border-top: 1px solid var(--border);
+  /* border-top: 1px solid var(--border); */
   list-style: none;
   font-size: 13px;
   text-align: left;
@@ -651,7 +652,7 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   gap: 12px;
   margin: 0;
   padding: 14px 0 0;
-  border-top: 1px solid var(--border);
+  /* border-top: 1px solid var(--border); */
   list-style: none;
 }
 .profile-social a {
