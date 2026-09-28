@@ -27,7 +27,7 @@ jobs:
   ping:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Ping Supabase REST API
         env:
@@ -40,6 +40,11 @@ jobs:
             exit 0
           fi
 
+          # 规范化项目地址：Secrets 里的值若误带 /rest/v1 等后缀（从 Dashboard 复制时常见），
+          # 直接拼接会变成 /rest/v1/rest/v1/posts 而 404。与前端 src/lib/supabase.ts 的裁剪逻辑保持一致。
+          SUPABASE_URL=$(echo "$SUPABASE_URL" | sed -E 's#/(rest|auth|storage|realtime)/v1/?$##; s#/*$##')
+          echo "唤醒目标：$SUPABASE_URL"
+
           code=$(curl -sS -o /tmp/body.json -w '%{http_code}' --max-time 30 \
             "$SUPABASE_URL/rest/v1/posts?select=id&limit=1" \
             -H "apikey: $SUPABASE_ANON_KEY" \
@@ -51,7 +56,11 @@ jobs:
 
           # 返回 200 即成功；空数组也算成功，关键是产生了真实的数据库查询活动
           if [ "$code" != "200" ]; then
-            echo "::error::Supabase 返回 $code，项目可能已被暂停。请到 Supabase Dashboard 检查项目状态，必要时点 Resume project。"
+            case "$code" in
+              401) echo "::error::返回 401：VITE_SUPABASE_ANON_KEY 不正确或已轮换，请到仓库 Settings → Secrets 更新。" ;;
+              404) echo "::error::返回 404：REST 路径不存在，请检查 VITE_SUPABASE_URL 是否为纯项目域名。" ;;
+              *)   echo "::error::返回 $code：项目可能已被暂停或网络异常，请到 Supabase Dashboard 检查项目状态，必要时点 Resume project。" ;;
+            esac
             exit 1
           fi
           echo "唤醒成功：已产生一次数据库查询活动"
