@@ -644,6 +644,38 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
 .profile-link-label { flex: none; color: var(--muted); }
 .profile-links a { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
+/* 社交图标行：邮箱 / GitHub / 微博 / X */
+.profile-social {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin: 0;
+  padding: 14px 0 0;
+  border-top: 1px solid var(--border);
+  list-style: none;
+}
+.profile-social a {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid var(--border);
+  border-radius: 50%;
+  color: var(--muted);
+  transition: color 0.2s, border-color 0.2s, transform 0.2s;
+}
+.profile-social a:hover {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.profile-social svg { width: 17px; height: 17px; }
+@media (prefers-reduced-motion: reduce) {
+  .profile-social a { transition: none; }
+  .profile-social a:hover { transform: none; }
+}
+
 /* 侧边栏容器：ProfileCard + 趣味组件竖向堆叠 */
 .sidebar { display: flex; flex-direction: column; gap: 16px; }
 

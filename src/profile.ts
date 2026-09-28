@@ -6,6 +6,8 @@ export type ProfileLink = {
   href: string
   /** 显示文字，不填则显示 href 原文 */
   text?: string
+  /** 社交图标：设置后渲染到头像下方的图标行，不再出现在文字列表里 */
+  icon?: 'mail' | 'github' | 'weibo' | 'x'
 }
 
 export const profile = {
@@ -14,7 +16,10 @@ export const profile = {
   bio: '前端开发者，喜欢折腾工具链，也随手记录一些踩坑笔记。',
   links: [
     { label: '关于', href: '/about', text: '个人简历' },
-    { label: '邮箱', href: 'mailto:lpw9494@gmail.com', text: 'lpw9494@gmail.com' },
-    { label: 'GitHub', href: 'https://github.com/lpw94', text: 'github.com/lpw94' },
+    { label: '邮箱', href: 'mailto:lpw9494@gmail.com', icon: 'mail' },
+    { label: 'GitHub', href: 'https://github.com/lpw94', icon: 'github' },
+    // TODO: 换成你的真实微博 / X 地址
+    { label: '微博', href: 'https://weibo.com/', icon: 'weibo' },
+    { label: 'X (Twitter)', href: 'https://x.com/', icon: 'x' },
   ] as ProfileLink[],
 }
