@@ -102,7 +102,7 @@ export default function FloatingPet() {
       return () => clearTimers()
     }
     // 首次出现缩短到约 1.5 秒，让用户加载后即能看到；之后由 leave→schedule 循环 12~32s
-    later(appear, 1500)
+    later(appear, 2*60*1000)
     return () => clearTimers()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [reduced])
