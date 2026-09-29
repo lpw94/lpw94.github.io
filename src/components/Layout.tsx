@@ -110,16 +110,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <FloatingPet />
       <MusicPlayer />
       <BackToTop />
-      <div className="page-shell">
-      {showProfile && (
-        <aside className="sidebar sidebar-left">
-          <ProfileCard />
-          {/* <KonamiCode /> */}
-          <DonateWidget />
-          {/* <AdSlot /> */}
-        </aside>
-      )}
-      <div className={`container${showProfile ? ' has-sidebars' : ''}`}>
       <header className="site-header">
         <Link to="/" className="logo">个人博客</Link>
         <nav>
@@ -180,6 +170,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           )}
         </nav>
       </header>
+      <div className="page-shell">
+      {showProfile && (
+        <aside className="sidebar sidebar-left">
+          <ProfileCard />
+          {/* <KonamiCode /> */}
+          <DonateWidget />
+          {/* <AdSlot /> */}
+        </aside>
+      )}
+      <div className={`container${showProfile ? ' has-sidebars' : ''}`}>
       <div className="layout">
         <main>{children}</main>
       </div>

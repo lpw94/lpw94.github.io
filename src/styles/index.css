@@ -4,6 +4,8 @@
   --muted: #888;
   --accent: #2563eb;
   --border: #e5e5e5;
+  /* 吸顶头部栏高度；侧栏 sticky 偏移依赖它，保持一致 */
+  --header-h: 60px;
 }
 * { box-sizing: border-box; }
 body {
@@ -83,9 +85,22 @@ a:hover { text-decoration: underline; }
   max-width: 760px;
   min-width: 0;
 }
+/* 头部栏：移出白卡，占满整个屏幕宽度并吸顶悬浮滚动 */
 .site-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 20px 0; border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 120;
+  height: var(--header-h);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 0 clamp(16px, 3vw, 28px);
+  background: rgba(255, 255, 255, 0.86);
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border-bottom: 1px solid var(--border);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
 }
 .logo { font-weight: 700; font-size: 18px; color: var(--fg); }
 nav { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px 16px; }
@@ -104,10 +119,11 @@ main { min-height: 60vh; }
    用 sticky 让其随容器两侧固定可见，而不是钉在浏览器边缘 */
 .sidebar {
   position: sticky;
-  top: 100px;
+  /* 吸顶头部之下，避免被悬浮头部压住 */
+  top: calc(var(--header-h) + 16px);
   flex: 0 0 220px;
   width: 220px;
-  max-height: calc(100vh - 130px);
+  max-height: calc(100vh - var(--header-h) - 46px);
   overflow-y: auto;
   display: flex;
   flex-direction: column;
