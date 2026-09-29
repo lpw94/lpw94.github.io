@@ -2,8 +2,8 @@ import { useState } from 'react'
 
 // 把你的收款码图片放到 public/ 下（支持 png/jpg/svg），改这里的路径即可
 const QR_CODES = {
-  wechat: { label: '微信', src: '/donate-wechat.svg', tip: '打开微信扫一扫' },
-  alipay: { label: '支付宝', src: '/donate-alipay.svg', tip: '打开支付宝扫一扫' },
+  wechat: { label: '微信', src: '/wx.png', tip: '打开微信扫一扫' },
+  alipay: { label: '支付宝', src: '/zfb.png', tip: '打开支付宝扫一扫' },
 } as const
 
 type PayKey = keyof typeof QR_CODES
@@ -30,7 +30,7 @@ export default function DonateWidget() {
       <div className="dw-qr">
         <img src={cur.src} alt={`${cur.label}收款码`} draggable={false} />
       </div>
-      <div className="dw-tip">{cur.tip}，请我喝杯咖啡</div>
+      <div className="dw-tip">{cur.tip}，支持一下房子首付。</div>
     </section>
   )
 }
