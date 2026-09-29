@@ -173,18 +173,22 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       </header>
       <div className={`layout${showProfile ? '' : ' no-sidebar'}`}>
         {showProfile && (
-          <div className="sidebar">
+          <aside className="sidebar sidebar-left">
             <ProfileCard />
-            <VisitorWidget />
-            <TimeWidget />
-            <FortuneWidget />
             <GameCenter />
             {/* <KonamiCode /> */}
             <AdSlot />
             <DonateWidget />
-          </div>
+          </aside>
         )}
         <main>{children}</main>
+        {showProfile && (
+          <aside className="sidebar sidebar-right">
+            <TimeWidget />
+            <VisitorWidget />
+            <FortuneWidget />
+          </aside>
+        )}
       </div>
       <footer className="muted">
         <div>© {new Date().getFullYear()} woge博客</div>

@@ -75,7 +75,7 @@ nav a { margin-left: 0; color: var(--muted); }
 /* 左：个人信息栏，右：正文 */
 .layout {
   display: grid;
-  grid-template-columns: 220px minmax(0, 1fr);
+  grid-template-columns: 220px minmax(0, 1fr) 240px;
   gap: 32px;
   align-items: start;
   padding: 32px 0;
@@ -1086,6 +1086,10 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   .konami-piece { display: none; }
 }
 
+/* 中等及以下屏：三栏堆叠为单栏（左栏在上、右栏在下），避免内容被压窄 */
+@media (max-width: 1100px) {
+  .layout { grid-template-columns: 1fr; gap: 24px; }
+}
 /* 窄屏：个人信息栏移到正文上方 */
 @media (max-width: 720px) {
   .layout { grid-template-columns: 1fr; gap: 24px; }
