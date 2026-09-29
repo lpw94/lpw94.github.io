@@ -54,7 +54,7 @@ a:hover { text-decoration: underline; }
 /* 内容区玻璃拟态：浅色半透明 + 模糊，既保证深字可读，又让边缘透出炫酷 3D */
 .container {
   max-width: 1000px;
-  margin: 28px auto 48px;
+  margin: 0;
   padding: 0 22px;
   background: rgba(255, 255, 255, 0.86);
   backdrop-filter: blur(12px) saturate(150%);
@@ -62,6 +62,17 @@ a:hover { text-decoration: underline; }
   border: 1px solid rgba(255, 255, 255, 0.6);
   border-radius: 10px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
+}
+/* 三栏外壳：左浮层 + 中间容器 + 右浮层，整体在视口里居中成一组，
+   因此浮层是挂在「中间容器两侧」，而不是浏览器两侧 */
+.page-shell {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  gap: 24px;
+  max-width: 1420px;
+  margin: 28px auto 48px;
+  padding: 0 16px;
 }
 /* 有两侧浮层时收窄中间白卡，给浮层让出空间（文章详情等无侧栏页保持 1000） */
 .container.has-sidebars { max-width: 900px; }
@@ -82,10 +93,12 @@ main { min-height: 60vh; }
 /* 无侧栏页面（如简历页）：正文占满整行 */
 .layout.no-sidebar { grid-template-columns: minmax(0, 1fr); }
 
-/* 侧边栏：脱离中间白卡，作为视口两侧的独立浮层（不挤压正文） */
+/* 侧边栏：脱离中间白卡、作为容器两侧的独立浮层（不挤压正文）。
+   用 sticky 让其随容器两侧固定可见，而不是钉在浏览器边缘 */
 .sidebar {
-  position: fixed;
+  position: sticky;
   top: 100px;
+  flex: 0 0 220px;
   width: 220px;
   max-height: calc(100vh - 130px);
   overflow-y: auto;
@@ -97,15 +110,15 @@ main { min-height: 60vh; }
 }
 .sidebar::-webkit-scrollbar { width: 6px; }
 .sidebar::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.4); border-radius: 3px; }
-.sidebar-left { left: 24px; }
-.sidebar-right { right: 24px; }
-/* 窄屏：浮层改回普通流式排列（左栏在上、右栏在下），避免遮挡正文 */
-@media (max-width: 1359px) {
+/* 顺序由 DOM 决定（左栏在容器前、右栏在容器后），无需单独定位 */
+.sidebar-left, .sidebar-right { left: auto; right: auto; }
+/* 窄屏：浮层回到普通流式排列（左栏在上、右栏在下），避免挤压正文 */
+@media (max-width: 1180px) {
+  .page-shell { flex-direction: column; align-items: stretch; gap: 24px; }
   .sidebar {
     position: static;
     top: auto;
-    left: auto;
-    right: auto;
+    flex: none;
     width: auto;
     max-height: none;
     overflow: visible;

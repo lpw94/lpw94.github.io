@@ -19,7 +19,7 @@ export const profile = {
     { label: '邮箱', href: 'mailto:lpw9494@gmail.com', icon: 'mail' },
     { label: 'GitHub', href: 'https://github.com/lpw94', icon: 'github' },
     // TODO: 换成你的真实微博 / X 地址
-    { label: '微博', href: 'https://weibo.com/lpw945', icon: 'weibo' },
+    { label: '微博', href: 'https://weibo.com/lpw94', icon: 'weibo' },
     { label: 'X (Twitter)', href: 'https://x.com/', icon: 'x' },
   ] as ProfileLink[],
 }

@@ -110,6 +110,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <FloatingPet />
       <MusicPlayer />
       <BackToTop />
+      <div className="page-shell">
       {showProfile && (
         <aside className="sidebar sidebar-left">
           <ProfileCard />
@@ -235,6 +236,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <FortuneWidget />
         </aside>
       )}
+      </div>
     </>
   )
 }

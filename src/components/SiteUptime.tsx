@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
 // 网站上线日期（取仓库首个提交日 2026-09-22），要改上线时间只动这里
-const LAUNCH_AT = new Date('2026-09-22T00:00:00+08:00').getTime()
+const LAUNCH_AT = new Date('2022-09-22T00:00:00+08:00').getTime()
 
 function elapsed() {
   const minutes = Math.max(0, Math.floor((Date.now() - LAUNCH_AT) / 60000))
