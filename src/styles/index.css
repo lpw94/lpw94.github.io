@@ -63,6 +63,8 @@ a:hover { text-decoration: underline; }
   border-radius: 10px;
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.38);
 }
+/* 有两侧浮层时收窄中间白卡，给浮层让出空间（文章详情等无侧栏页保持 1000） */
+.container.has-sidebars { max-width: 900px; }
 .site-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 0; border-bottom: 1px solid var(--border);
@@ -74,15 +76,42 @@ nav a { margin-left: 0; color: var(--muted); }
    因为它们需要排在全局 button / .modal 规则之后才能生效 */
 /* 左：个人信息栏，右：正文 */
 .layout {
-  display: grid;
-  grid-template-columns: 220px minmax(0, 1fr) 240px;
-  gap: 32px;
-  align-items: start;
   padding: 32px 0;
 }
 main { min-height: 60vh; }
 /* 无侧栏页面（如简历页）：正文占满整行 */
 .layout.no-sidebar { grid-template-columns: minmax(0, 1fr); }
+
+/* 侧边栏：脱离中间白卡，作为视口两侧的独立浮层（不挤压正文） */
+.sidebar {
+  position: fixed;
+  top: 100px;
+  width: 220px;
+  max-height: calc(100vh - 130px);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  z-index: 60;
+  scrollbar-width: thin;
+}
+.sidebar::-webkit-scrollbar { width: 6px; }
+.sidebar::-webkit-scrollbar-thumb { background: rgba(128, 128, 128, 0.4); border-radius: 3px; }
+.sidebar-left { left: 24px; }
+.sidebar-right { right: 24px; }
+/* 窄屏：浮层改回普通流式排列（左栏在上、右栏在下），避免遮挡正文 */
+@media (max-width: 1359px) {
+  .sidebar {
+    position: static;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: auto;
+    max-height: none;
+    overflow: visible;
+    gap: 20px;
+  }
+}
 footer { padding: 24px 0; border-top: 1px solid var(--border); text-align: center; }
 .site-uptime { display: inline-block; margin-top: 6px; font-size: 12px; opacity: 0.75; }
 .muted { color: var(--muted); font-size: 14px; }

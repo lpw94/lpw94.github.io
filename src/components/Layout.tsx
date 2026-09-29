@@ -110,7 +110,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <FloatingPet />
       <MusicPlayer />
       <BackToTop />
-      <div className="container">
+      {showProfile && (
+        <aside className="sidebar sidebar-left">
+          <ProfileCard />
+          <GameCenter />
+          {/* <KonamiCode /> */}
+          <AdSlot />
+          <DonateWidget />
+        </aside>
+      )}
+      <div className={`container${showProfile ? ' has-sidebars' : ''}`}>
       <header className="site-header">
         <Link to="/" className="logo">个人博客</Link>
         <nav>
@@ -171,24 +180,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           )}
         </nav>
       </header>
-      <div className={`layout${showProfile ? '' : ' no-sidebar'}`}>
-        {showProfile && (
-          <aside className="sidebar sidebar-left">
-            <ProfileCard />
-            <GameCenter />
-            {/* <KonamiCode /> */}
-            <AdSlot />
-            <DonateWidget />
-          </aside>
-        )}
+      <div className="layout">
         <main>{children}</main>
-        {showProfile && (
-          <aside className="sidebar sidebar-right">
-            <TimeWidget />
-            <VisitorWidget />
-            <FortuneWidget />
-          </aside>
-        )}
       </div>
       <footer className="muted">
         <div>© {new Date().getFullYear()} woge博客</div>
@@ -235,6 +228,13 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           document.body,
         )}
     </div>
+      {showProfile && (
+        <aside className="sidebar sidebar-right">
+          <TimeWidget />
+          <VisitorWidget />
+          <FortuneWidget />
+        </aside>
+      )}
     </>
   )
 }
