@@ -257,6 +257,35 @@ button:hover { opacity: 0.9; }
 }
 .post-pager-btns button:disabled { opacity: 0.5; cursor: default; }
 
+/* ===== 首页文章分页（复用 .post-pager-btns 按钮样式） ===== */
+.home-pager {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-top: 24px;
+}
+.home-pager-left { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
+.home-pager-info { font-size: 13px; color: var(--muted); }
+.page-size-select {
+  font-size: 13px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.page-size-select select {
+  padding: 5px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: #fff;
+  color: var(--fg);
+  font-size: 13px;
+  cursor: pointer;
+}
+.page-size-select select:hover { border-color: var(--accent); }
+
 /* ===== 返回顶部（右下角，叠在音乐播放器上方：bottom = 22 + 54 + 8；层级同音乐播放器 9997） ===== */
 .back-to-top {
   position: fixed;
