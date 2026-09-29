@@ -38,6 +38,8 @@ export const SITE_NAV: SiteCategory[] = [
   {
     title: 'AI 工具',
     sites: [
+      { name: 'OpenAI', url: 'https://openai.com', desc: '人工智能实验室' },
+      { name: '豆包', url: 'https://www.doubao.com', desc: '豆包 AI 助手' },
       { name: 'ChatGPT', url: 'https://chat.openai.com', desc: 'OpenAI 对话助手' },
       { name: 'Claude', url: 'https://claude.ai', desc: 'Anthropic 对话助手' },
       { name: 'DeepSeek', url: 'https://chat.deepseek.com', desc: '深度推理模型' },
