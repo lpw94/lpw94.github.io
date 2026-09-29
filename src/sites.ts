@@ -77,4 +77,13 @@ export const SITE_NAV: SiteCategory[] = [
       { name: 'ProcessOn', url: 'https://www.processon.com', desc: '在线流程图/脑图' },
     ],
   },
+  {
+    title: '免费数据库',
+    sites: [
+      { name: 'MongoDB', url: 'https://www.mongodb.com', desc: 'NoSQL 数据库' },
+      { name: 'Supabase', url: 'https://supabase.com', desc: '开箱即用的 Firebase' },
+      { name: 'PlanetScale', url: 'https://planetscale.com', desc: 'MySQL 数据库' },
+      { name: 'PocketBase', url: 'https://pocketbase.io/', desc: 'PocketBase 是一个 轻量级后端即服务平台' },
+    ],
+  },
 ]

@@ -11,7 +11,7 @@ import FortuneWidget from './FortuneWidget'
 import GameCenter from './GameCenter'
 import AdSlot from './AdSlot'
 import DonateWidget from './DonateWidget'
-import KonamiCode from './KonamiCode'
+// import KonamiCode from './KonamiCode'
 import VisitorWidget from './VisitorWidget'
 import SiteUptime from './SiteUptime'
 import FloatingPet from './FloatingPet'
@@ -115,7 +115,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Link to="/">首页</Link>
           <Link to="/gallery">展厅</Link>
           <Link to="/tools">工具</Link>
-          <Link to="/about">简历</Link>
+          {/* <Link to="/about">简历</Link> */}
           <Link to="/admin">后台</Link>
           <select
             className="theme-select"
@@ -177,7 +177,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
             <TimeWidget />
             <FortuneWidget />
             <GameCenter />
-            <KonamiCode />
+            {/* <KonamiCode /> */}
             <AdSlot />
             <DonateWidget />
           </div>
