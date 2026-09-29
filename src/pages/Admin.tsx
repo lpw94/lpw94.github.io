@@ -37,6 +37,9 @@ const emptyForm = (): FormState => ({
   status: 'published',
 })
 
+// 文章列表每页条数（客户端切片分页；posts 仍保留全量，供图片清理逻辑计算 keep 集合）
+const PAGE_SIZE = 10
+
 // 列表里显示的时间：已发布用发布时间，草稿退回创建时间；统一转本地时区
 function formatTime(post: Post) {
   return formatDateTime(post.published_at ?? post.created_at) || '—'
@@ -62,6 +65,8 @@ export default function Admin() {
   const [richMode, setRichMode] = useState(true)
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
+  /** 文章列表当前页码（从 1 开始）；列表本身仍由 posts 全量驱动，仅显示切片 */
+  const [page, setPage] = useState(1)
 
   /** 本次表单会话里新上传的图片公开地址（封面 + 正文图）。
       上传即落盘，但只有保存成功后才真正被文章引用；
@@ -103,6 +108,12 @@ export default function Admin() {
   useEffect(() => {
     if (user) load()
   }, [user])
+
+  // 删除 / 新增 / 切换状态后 posts 数量变化，当前页可能越界，自动回退到最后一页
+  useEffect(() => {
+    const tp = Math.max(1, Math.ceil(posts.length / PAGE_SIZE))
+    if (page > tp) setPage(tp)
+  }, [posts, page])
 
   /** 删除不再被引用的图片；失败只记日志（外链地址会被 deleteImage 自动跳过），
       不阻断保存/关闭流程 —— 图片清理是锦上添花，不能因为它把发文搞挂。 */
@@ -344,6 +355,11 @@ export default function Admin() {
     )
   }
 
+  const totalPages = Math.max(1, Math.ceil(posts.length / PAGE_SIZE))
+  const safePage = Math.min(page, totalPages)
+  const pageStart = (safePage - 1) * PAGE_SIZE
+  const pagePosts = posts.slice(pageStart, pageStart + PAGE_SIZE)
+
   return (
     <div className="admin">
       <div className="admin-head">
@@ -367,7 +383,7 @@ export default function Admin() {
             </tr>
           </thead>
           <tbody>
-            {posts.map((p) => (
+            {pagePosts.map((p) => (
               <tr key={p.id}>
                 <td className="post-table-title">{p.title}</td>
                 <td>
@@ -400,6 +416,40 @@ export default function Admin() {
             ))}
           </tbody>
         </table>
+      )}
+
+      {posts.length > 0 && (
+        <nav className="post-pager" aria-label="分页导航">
+          <span className="post-pager-info">
+            共 {posts.length} 篇 · 第 {safePage}/{totalPages} 页
+          </span>
+          <div className="post-pager-btns">
+            <button
+              type="button"
+              disabled={safePage <= 1}
+              onClick={() => setPage(safePage - 1)}
+            >
+              上一页
+            </button>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((n) => (
+              <button
+                type="button"
+                key={n}
+                className={n === safePage ? 'active' : ''}
+                onClick={() => setPage(n)}
+              >
+                {n}
+              </button>
+            ))}
+            <button
+              type="button"
+              disabled={safePage >= totalPages}
+              onClick={() => setPage(safePage + 1)}
+            >
+              下一页
+            </button>
+          </div>
+        </nav>
       )}
 
       {open &&
