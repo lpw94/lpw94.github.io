@@ -16,6 +16,7 @@ import VisitorWidget from './VisitorWidget'
 import SiteUptime from './SiteUptime'
 import FloatingPet from './FloatingPet'
 import MusicPlayer from './MusicPlayer'
+import BackToTop from './BackToTop'
 import { THEMES } from '../lib/themes'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -108,6 +109,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <CursorFX theme={theme} />
       <FloatingPet />
       <MusicPlayer />
+      <BackToTop />
       <div className="container">
       <header className="site-header">
         <Link to="/" className="logo">个人博客</Link>

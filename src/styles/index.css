@@ -257,6 +257,39 @@ button:hover { opacity: 0.9; }
 }
 .post-pager-btns button:disabled { opacity: 0.5; cursor: default; }
 
+/* ===== 返回顶部（右下角，叠在音乐播放器上方：bottom = 22 + 54 + 8；层级同音乐播放器 9997） ===== */
+.back-to-top {
+  position: fixed;
+  right: 22px;
+  bottom: 84px;
+  z-index: 9997;
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--accent);
+  font-size: 20px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  transition: transform 0.15s, box-shadow 0.15s, color 0.15s, background 0.15s, border-color 0.15s;
+}
+.back-to-top:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .back-to-top { transition: none; }
+  .back-to-top:hover { transform: none; }
+}
+
 /* 表单底部按钮：保存 + 取消编辑 并排 */
 .form-row { display: flex; gap: 10px; }
 .form-row > * { flex: 1; min-width: 0; }
