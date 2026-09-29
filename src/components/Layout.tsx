@@ -114,10 +114,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {showProfile && (
         <aside className="sidebar sidebar-left">
           <ProfileCard />
-          <GameCenter />
           {/* <KonamiCode /> */}
-          <AdSlot />
           <DonateWidget />
+          {/* <AdSlot /> */}
         </aside>
       )}
       <div className={`container${showProfile ? ' has-sidebars' : ''}`}>
@@ -234,6 +233,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <TimeWidget />
           <VisitorWidget />
           <FortuneWidget />
+          <GameCenter />
         </aside>
       )}
       </div>

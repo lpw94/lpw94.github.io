@@ -75,7 +75,14 @@ a:hover { text-decoration: underline; }
   padding: 0 16px;
 }
 /* 有两侧浮层时收窄中间白卡，给浮层让出空间（文章详情等无侧栏页保持 1000） */
-.container.has-sidebars { max-width: 900px; }
+/* 有侧栏时容器固定一个舒适的阅读宽度，并作为弹性项居中成组，
+   使左右浮层紧贴容器两侧、整组在视口里居中（而非贴在浏览器边缘） */
+.container.has-sidebars {
+  flex: 0 1 760px;
+  width: 760px;
+  max-width: 760px;
+  min-width: 0;
+}
 .site-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 20px 0; border-bottom: 1px solid var(--border);
