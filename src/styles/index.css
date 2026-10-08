@@ -141,6 +141,8 @@ main { min-height: 60vh; }
 /* 窄屏：浮层回到普通流式排列（左栏在上、右栏在下），避免挤压正文 */
 @media (max-width: 1180px) {
   .page-shell { flex-direction: column; align-items: stretch; gap: 24px; }
+  /* 堆叠时白卡必须收回固定宽度，否则 760px 会在手机上横向溢出 */
+  .container.has-sidebars { width: auto; max-width: 100%; flex: 1 1 auto; }
   .sidebar {
     position: static;
     top: auto;
@@ -1163,12 +1165,27 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   .layout { grid-template-columns: 1fr; gap: 24px; }
   .profile-card { position: static; }
   .profile-links li { justify-content: flex-start; }
-  /* 窄屏下顶部栏允许换行，邮箱过长时截断 */
-  .site-header { flex-wrap: wrap; gap: 10px; }
+
+  /* 顶部栏：logo 单独一行、导航整行居中，避免链接/下拉/选择器散落换行 */
+  .site-header { flex-wrap: wrap; gap: 8px; padding: 8px 14px; }
+  .logo { font-size: 16px; }
+  nav { width: 100%; justify-content: center; gap: 4px 12px; }
+  nav a { font-size: 14px; }
+  .theme-select { padding: 4px 10px; font-size: 12px; }
   .nav-email { max-width: 120px; }
+
+  /* 外壳与白卡：收窄留白、正文更贴边，整页不横向溢出 */
+  .page-shell { gap: 16px; padding: 0 12px; margin: 16px auto 32px; }
+  .container { padding: 0 16px; }
+  .layout { padding: 20px 0; }
+
   /* 上下篇改为上下堆叠，右对齐改回左对齐 */
   .post-nav { grid-template-columns: 1fr; }
   .post-nav-item.align-right { align-items: flex-start; text-align: left; }
+
+  /* 首页分页：信息行与按钮行分开，避免挤压 */
+  .home-pager { gap: 10px; }
+  .home-pager-left { gap: 10px; }
 }
 
 /* ============ 顶部栏用户菜单（邮箱下拉 + 退出确认） ============
@@ -1287,6 +1304,22 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
 /* 窄屏：邮箱触发器收窄（必须写在基础规则之后才不会被覆盖） */
 @media (max-width: 720px) {
   .nav-trigger { max-width: 160px; }
+}
+
+/* 极窄屏（手机竖屏）：头部与个人信息进一步收紧，避免横向滚动 */
+@media (max-width: 480px) {
+  .site-header { padding: 8px 12px; gap: 6px; }
+  .logo { font-size: 15px; }
+  nav { gap: 4px 10px; }
+  nav a { font-size: 13px; }
+  .theme-select { padding: 3px 8px; font-size: 11px; }
+  .nav-trigger { max-width: 132px; }
+  .profile-avatar { width: 80px; height: 80px; }
+  .page-shell { padding: 0 10px; margin: 12px auto 28px; }
+  .container { padding: 0 14px; }
+  .layout { padding: 16px 0; }
+  /* 分页按钮较多时允许整体换行并左对齐，不顶满挤成一团 */
+  .post-pager-btns { justify-content: flex-start; }
 }
 
 /* ============================================================
