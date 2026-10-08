@@ -2,8 +2,8 @@ import { useState } from 'react'
 
 // 把你的收款码图片放到 public/ 下（支持 png/jpg/svg），改这里的路径即可
 const QR_CODES = {
-  wechat: { label: '微信', src: '/wx.png', tip: '打开微信扫一扫，支持一下宝马油钱。' },
-  alipay: { label: '支付宝', src: '/zfb.png', tip: '打开支付宝扫一扫，支持一下房子首付' },
+  wechat: { label: '微信', src: '/wx.png', tip: '支持一下宝马油钱。' },
+  alipay: { label: '支付宝', src: '/zfb.png', tip: '支持一下房子首付' },
 } as const
 
 type PayKey = keyof typeof QR_CODES
@@ -15,7 +15,7 @@ export default function DonateWidget() {
 
   return (
     <section className="widget-card donate-widget" aria-label="支持收款">
-      <div className="ww-title">大爷支持一下</div>
+      {/* <div className="ww-title">大爷支持一下</div> */}
       <div className="dw-tabs">
         {(Object.keys(QR_CODES) as PayKey[]).map((k) => (
           <button

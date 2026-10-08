@@ -775,7 +775,7 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
 /* 左侧个人信息栏 */
 .profile-card {
   position: sticky;
-  top: 24px;
+  top: 0;
   padding: 20px;
   border: 1px solid var(--border);
   border-radius: 10px;
