@@ -4,7 +4,8 @@ import { formatDate } from '../lib/date'
 
 export default function PostCard({ post }: { post: Post }) {
   return (
-    <Link to={`/post/${post.slug}`} className="post-card">
+    // 把列表里已取回的全文随路由带给详情页，点开后正文立即可见（详情页仍会后台刷新）
+    <Link to={`/post/${post.slug}`} state={{ post }} className="post-card">
       {post.cover_url && <img src={post.cover_url} alt={post.title} />}
       <div className="post-card-meta">
         {post.category && (

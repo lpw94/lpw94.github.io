@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useLocation, useParams } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
@@ -28,8 +28,17 @@ const RELATED_LIMIT = 4
 
 export default function PostDetail() {
   const { slug } = useParams<{ slug: string }>()
-  const [post, setPost] = useState<Post | null>(null)
-  const [loading, setLoading] = useState(true)
+  const location = useLocation()
+  /**
+   * 从首页文章卡片点进来时，列表里已经带了全文（Home 是 select('*')），
+   * 这里直接把这份数据当初始值，正文立刻渲染，不再白等一次网络请求。
+   * 仍会照常发请求刷新，保证浏览数、内容与数据库一致。
+   * 仅当带过来的数据确实含正文时才采用（相关文章等只带列表字段，不能当正文用）。
+   */
+  const seeded = (location.state as { post?: Post } | null)?.post
+  const seededPost = seeded && typeof seeded.content === 'string' ? seeded : null
+  const [post, setPost] = useState<Post | null>(seededPost)
+  const [loading, setLoading] = useState(!seededPost)
   /** 正文容器 ref：富文本（HTML）路径不走 react-markdown，需手动跑 hljs 高亮 */
   const contentRef = useRef<HTMLDivElement>(null)
   /** 自建评论（Supabase）相关 state */
@@ -44,6 +53,13 @@ export default function PostDetail() {
   const countedRef = useRef<string | null>(null)
 
   useEffect(() => {
+    // 切换文章时 React Router 不会重挂载同一路由的组件，这里先把状态对齐到当前 slug：
+    // 若这次跳转带上了全文（从首页卡片进入）就直接用，否则回到骨架屏，
+    // 避免在新文章到达前短暂显示上一篇的内容。
+    const seededForSlug = seededPost && seededPost.slug === slug ? seededPost : null
+    setPost(seededForSlug)
+    setLoading(!seededForSlug)
+
     const load = async () => {
       const { data, error } = await supabase
         .from('posts')
@@ -91,7 +107,8 @@ export default function PostDetail() {
       if (data) setAllPosts(data as PostRef[])
     }
     loadNeighbors()
-  }, [post])
+    // 依赖用 id 而非整个对象：避免拿到刷新后的新对象导致重复请求
+  }, [post?.id])
 
   // 加载本篇文章的自建评论（Supabase）
   useEffect(() => {
@@ -105,7 +122,7 @@ export default function PostDetail() {
       if (data) setComments(data as Comment[])
     }
     loadComments()
-  }, [post])
+  }, [post?.id])
 
   // 订阅登录状态：登录后评论昵称默认填邮箱
   useEffect(() => {
@@ -181,7 +198,18 @@ export default function PostDetail() {
     }
   }, [post, allPosts])
 
-  if (loading) return <p className="muted">加载中…</p>
+  if (loading)
+    return (
+      <div className="post-skeleton" aria-busy="true" aria-label="文章加载中">
+        <div className="sk-line sk-title" />
+        <div className="sk-line sk-meta" />
+        <div className="sk-line" />
+        <div className="sk-line" />
+        <div className="sk-line sk-short" />
+        <div className="sk-line" />
+        <div className="sk-line sk-short" />
+      </div>
+    )
   if (!post) return <p className="muted">文章不存在。</p>
 
   // 富文本文章存的是 HTML，先剥掉标签再截取，避免把标签写进 meta 描述
