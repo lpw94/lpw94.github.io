@@ -7,7 +7,7 @@ const SHOW_AFTER = 400
  * 分享按钮：挂在 Layout 里，全站可用。点击弹出分享菜单，分享「当前页面」。
  * 移动端优先用系统原生分享（navigator.share，可直接调起微信/QQ 等），
  * 桌面端提供复制链接、微博、X、Facebook 等常用渠道。
- * 位置固定在右下角「返回顶部」按钮正下方。
+ * 位置固定在右下角「返回顶部」按钮正上方（音乐播放器已占最底，避免遮挡）。
  */
 export default function ShareButton() {
   const [visible, setVisible] = useState(false)

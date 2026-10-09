@@ -396,11 +396,12 @@ button:hover { opacity: 0.9; }
   .share-btn:hover { transform: none; }
 }
 
-/* 分享按钮：固定在右下角「返回顶部」正下方 */
+/* 分享按钮：固定在右下角。由于音乐播放器(music)占最底(bottom:22)、返回顶部占其上方(bottom:84)，
+   分享按钮改放「返回顶部」正上方(bottom:138)，三者竖向排开互不遮挡；菜单向上展开。 */
 .share-fab {
   position: fixed;
   right: 22px;
-  bottom: 22px;
+  bottom: 138px;
   z-index: 9997;
   display: flex;
   flex-direction: column;
