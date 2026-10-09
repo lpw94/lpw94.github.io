@@ -392,6 +392,73 @@ button:hover { opacity: 0.9; }
 @media (prefers-reduced-motion: reduce) {
   .back-to-top { transition: none; }
   .back-to-top:hover { transform: none; }
+  .share-btn { transition: none; }
+  .share-btn:hover { transform: none; }
+}
+
+/* 分享按钮：固定在右下角「返回顶部」正下方 */
+.share-fab {
+  position: fixed;
+  right: 22px;
+  bottom: 22px;
+  z-index: 9997;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.share-btn {
+  width: 46px;
+  height: 46px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.18);
+  transition: transform .15s, color .15s, background .15s, border-color .15s;
+}
+.share-btn:hover {
+  transform: translateY(-2px);
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.share-menu {
+  margin-bottom: 12px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.22);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 156px;
+}
+.share-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-align: left;
+  border: none;
+  background: transparent;
+  color: var(--fg);
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background .12s;
+}
+.share-item:hover {
+  background: var(--accent-soft, rgba(0, 0, 0, 0.06));
+}
+.share-item span {
+  font-size: 15px;
+  line-height: 1;
 }
 
 /* 表单底部按钮：保存 + 取消编辑 并排 */

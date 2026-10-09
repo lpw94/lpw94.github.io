@@ -17,6 +17,7 @@ import SiteUptime from './SiteUptime'
 import FloatingPet from './FloatingPet'
 import MusicPlayer from './MusicPlayer'
 import BackToTop from './BackToTop'
+import ShareButton from './ShareButton'
 import { THEMES } from '../lib/themes'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -110,6 +111,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <FloatingPet />
       <MusicPlayer />
       <BackToTop />
+      <ShareButton />
       <header className="site-header">
         <Link to="/" className="logo">个人博客</Link>
         <nav>
