@@ -14,7 +14,6 @@ import DonateWidget from './DonateWidget'
 // import KonamiCode from './KonamiCode'
 import VisitorWidget from './VisitorWidget'
 import SiteUptime from './SiteUptime'
-import FloatingPet from './FloatingPet'
 import MusicPlayer from './MusicPlayer'
 import BackToTop from './BackToTop'
 import ShareButton from './ShareButton'
@@ -108,7 +107,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     <>
       <Background3D theme={theme} />
       <CursorFX theme={theme} />
-      <FloatingPet />
       <MusicPlayer />
       <BackToTop />
       <ShareButton />

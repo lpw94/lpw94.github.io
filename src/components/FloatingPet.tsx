@@ -199,7 +199,7 @@ export default function FloatingPet() {
         }`}
         style={{ left: `${left}px` }}
         onClick={onClick}
-        title={`摸摸${pet.name}`}
+        aria-label={`摸摸${pet.name}`}
       >
         {bubble && <span className="pet-bubble">{bubble}</span>}
         {/* key 随互动自增：连点时重新挂载，特效每次都会重播 */}
