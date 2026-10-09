@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 /** 极简贪吃蛇：15×15 格子，方向键 / 屏幕按钮控制，吃到食物 +1 分 */
 const GRID = 15
-const CELL = 16
+const CELL = 22
 const SIZE = GRID * CELL
 const TICK = 130
 
