@@ -5,11 +5,11 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import hljs from '../lib/highlight'
-import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { looksLikeHtml, toPlainText } from '../lib/content'
 import { formatDate } from '../lib/date'
-import { CATEGORY_LABEL, type Post, type Comment } from '../types'
+import { CATEGORY_LABEL, type Post } from '../types'
+import GiscusComments from '../components/GiscusComments'
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://your-domain.com'
 
@@ -29,11 +29,6 @@ export default function PostDetail() {
   const { slug } = useParams<{ slug: string }>()
   const [post, setPost] = useState<Post | null>(null)
   const [loading, setLoading] = useState(true)
-  const [comments, setComments] = useState<Comment[]>([])
-  const [user, setUser] = useState<User | null>(null)
-  const [author, setAuthor] = useState('')
-  const [content, setContent] = useState('')
-  const [submitting, setSubmitting] = useState(false)
   /** 正文容器 ref：富文本（HTML）路径不走 react-markdown，需手动跑 hljs 高亮 */
   const contentRef = useRef<HTMLDivElement>(null)
   /** 全站已发布文章（按时间倒序），用于上下篇与推荐 */
@@ -76,19 +71,6 @@ export default function PostDetail() {
       })
   }, [post?.id])
 
-  useEffect(() => {
-    if (!post) return
-    const loadComments = async () => {
-      const { data } = await supabase
-        .from('comments')
-        .select('*')
-        .eq('post_id', post.id)
-        .order('created_at', { ascending: true })
-      if (data) setComments(data as Comment[])
-    }
-    loadComments()
-  }, [post])
-
   // 取已发布文章列表，用于底部「上一篇 / 下一篇」和「相关文章」
   useEffect(() => {
     if (!post) return
@@ -104,20 +86,6 @@ export default function PostDetail() {
     loadNeighbors()
   }, [post])
 
-  // 订阅登录状态：登录后评论昵称默认填邮箱
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null))
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-    return () => sub.subscription.unsubscribe()
-  }, [])
-
-  // 用邮箱预填昵称，但不覆盖用户已手动输入的内容（prev || email）
-  useEffect(() => {
-    if (user?.email) setAuthor((prev) => prev || user.email!)
-  }, [user])
-
   // 富文本（HTML）路径不经过 react-markdown 的 rehype-highlight，
   // 这里手动给正文里的代码块跑语法高亮。代码块可能是 <pre><code>（Markdown 路径已带 hljs 类，
   // 跳过）或 <pre> 裸文本（后台富文本存出的结构），两种情况都要覆盖。
@@ -129,31 +97,6 @@ export default function PostDetail() {
       if (!target.classList.contains('hljs')) hljs.highlightElement(target)
     })
   }, [post?.content])
-
-  const submitComment = async (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!post || !author.trim() || !content.trim()) return
-    setSubmitting(true)
-    const { error } = await supabase.from('comments').insert({
-      post_id: post.id,
-      author_name: author.trim(),
-      content: content.trim(),
-    })
-    setSubmitting(false)
-    if (error) {
-      alert(error.message)
-      return
-    }
-    // 提交后清空正文；昵称若为登录用户则回填邮箱
-    setAuthor(user?.email ?? '')
-    setContent('')
-    const { data } = await supabase
-      .from('comments')
-      .select('*')
-      .eq('post_id', post.id)
-      .order('created_at', { ascending: true })
-    if (data) setComments(data as Comment[])
-  }
 
   // 上下篇按发布时间倒序：上一篇是更新的一篇，下一篇是更早的一篇。
   // 推荐优先同分类，不足时用其他分类的最新文章补齐，并排除已在上下篇出现过的文章。
@@ -291,37 +234,7 @@ export default function PostDetail() {
         </section>
       )}
 
-      <section className="comments">
-        <h2>评论 ({comments.length})</h2>
-        <ul>
-          {comments.map((c) => (
-            <li key={c.id}>
-              <strong>{c.author_name}</strong>
-              <span className="muted"> · {formatDate(c.created_at)}</span>
-              <p>{c.content}</p>
-            </li>
-          ))}
-        </ul>
-
-        <form onSubmit={submitComment} className="comment-form">
-          <input
-            placeholder="昵称"
-            value={author}
-            onChange={(e) => setAuthor(e.target.value)}
-            required
-          />
-          <textarea
-            placeholder="写下评论…"
-            rows={3}
-            value={content}
-            onChange={(e) => setContent(e.target.value)}
-            required
-          />
-          <button type="submit" disabled={submitting}>
-            {submitting ? '提交中…' : '发表评论'}
-          </button>
-        </form>
-      </section>
+      <GiscusComments />
     </article>
   )
 }

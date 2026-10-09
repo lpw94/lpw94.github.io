@@ -700,6 +700,8 @@ button:hover { opacity: 0.9; }
 .comments li p { margin: 4px 0 0; }
 .comment-form { display: flex; flex-direction: column; gap: 10px; max-width: 480px; margin-top: 12px; }
 .comment-form button { align-self: flex-start; }
+/* Giscus 评论挂载区：预设最小高度，避免加载时页面跳动 */
+.giscus-mount { margin-top: 12px; min-height: 120px; }
 
 /* 文章底部：上一篇 / 下一篇 */
 .post-nav {
