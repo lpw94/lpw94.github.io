@@ -5,10 +5,11 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import rehypeHighlight from 'rehype-highlight'
 import hljs from '../lib/highlight'
+import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import { looksLikeHtml, toPlainText } from '../lib/content'
 import { formatDate } from '../lib/date'
-import { CATEGORY_LABEL, type Post } from '../types'
+import { CATEGORY_LABEL, type Post, type Comment } from '../types'
 import GiscusComments from '../components/GiscusComments'
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://your-domain.com'
@@ -31,6 +32,12 @@ export default function PostDetail() {
   const [loading, setLoading] = useState(true)
   /** 正文容器 ref：富文本（HTML）路径不走 react-markdown，需手动跑 hljs 高亮 */
   const contentRef = useRef<HTMLDivElement>(null)
+  /** 自建评论（Supabase）相关 state */
+  const [comments, setComments] = useState<Comment[]>([])
+  const [user, setUser] = useState<User | null>(null)
+  const [author, setAuthor] = useState('')
+  const [content, setContent] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   /** 全站已发布文章（按时间倒序），用于上下篇与推荐 */
   const [allPosts, setAllPosts] = useState<PostRef[]>([])
   /** 已计数的文章 id：防止同一挂载内（如 React StrictMode 双调用）重复 +1 */
@@ -85,6 +92,59 @@ export default function PostDetail() {
     }
     loadNeighbors()
   }, [post])
+
+  // 加载本篇文章的自建评论（Supabase）
+  useEffect(() => {
+    if (!post) return
+    const loadComments = async () => {
+      const { data } = await supabase
+        .from('comments')
+        .select('*')
+        .eq('post_id', post.id)
+        .order('created_at', { ascending: true })
+      if (data) setComments(data as Comment[])
+    }
+    loadComments()
+  }, [post])
+
+  // 订阅登录状态：登录后评论昵称默认填邮箱
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data }) => setUser(data.session?.user ?? null))
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
+  // 用邮箱预填昵称，但不覆盖用户已手动输入的内容（prev || email）
+  useEffect(() => {
+    if (user?.email) setAuthor((prev) => prev || user.email!)
+  }, [user])
+
+  const submitComment = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!post || !author.trim() || !content.trim()) return
+    setSubmitting(true)
+    const { error } = await supabase.from('comments').insert({
+      post_id: post.id,
+      author_name: author.trim(),
+      content: content.trim(),
+    })
+    setSubmitting(false)
+    if (error) {
+      alert(error.message)
+      return
+    }
+    // 提交后清空正文；昵称若为登录用户则回填邮箱
+    setAuthor(user?.email ?? '')
+    setContent('')
+    const { data } = await supabase
+      .from('comments')
+      .select('*')
+      .eq('post_id', post.id)
+      .order('created_at', { ascending: true })
+    if (data) setComments(data as Comment[])
+  }
 
   // 富文本（HTML）路径不经过 react-markdown 的 rehype-highlight，
   // 这里手动给正文里的代码块跑语法高亮。代码块可能是 <pre><code>（Markdown 路径已带 hljs 类，
@@ -234,6 +294,40 @@ export default function PostDetail() {
         </section>
       )}
 
+      {/* 自建评论（Supabase 后端，无需 GitHub 登录即可留言） */}
+      <section className="comments">
+        <h2>评论 ({comments.length})</h2>
+        <ul>
+          {comments.map((c) => (
+            <li key={c.id}>
+              <strong>{c.author_name}</strong>
+              <span className="muted"> · {formatDate(c.created_at)}</span>
+              <p>{c.content}</p>
+            </li>
+          ))}
+        </ul>
+
+        <form onSubmit={submitComment} className="comment-form">
+          <input
+            placeholder="昵称"
+            value={author}
+            onChange={(e) => setAuthor(e.target.value)}
+            required
+          />
+          <textarea
+            placeholder="写下评论…"
+            rows={3}
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+            required
+          />
+          <button type="submit" disabled={submitting}>
+            {submitting ? '提交中…' : '发表评论'}
+          </button>
+        </form>
+      </section>
+
+      {/* Giscus 评论（基于 GitHub Discussions，不便登录 GitHub 的访客可用上方自建评论） */}
       <GiscusComments />
     </article>
   )

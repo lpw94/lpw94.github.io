@@ -4,18 +4,20 @@ import { useLocation } from 'react-router-dom'
 /**
  * Giscus 评论（基于 GitHub Discussions，零后端依赖）。
  *
- * 上线前需补齐两项 GitHub 节点 ID（公开仓库也拿不到，必须到 https://giscus.app 生成）：
- *   1) 仓库 Settings → 开启 Discussions；
- *   2) 安装 giscus app：https://github.com/apps/giscus ；
- *   3) 打开 https://giscus.app ，填好仓库与「评论」分类，复制生成的
- *      data-repo-id（R_xxx）与 data-category-id（DIC_xxx）填到下方。
+ * 依赖（已配置完成）：
+ *   1) 仓库已开启 Discussions；
+ *   2) 已安装 giscus app 并授权本仓库；
+ *   3) 下方 repoId / categoryId 取自 giscus 官方接口
+ *      https://giscus.app/api/discussions/categories?repo=<owner>/<name> 。
+ * 使用分类 Announcements（giscus 官方推荐：仅维护者可发起讨论，避免被当作普通讨论区）；
+ * 想改成 General 只需同步替换 category / categoryId 两行。
  * 其余字段已按本博客配好：按 pathname 映射每篇文章独立讨论串、开启表情回应、简体中文。
  */
 const GISCUS = {
   repo: 'lpw94/lpw94.github.io',
-  repoId: '', // TODO: 填 giscus.app 生成的 repo-id
-  category: 'Comments', // Discussions 里用于评论的分类名（需先建好）
-  categoryId: '', // TODO: 填 giscus.app 生成的 category-id
+  repoId: 'MDEwOlJlcG9zaXRvcnk2ODUwNTYwNA==',
+  category: 'Announcements',
+  categoryId: 'DIC_kwDOBBVQBM4CcDCP',
   mapping: 'pathname',
   strict: '0',
   reactionsEnabled: '1',
