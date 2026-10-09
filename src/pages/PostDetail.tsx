@@ -10,9 +10,13 @@ import { supabase } from '../lib/supabase'
 import { looksLikeHtml, toPlainText } from '../lib/content'
 import { formatDate } from '../lib/date'
 import { CATEGORY_LABEL, type Post, type Comment } from '../types'
+import { profile } from '../profile'
 import GiscusComments from '../components/GiscusComments'
 
-const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://your-domain.com'
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://lpw94.github.io'
+const SITE_NAME = '沃哥博客'
+// 发布者的 X / Twitter 账号（用于 twitter:site）；没有或想改就改这里
+const TWITTER_SITE = '@lpw94'
 
 /** 上一篇 / 下一篇 / 推荐只需要列表字段，不必把正文一起取回来 */
 type PostRef = Pick<
@@ -219,17 +223,63 @@ export default function PostDetail() {
     .trim()
     .slice(0, 120)
 
+  // 社交分享图：优先文章封面，缺省时回退到站点头像，保证 OG / Twitter 图片始终有值
+  const ogImage = post.cover_url || `${SITE_URL}/avatar.png`
+  const canonicalUrl = `${SITE_URL}/post/${post.slug}`
+
+  // 结构化数据（schema.org / JSON-LD），帮助搜索引擎理解文章并出富媒体结果
+  const jsonLd = {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    description,
+    image: ogImage,
+    datePublished: post.published_at || post.created_at,
+    dateModified: post.published_at || post.created_at,
+    author: { '@type': 'Person', name: profile.name },
+    publisher: {
+      '@type': 'Organization',
+      name: SITE_NAME,
+      logo: { '@type': 'ImageObject', url: `${SITE_URL}/favicon-32.png` },
+    },
+    mainEntityOfPage: { '@type': 'WebPage', '@id': canonicalUrl },
+  }
+
   return (
     <article className="post-detail">
       <Helmet>
-        <title>{post.title} · 博客</title>
+        <title>{post.title} · {SITE_NAME}</title>
         <meta name="description" content={description} />
+        <link rel="canonical" href={canonicalUrl} />
+
+        {/* Open Graph */}
         <meta property="og:type" content="article" />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:locale" content="zh_CN" />
         <meta property="og:title" content={post.title} />
         <meta property="og:description" content={description} />
-        <meta property="og:url" content={`${SITE_URL}/post/${post.slug}`} />
+        <meta property="og:url" content={canonicalUrl} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:image:alt" content={post.title} />
         <meta property="article:published_time" content={post.published_at || ''} />
-        <link rel="canonical" href={`${SITE_URL}/post/${post.slug}`} />
+        <meta
+          property="article:modified_time"
+          content={post.published_at || post.created_at || ''}
+        />
+        <meta
+          property="article:section"
+          content={CATEGORY_LABEL[post.category] ?? post.category}
+        />
+
+        {/* Twitter Card */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:site" content={TWITTER_SITE} />
+        <meta name="twitter:title" content={post.title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={ogImage} />
+
+        {/* 结构化数据 */}
+        <script type="application/ld+json">{JSON.stringify(jsonLd)}</script>
       </Helmet>
 
       <h1>{post.title}</h1>
