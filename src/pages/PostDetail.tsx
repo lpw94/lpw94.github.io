@@ -12,6 +12,7 @@ import { formatDate } from '../lib/date'
 import { CATEGORY_LABEL, type Post, type Comment } from '../types'
 import { profile } from '../profile'
 import GiscusComments from '../components/GiscusComments'
+import SharePoster from '../components/SharePoster'
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://lpw94.github.io'
 const SITE_NAME = '沃哥博客'
@@ -107,6 +108,8 @@ export default function PostDetail() {
   const [liked, setLiked] = useState(false)
   const [likeBusy, setLikeBusy] = useState(false)
   const [likeError, setLikeError] = useState(false)
+  /** 分享海报弹窗开关 */
+  const [posterOpen, setPosterOpen] = useState(false)
 
   useEffect(() => {
     // 切换文章时 React Router 不会重挂载同一路由的组件，这里先把状态对齐到当前 slug：
@@ -383,6 +386,11 @@ export default function PostDetail() {
 
   // 阅读时长：纯文本按中英文混合估算
   const readingMins = readingTime(post.content)
+  // 海报摘要：正文纯文本，去空白，取前 260 字（海报内部还会按行省略）
+  const summary = toPlainText(post.content)
+    .replace(/\s+/g, ' ')
+    .trim()
+    .slice(0, 260)
 
   // 社交分享图：优先文章封面，缺省时回退到站点头像，保证 OG / Twitter 图片始终有值
   const ogImage = post.cover_url || `${SITE_URL}/avatar.png`
@@ -483,6 +491,14 @@ export default function PostDetail() {
                 {liked ? '❤️' : '🤍'} {likes}
               </button>
             )}
+            <button
+              type="button"
+              className="post-poster-btn"
+              onClick={() => setPosterOpen(true)}
+              title="生成分享海报"
+            >
+              🖼 分享海报
+            </button>
           </div>
 
           {post.cover_url && (
@@ -622,6 +638,16 @@ export default function PostDetail() {
           </aside>
         )}
       </div>
+
+      <SharePoster
+        open={posterOpen}
+        onClose={() => setPosterOpen(false)}
+        title={post.title}
+        summary={summary}
+        url={canonicalUrl}
+        author={profile.name}
+        siteName={SITE_NAME}
+      />
     </>
   )
 }
