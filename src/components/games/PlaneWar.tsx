@@ -258,9 +258,9 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
         spawnGap.current = Math.max(280, spawnGap.current - 8)
       }
 
-      // 玩家子弹（带速度向量）
+      // 玩家子弹（带速度向量，map 需保留 vx/vy 否则下一帧速度丢失变 NaN）
       bullets.current = bullets.current
-        .map((b) => ({ x: b.x + b.vx * eStep, y: b.y + b.vy * eStep }))
+        .map((b) => ({ x: b.x + b.vx * eStep, y: b.y + b.vy * eStep, vx: b.vx, vy: b.vy }))
         .filter((b) => b.y > -BULLET_H && b.x > -10 && b.x < W + 10)
 
       // 敌弹（变向变速）
