@@ -16,6 +16,7 @@
 | `06-blog-tech-highlights.md` | 个人博客的技术要点与自定义功能拆解：RLS、构建时 Feeds 与登录弹窗 | `blog-tech-highlights` | 前端 |
 | `07-blog-optimization-log.md` | 博客功能优化实录：后台图片自动清理、富文本对齐与编辑弹窗打磨 | `blog-optimization-log` | 前端 |
 | `08-blog-interactive-features.md` | 博客互动化改造：3D 背景换肤、点击特效、桌面宠物与侧边栏小游戏 | `blog-interactive-features` | 前端 |
+| `11-blog-seo-share-games.md` | 博客 SEO 与交互再打磨：RSS/Sitemap、社交分享卡片、2048 滑动动画 | `blog-seo-share-games` | 前端 |
 
 > `05` / `06` / `07` / `08` 是本博客**自身**的建站与技术拆解（含真实踩坑），属于"项目自述"型文章，与其他四篇的通用教程定位不同。
 
