@@ -1,7 +1,7 @@
 import { supabase } from './supabase'
 
 /** 小游戏注册表：侧边栏入口、弹窗标题、排行榜排序都从这里取 */
-export type GameId = 'snake' | 'minesweeper' | 'g2048'
+export type GameId = 'snake' | 'minesweeper' | 'g2048' | 'plane'
 
 export type GameDef = {
   id: GameId
@@ -17,6 +17,7 @@ export const GAMES: GameDef[] = [
   { id: 'snake', name: '贪吃蛇', icon: '🐍', scoreLabel: '食物', asc: false },
   { id: 'minesweeper', name: '扫雷', icon: '💣', scoreLabel: '用时(秒)', asc: true },
   { id: 'g2048', name: '2048', icon: '🔢', scoreLabel: '分数', asc: false },
+  { id: 'plane', name: '飞机大战', icon: '✈️', scoreLabel: '得分', asc: false },
 ]
 
 export type ScoreRow = {

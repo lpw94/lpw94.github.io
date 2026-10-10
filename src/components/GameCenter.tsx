@@ -4,6 +4,7 @@ import { GAMES, fetchLeaderboard, playerNameStore, submitScore, type GameDef, ty
 import SnakeGame from './games/SnakeGame'
 import MinesweeperGame from './games/MinesweeperGame'
 import Game2048 from './games/Game2048'
+import PlaneWar from './games/PlaneWar'
 
 /**
  * 游戏中心（侧边栏入口）：贪吃蛇 / 扫雷 / 2048 三个极简小游戏，
@@ -112,6 +113,7 @@ export default function GameCenter() {
                 {active.id === 'snake' && <SnakeGame onGameOver={handleGameOver} />}
                 {active.id === 'minesweeper' && <MinesweeperGame onGameOver={handleGameOver} />}
                 {active.id === 'g2048' && <Game2048 onGameOver={handleGameOver} />}
+                {active.id === 'plane' && <PlaneWar onGameOver={handleGameOver} />}
               </div>
 
               {/* 分数提交 */}
