@@ -26,9 +26,11 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
 
   // 游戏状态放 ref，主循环直接读写，不触发重渲染
   const playerX = useRef(W / 2)
+  const playerY = useRef(H - PLAYER_H / 2)
   const bullets = useRef<{ x: number; y: number }[]>([])
   const enemies = useRef<Enemy[]>([])
   const eBullets = useRef<EBullet[]>([])
+  const sparks = useRef<{ x: number; y: number; born: number }[]>([])
   const scoreRef = useRef(0)
   const livesRef = useRef(3)
   const alive = useRef(false)
@@ -39,15 +41,18 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
   const lastSpawn = useRef(0)
   const spawnGap = useRef(900)
   const invulnUntil = useRef(0)
-  const keys = useRef({ left: false, right: false })
+  const keys = useRef({ left: false, right: false, up: false, down: false })
 
   const clampX = (x: number) => Math.max(PLAYER_W / 2, Math.min(W - PLAYER_W / 2, x))
+  const clampY = (y: number) => Math.max(PLAYER_H / 2 + 24, Math.min(H - PLAYER_H / 2, y))
 
   const reset = useCallback(() => {
     playerX.current = W / 2
+    playerY.current = H - PLAYER_H / 2
     bullets.current = []
     enemies.current = []
     eBullets.current = []
+    sparks.current = []
     scoreRef.current = 0
     livesRef.current = 3
     spawnGap.current = 900
@@ -109,16 +114,19 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
       const dt = lastTs.current ? Math.min(50, t - lastTs.current) : 16
       lastTs.current = t
 
-      // 键盘移动
+      // 键盘移动（前后左右）
       const mv = 0.34 * dt
       if (keys.current.left) playerX.current -= mv
       if (keys.current.right) playerX.current += mv
+      if (keys.current.up) playerY.current -= mv
+      if (keys.current.down) playerY.current += mv
       playerX.current = clampX(playerX.current)
+      playerY.current = clampY(playerY.current)
 
-      // 玩家自动射击
+      // 玩家自动射击（从机头发射）
       if (t - lastShot.current > 320) {
         lastShot.current = t
-        bullets.current.push({ x: playerX.current, y: H - PLAYER_H - 4 })
+        bullets.current.push({ x: playerX.current, y: playerY.current - PLAYER_H / 2 - 4 })
       }
 
       // 敌机生成（随时间加快）
@@ -140,9 +148,38 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
         .map((b) => ({ ...b, y: b.y + b.speed * ebStep }))
         .filter((b) => b.y < H + EBULLET_H)
 
+      // 子弹对打：玩家子弹(上) 与 敌弹(下) 相撞则相互抵消，并迸发火花
+      const pbKill = new Set<number>()
+      const ebKill = new Set<number>()
+      for (let i = 0; i < bullets.current.length; i++) {
+        if (pbKill.has(i)) continue
+        const b = bullets.current[i]
+        const bx1 = b.x - BULLET_W / 2
+        const bx2 = b.x + BULLET_W / 2
+        const by1 = b.y
+        const by2 = b.y + BULLET_H
+        for (let j = 0; j < eBullets.current.length; j++) {
+          if (ebKill.has(j)) continue
+          const e = eBullets.current[j]
+          const ex1 = e.x - EBULLET_W / 2
+          const ex2 = e.x + EBULLET_W / 2
+          const ey1 = e.y
+          const ey2 = e.y + EBULLET_H
+          if (bx1 < ex2 && bx2 > ex1 && by1 < ey2 && by2 > ey1) {
+            pbKill.add(i)
+            ebKill.add(j)
+            sparks.current.push({ x: (b.x + e.x) / 2, y: (b.y + e.y) / 2, born: t })
+            break
+          }
+        }
+      }
+      if (pbKill.size) bullets.current = bullets.current.filter((_, i) => !pbKill.has(i))
+      if (ebKill.size) eBullets.current = eBullets.current.filter((_, i) => !ebKill.has(i))
+      sparks.current = sparks.current.filter((s) => t - s.born < 180)
+
       // 敌机下落 + 开火 + 撞玩家
       const eStep = dt / 1000
-      const py = H - PLAYER_H / 2
+      const py = playerY.current
       const px = playerX.current
       const survivors: Enemy[] = []
       for (const e of enemies.current) {
@@ -237,6 +274,18 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
 
       // 敌机
       for (const e of enemies.current) drawEnemy(ctx, e, t)
+      // 子弹对打火花
+      for (const s of sparks.current) {
+        const k = (t - s.born) / 180
+        ctx.save()
+        ctx.globalAlpha = 1 - k
+        ctx.strokeStyle = '#fde047'
+        ctx.lineWidth = 2
+        ctx.beginPath()
+        ctx.arc(s.x, s.y, 3 + k * 9, 0, Math.PI * 2)
+        ctx.stroke()
+        ctx.restore()
+      }
       // 玩家飞机（受击闪烁）
       const blink = t < invulnUntil.current && Math.floor(t / 90) % 2 === 0
       ctx.save()
@@ -258,23 +307,33 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
     raf.current = requestAnimationFrame(loop)
   }, [reset, loop])
 
-  // 键盘控制（输入框聚焦时不抢按键）
+  // 键盘控制（输入框聚焦时不抢按键）：方向键 或 WASD
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement) return
-      if (e.key === 'ArrowLeft') {
+      const k = e.key
+      if (k === 'ArrowLeft' || k === 'a' || k === 'A') {
         keys.current.left = true
         e.preventDefault()
-      } else if (e.key === 'ArrowRight') {
+      } else if (k === 'ArrowRight' || k === 'd' || k === 'D') {
         keys.current.right = true
         e.preventDefault()
-      } else if (e.key === 'Enter' && status !== 'playing') {
+      } else if (k === 'ArrowUp' || k === 'w' || k === 'W') {
+        keys.current.up = true
+        e.preventDefault()
+      } else if (k === 'ArrowDown' || k === 's' || k === 'S') {
+        keys.current.down = true
+        e.preventDefault()
+      } else if (k === 'Enter' && status !== 'playing') {
         start()
       }
     }
     const onUp = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') keys.current.left = false
-      else if (e.key === 'ArrowRight') keys.current.right = false
+      const k = e.key
+      if (k === 'ArrowLeft' || k === 'a' || k === 'A') keys.current.left = false
+      else if (k === 'ArrowRight' || k === 'd' || k === 'D') keys.current.right = false
+      else if (k === 'ArrowUp' || k === 'w' || k === 'W') keys.current.up = false
+      else if (k === 'ArrowDown' || k === 's' || k === 'S') keys.current.down = false
     }
     window.addEventListener('keydown', onKey)
     window.addEventListener('keyup', onUp)
@@ -287,16 +346,18 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
   // 组件卸载时停止循环，避免弹窗关闭后仍在跑
   useEffect(() => () => cancelAnimationFrame(raf.current), [])
 
-  // 指针控制：鼠标 / 触摸映射到 canvas 内坐标
-  const aim = (clientX: number) => {
+  // 指针控制：鼠标 / 触摸映射到 canvas 内坐标（双轴，前后左右都能跟手）
+  const aim = (clientX: number, clientY: number) => {
     const c = canvasRef.current
     if (!c) return
     const rect = c.getBoundingClientRect()
-    const scale = W / rect.width
-    playerX.current = clampX((clientX - rect.left) * scale)
+    const scaleX = W / rect.width
+    const scaleY = H / rect.height
+    playerX.current = clampX((clientX - rect.left) * scaleX)
+    playerY.current = clampY((clientY - rect.top) * scaleY)
   }
   const onPointerMove = (e: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (status === 'playing') aim(e.clientX)
+    if (status === 'playing') aim(e.clientX, e.clientY)
   }
 
   return (
@@ -312,18 +373,18 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
         onPointerMove={onPointerMove}
         onTouchMove={(e) => {
           e.preventDefault()
-          if (status === 'playing' && e.touches[0]) aim(e.touches[0].clientX)
+          if (status === 'playing' && e.touches[0]) aim(e.touches[0].clientX, e.touches[0].clientY)
         }}
       />
       {status !== 'playing' && (
         <div className="game-overlay">
-          <p>{status === 'idle' ? '移动鼠标 / 触摸控制飞机，自动射击；敌机也会反击' : `游戏结束，得分 ${score}`}</p>
+          <p>{status === 'idle' ? '移动鼠标 / 触摸或 WASD 四向飞行，自动射击；敌机也会反击' : `游戏结束，得分 ${score}`}</p>
           <button type="button" className="btn-primary game-btn" onClick={start}>
             {status === 'idle' ? '开始游戏' : '再来一局'}
           </button>
         </div>
       )}
-      <p className="game-help">🖱 移动鼠标 / 触摸控制 · 自动射击 · 敌机会反击，注意躲避</p>
+      <p className="game-help">🖱 鼠标 / 触摸 或 WASD 四向飞行 · 自动射击 · 子弹可拦截敌弹 · 敌机会反击</p>
     </div>
   )
 }
