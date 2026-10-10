@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom'
 import { CATEGORY_LABEL, type Post } from '../types'
 import { formatDate } from '../lib/date'
+import { readingTime } from '../lib/content'
 
 export default function PostCard({ post }: { post: Post }) {
   return (
@@ -14,6 +15,7 @@ export default function PostCard({ post }: { post: Post }) {
           </span>
         )}
         <time className="muted">{formatDate(post.published_at)}</time>
+        <span className="muted">· {readingTime(post.content)} 分钟</span>
       </div>
       <h2>{post.title}</h2>
     </Link>

@@ -20,3 +20,15 @@ export function looksLikeHtml(content: string) {
 export function toPlainText(content: string) {
   return content.replace(/<[^>]+>/g, ' ')
 }
+
+/**
+ * 估算阅读时长（分钟）。中文按约 400 字/分钟，英文单词按 200 词/分钟，
+ * 取两者较大值避免低估。代码块会拉高字数但阅读快，这里仍按纯文本粗算，够用。
+ */
+export function readingTime(content: string): number {
+  const text = toPlainText(content)
+  const cjk = (text.match(/[一-龥]/g) || []).length
+  const words = (text.replace(/[一-龥]/g, ' ').match(/[A-Za-z0-9]+/g) || []).length
+  const minutes = Math.max(cjk / 400, words / 200)
+  return Math.max(1, Math.round(minutes))
+}

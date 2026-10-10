@@ -17,6 +17,7 @@ import SiteUptime from './SiteUptime'
 import MusicPlayer from './MusicPlayer'
 import BackToTop from './BackToTop'
 import ShareButton from './ShareButton'
+import SearchBox from './SearchBox'
 import { THEMES } from '../lib/themes'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -112,6 +113,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       <ShareButton />
       <header className="site-header">
         <Link to="/" className="logo">个人博客</Link>
+        <SearchBox />
         <nav>
           <Link to="/">首页</Link>
           <Link to="/gallery">展厅</Link>
