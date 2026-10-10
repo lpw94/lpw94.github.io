@@ -1,38 +1,80 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { PointerEvent as ReactPointerEvent } from 'react'
 
-/** 飞机大战：移动鼠标 / 触摸或方向键控制飞机，自动射击；敌机可反击，击落得分，3 条命 */
+/** 飞机大战：多机型敌机 + 变向变速子弹 + 我方道具升级 */
 const W = 360
 const H = 480
 const PLAYER_W = 36
 const PLAYER_H = 32
 const BULLET_W = 4
 const BULLET_H = 12
-const ENEMY_W = 30
-const ENEMY_H = 26
-const EBULLET_W = 4
-const EBULLET_H = 10
 const INVULN_MS = 1000 // 受击后无敌时间，避免一帧内被多发子弹连续扣命
 
 type Status = 'idle' | 'playing' | 'over'
-type Enemy = { x: number; y: number; speed: number; big: boolean; nextShot: number; hp: number; flash: number }
-type EBullet = { x: number; y: number; speed: number; big: boolean }
+type EnemyKind = 'scout' | 'fighter' | 'zigzag' | 'gunner' | 'tank'
+type PowerKind = 'power' | 'shield' | 'life' | 'rapid'
+
+// 敌机机型配置：尺寸 / 血量 / 下落速度 / 得分 / 配色 / 道具掉落概率
+const ENEMY_DEF: Record<
+  EnemyKind,
+  {
+    w: number
+    h: number
+    hp: number
+    sMin: number
+    sMax: number
+    score: number
+    glow: string
+    grad: [string, string]
+    drop: number
+  }
+> = {
+  scout: { w: 28, h: 24, hp: 1, sMin: 150, sMax: 215, score: 10, glow: '#ef4444', grad: ['#fca5a5', '#b91c1c'], drop: 0.12 },
+  fighter: { w: 34, h: 30, hp: 2, sMin: 70, sMax: 110, score: 30, glow: '#f59e0b', grad: ['#fbbf24', '#b45309'], drop: 0.18 },
+  zigzag: { w: 30, h: 26, hp: 1, sMin: 110, sMax: 140, score: 15, glow: '#a855f7', grad: ['#d8b4fe', '#7e22ce'], drop: 0.16 },
+  gunner: { w: 32, h: 28, hp: 2, sMin: 85, sMax: 115, score: 25, glow: '#22c55e', grad: ['#86efac', '#15803d'], drop: 0.22 },
+  tank: { w: 44, h: 38, hp: 4, sMin: 40, sMax: 62, score: 60, glow: '#64748b', grad: ['#cbd5e1', '#334155'], drop: 0.45 },
+}
+
+type Enemy = {
+  kind: EnemyKind
+  x: number
+  y: number
+  baseX: number
+  amp: number
+  phase: number
+  speed: number
+  hp: number
+  flash: number
+  nextShot: number
+}
+
+// 子弹统一用速度向量（px/秒），方向速度各不相同
+type Bullet = { x: number; y: number; vx: number; vy: number }
+type EBullet = { x: number; y: number; vx: number; vy: number; size: number; color: string }
+type Spark = { x: number; y: number; born: number }
+type PowerUp = { x: number; y: number; kind: PowerKind }
 
 export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => void }) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [status, setStatus] = useState<Status>('idle')
   const [score, setScore] = useState(0)
   const [lives, setLives] = useState(3)
+  const [hud, setHud] = useState({ power: 1, shield: false, rapid: false })
 
   // 游戏状态放 ref，主循环直接读写，不触发重渲染
   const playerX = useRef(W / 2)
   const playerY = useRef(H - PLAYER_H / 2)
-  const bullets = useRef<{ x: number; y: number }[]>([])
+  const bullets = useRef<Bullet[]>([])
   const enemies = useRef<Enemy[]>([])
   const eBullets = useRef<EBullet[]>([])
-  const sparks = useRef<{ x: number; y: number; born: number }[]>([])
+  const sparks = useRef<Spark[]>([])
+  const powerups = useRef<PowerUp[]>([])
   const scoreRef = useRef(0)
   const livesRef = useRef(3)
+  const powerLevel = useRef(1)
+  const shieldUntil = useRef(0)
+  const rapidUntil = useRef(0)
   const alive = useRef(false)
   const overNotified = useRef(false)
   const raf = useRef(0)
@@ -40,11 +82,24 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
   const lastShot = useRef(0)
   const lastSpawn = useRef(0)
   const spawnGap = useRef(900)
+  const startT = useRef(0)
   const invulnUntil = useRef(0)
   const keys = useRef({ left: false, right: false, up: false, down: false })
+  const hudRef = useRef({ power: 1, shield: false, rapid: false })
 
   const clampX = (x: number) => Math.max(PLAYER_W / 2, Math.min(W - PLAYER_W / 2, x))
   const clampY = (y: number) => Math.max(PLAYER_H / 2 + 24, Math.min(H - PLAYER_H / 2, y))
+
+  const syncHud = useCallback(
+    (next: { power: number; shield: boolean; rapid: boolean }) => {
+      const p = hudRef.current
+      if (p.power !== next.power || p.shield !== next.shield || p.rapid !== next.rapid) {
+        hudRef.current = next
+        setHud(next)
+      }
+    },
+    [],
+  )
 
   const reset = useCallback(() => {
     playerX.current = W / 2
@@ -53,19 +108,27 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
     enemies.current = []
     eBullets.current = []
     sparks.current = []
+    powerups.current = []
     scoreRef.current = 0
     livesRef.current = 3
+    powerLevel.current = 1
+    shieldUntil.current = 0
+    rapidUntil.current = 0
     spawnGap.current = 900
     lastShot.current = 0
     lastSpawn.current = 0
+    startT.current = 0
     invulnUntil.current = 0
+    hudRef.current = { power: 1, shield: false, rapid: false }
     setScore(0)
     setLives(3)
+    setHud({ power: 1, shield: false, rapid: false })
   }, [])
 
   const damage = useCallback(
     (t: number) => {
       if (t < invulnUntil.current) return
+      if (t < shieldUntil.current) return // 护盾期间免伤
       livesRef.current -= 1
       setLives(livesRef.current)
       invulnUntil.current = t + INVULN_MS
@@ -82,37 +145,95 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
     [onGameOver],
   )
 
-  const gameOver = useCallback(() => {
-    alive.current = false
-    cancelAnimationFrame(raf.current)
-    setStatus('over')
-    if (!overNotified.current) {
-      overNotified.current = true
-      onGameOver(scoreRef.current)
+  /** 随时间提升敌机机型权重：前期小股，后期坦克/炮手登场 */
+  const pickKind = useCallback((elapsed: number): EnemyKind => {
+    const r = Math.random()
+    if (elapsed < 10000) {
+      if (r < 0.6) return 'scout'
+      if (r < 0.85) return 'fighter'
+      return 'zigzag'
+    } else if (elapsed < 22000) {
+      if (r < 0.42) return 'scout'
+      if (r < 0.68) return 'fighter'
+      if (r < 0.84) return 'zigzag'
+      return 'gunner'
     }
-  }, [onGameOver])
-
-  const spawnEnemy = useCallback((t: number) => {
-    const big = Math.random() < 0.22
-    enemies.current.push({
-      x: Math.random() * (W - ENEMY_W),
-      y: -ENEMY_H,
-      speed: (big ? 70 : 120) + Math.random() * 50,
-      big,
-      // 入场后稍作延迟再开火：大敌机快、小敌机慢且不常开火
-      nextShot: t + (big ? 700 + Math.random() * 600 : 1400 + Math.random() * 1400),
-      hp: big ? 2 : 1,
-      flash: 0,
-    })
+    if (r < 0.34) return 'scout'
+    if (r < 0.55) return 'fighter'
+    if (r < 0.7) return 'zigzag'
+    if (r < 0.86) return 'gunner'
+    return 'tank'
   }, [])
+
+  const spawnEnemy = useCallback(
+    (t: number) => {
+      const kind = pickKind(t - startT.current)
+      const def = ENEMY_DEF[kind]
+      const isZig = kind === 'zigzag'
+      const x = Math.random() * (W - def.w)
+      enemies.current.push({
+        kind,
+        x,
+        baseX: x,
+        amp: isZig ? 38 : 0,
+        phase: Math.random() * Math.PI * 2,
+        y: -def.h,
+        speed: def.sMin + Math.random() * (def.sMax - def.sMin),
+        hp: def.hp,
+        flash: 0,
+        nextShot: t + 700 + Math.random() * 900,
+      })
+    },
+    [pickKind],
+  )
+
+  const pushEB = useCallback((x: number, y: number, vx: number, vy: number, color: string, size = 4) => {
+    eBullets.current.push({ x, y, vx, vy, color, size })
+  }, [])
+
+  const firePlayer = useCallback((t: number) => {
+    const x = playerX.current
+    const y = playerY.current - PLAYER_H / 2 - 4
+    const spd = 380
+    const lvl = powerLevel.current
+    if (lvl <= 1) {
+      bullets.current.push({ x, y, vx: 0, vy: -spd })
+    } else if (lvl === 2) {
+      bullets.current.push({ x: x - 7, y, vx: -45, vy: -spd })
+      bullets.current.push({ x: x + 7, y, vx: 45, vy: -spd })
+    } else {
+      bullets.current.push({ x, y, vx: 0, vy: -spd })
+      bullets.current.push({ x, y, vx: -130, vy: -spd })
+      bullets.current.push({ x, y, vx: 130, vy: -spd })
+    }
+  }, [])
+
+  const dropPower = useCallback((cx: number, cy: number) => {
+    const r = Math.random()
+    const kind: PowerKind = r < 0.45 ? 'power' : r < 0.7 ? 'shield' : r < 0.9 ? 'rapid' : 'life'
+    powerups.current.push({ x: cx, y: cy, kind })
+  }, [])
+
+  const applyPower = useCallback((p: PowerKind, t: number) => {
+    if (p === 'power') powerLevel.current = Math.min(3, powerLevel.current + 1)
+    else if (p === 'shield') shieldUntil.current = t + 6000
+    else if (p === 'rapid') rapidUntil.current = t + 6000
+    else if (p === 'life') {
+      livesRef.current = Math.min(5, livesRef.current + 1)
+      setLives(livesRef.current)
+    }
+    syncHud({ power: powerLevel.current, shield: t < shieldUntil.current, rapid: t < rapidUntil.current })
+  }, [syncHud])
 
   const loop = useCallback(
     (t: number) => {
       if (!alive.current) return
       const ctx = canvasRef.current?.getContext('2d')
       if (!ctx) return
+      if (!startT.current) startT.current = t
       const dt = lastTs.current ? Math.min(50, t - lastTs.current) : 16
       lastTs.current = t
+      const eStep = dt / 1000
 
       // 键盘移动（前后左右）
       const mv = 0.34 * dt
@@ -123,32 +244,31 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
       playerX.current = clampX(playerX.current)
       playerY.current = clampY(playerY.current)
 
-      // 玩家自动射击（从机头发射）
-      if (t - lastShot.current > 320) {
+      // 玩家自动射击（等级越高弹道越宽；急速时射速翻倍）
+      const interval = t < rapidUntil.current ? 160 : 320
+      if (t - lastShot.current > interval) {
         lastShot.current = t
-        bullets.current.push({ x: playerX.current, y: playerY.current - PLAYER_H / 2 - 4 })
+        firePlayer(t)
       }
 
       // 敌机生成（随时间加快）
       if (t - lastSpawn.current > spawnGap.current) {
         lastSpawn.current = t
         spawnEnemy(t)
-        spawnGap.current = Math.max(300, spawnGap.current - 8)
+        spawnGap.current = Math.max(280, spawnGap.current - 8)
       }
 
-      // 玩家子弹上飞
-      const bStep = 0.5 * dt
+      // 玩家子弹（带速度向量）
       bullets.current = bullets.current
-        .map((b) => ({ x: b.x, y: b.y - bStep }))
-        .filter((b) => b.y > -BULLET_H)
+        .map((b) => ({ x: b.x + b.vx * eStep, y: b.y + b.vy * eStep }))
+        .filter((b) => b.y > -BULLET_H && b.x > -10 && b.x < W + 10)
 
-      // 敌弹下飞
-      const ebStep = 0.22 * dt
+      // 敌弹（变向变速）
       eBullets.current = eBullets.current
-        .map((b) => ({ ...b, y: b.y + b.speed * ebStep }))
-        .filter((b) => b.y < H + EBULLET_H)
+        .map((b) => ({ ...b, x: b.x + b.vx * eStep, y: b.y + b.vy * eStep }))
+        .filter((b) => b.y > -16 && b.y < H + 16 && b.x > -16 && b.x < W + 16)
 
-      // 子弹对打：玩家子弹(上) 与 敌弹(下) 相撞则相互抵消，并迸发火花
+      // 子弹对打：玩家子弹与敌弹相撞则相互抵消，并迸发火花
       const pbKill = new Set<number>()
       const ebKill = new Set<number>()
       for (let i = 0; i < bullets.current.length; i++) {
@@ -161,10 +281,10 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
         for (let j = 0; j < eBullets.current.length; j++) {
           if (ebKill.has(j)) continue
           const e = eBullets.current[j]
-          const ex1 = e.x - EBULLET_W / 2
-          const ex2 = e.x + EBULLET_W / 2
-          const ey1 = e.y
-          const ey2 = e.y + EBULLET_H
+          const ex1 = e.x - e.size
+          const ex2 = e.x + e.size
+          const ey1 = e.y - e.size
+          const ey2 = e.y + e.size
           if (bx1 < ex2 && bx2 > ex1 && by1 < ey2 && by2 > ey1) {
             pbKill.add(i)
             ebKill.add(j)
@@ -177,29 +297,51 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
       if (ebKill.size) eBullets.current = eBullets.current.filter((_, i) => !ebKill.has(i))
       sparks.current = sparks.current.filter((s) => t - s.born < 180)
 
-      // 敌机下落 + 开火 + 撞玩家
-      const eStep = dt / 1000
-      const py = playerY.current
+      // 敌机下落 + 蛇形 + 开火 + 撞玩家
       const px = playerX.current
+      const py = playerY.current
       const survivors: Enemy[] = []
       for (const e of enemies.current) {
+        const def = ENEMY_DEF[e.kind]
         e.y += e.speed * eStep
-        // 敌机开火（在屏幕内才打）
-        if (e.y > 8 && t > e.nextShot) {
-          e.nextShot = t + (e.big ? 900 + Math.random() * 500 : 1500 + Math.random() * 1200)
-          eBullets.current.push({
-            x: e.x + ENEMY_W / 2,
-            y: e.y + ENEMY_H,
-            speed: e.big ? 0.26 : 0.2,
-            big: e.big,
-          })
+        if (e.amp) {
+          e.phase += dt * 0.005
+          e.x = clampX(e.baseX + Math.sin(e.phase) * e.amp)
         }
-        const ex = e.x + ENEMY_W / 2
-        const ey = e.y + ENEMY_H / 2
-        if (
-          Math.abs(ex - px) < ENEMY_W / 2 + PLAYER_W / 2 &&
-          Math.abs(ey - py) < ENEMY_H / 2 + PLAYER_H / 2
-        ) {
+        // 开火：不同机型弹道与速度各异
+        if (e.y > 8 && t > e.nextShot) {
+          const ex = e.x + def.w / 2
+          const ey = e.y + def.h
+          if (e.kind === 'scout') {
+            e.nextShot = t + 1500 + Math.random() * 1200
+            pushEB(ex, ey, 0, 150, '#fb7185')
+          } else if (e.kind === 'fighter') {
+            e.nextShot = t + 900 + Math.random() * 600
+            pushEB(ex, ey, 0, 190, '#fde047')
+          } else if (e.kind === 'zigzag') {
+            e.nextShot = t + 1200 + Math.random() * 800
+            const dx = px - ex
+            const dy = py - ey
+            const len = Math.hypot(dx, dy) || 1
+            pushEB(ex, ey, (dx / len) * 210, (dy / len) * 210, '#e879f9')
+          } else if (e.kind === 'gunner') {
+            e.nextShot = t + 900 + Math.random() * 600
+            const dx = px - ex
+            const dy = py - ey
+            const len = Math.hypot(dx, dy) || 1
+            pushEB(ex, ey, (dx / len) * 230, (dy / len) * 230, '#4ade80')
+          } else {
+            // tank：三向散射
+            e.nextShot = t + 1100 + Math.random() * 600
+            const s = 170
+            pushEB(ex, ey, 0, s, '#94a3b8')
+            pushEB(ex, ey, -s * 0.5, s * 0.866, '#94a3b8')
+            pushEB(ex, ey, s * 0.5, s * 0.866, '#94a3b8')
+          }
+        }
+        const ex = e.x + def.w / 2
+        const ey = e.y + def.h / 2
+        if (Math.abs(ex - px) < def.w / 2 + PLAYER_W / 2 && Math.abs(ey - py) < def.h / 2 + PLAYER_H / 2) {
           damage(t) // 撞机：玩家受伤，敌机消失
           continue
         }
@@ -208,15 +350,16 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
       }
       enemies.current = survivors
 
-      // 玩家子弹 vs 敌机（hp 制：大敌机 2 发，小敌机 1 发）
+      // 玩家子弹 vs 敌机（hp 制）
       const hitSet = new Set<number>()
       bullets.current = bullets.current.filter((b) => {
         for (let i = 0; i < enemies.current.length; i++) {
           if (hitSet.has(i)) continue
           const e = enemies.current[i]
+          const def = ENEMY_DEF[e.kind]
           if (
-            Math.abs(b.x - (e.x + ENEMY_W / 2)) < ENEMY_W / 2 + BULLET_W / 2 &&
-            Math.abs(b.y - (e.y + ENEMY_H / 2)) < ENEMY_H / 2 + BULLET_H / 2
+            Math.abs(b.x - (e.x + def.w / 2)) < def.w / 2 + BULLET_W / 2 &&
+            Math.abs(b.y - (e.y + def.h / 2)) < def.h / 2 + BULLET_H / 2
           ) {
             hitSet.add(i)
             e.hp -= 1
@@ -230,7 +373,8 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
         let gained = 0
         enemies.current = enemies.current.filter((e, i) => {
           if (hitSet.has(i) && e.hp <= 0) {
-            gained += e.big ? 30 : 10
+            gained += ENEMY_DEF[e.kind].score
+            if (Math.random() < ENEMY_DEF[e.kind].drop) dropPower(e.x + ENEMY_DEF[e.kind].w / 2, e.y + ENEMY_DEF[e.kind].h / 2)
             return false
           }
           return true
@@ -242,28 +386,38 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
       }
 
       // 敌弹 vs 玩家
-      const px2 = px
-      const py2 = py
       eBullets.current = eBullets.current.filter((b) => {
-        if (
-          Math.abs(b.x - px2) < EBULLET_W / 2 + PLAYER_W / 2 &&
-          Math.abs(b.y - py2) < EBULLET_H / 2 + PLAYER_H / 2
-        ) {
+        if (Math.abs(b.x - px) < b.size + PLAYER_W / 2 && Math.abs(b.y - py) < b.size + PLAYER_H / 2) {
           damage(t)
           return false
         }
         return true
       })
 
+      // 道具下落 + 拾取
+      powerups.current = powerups.current
+        .map((p) => ({ ...p, y: p.y + 95 * eStep }))
+        .filter((p) => {
+          if (p.y > H + 16) return false
+          if (Math.abs(p.x - px) < 14 + PLAYER_W / 2 && Math.abs(p.y - py) < 14 + PLAYER_H / 2) {
+            applyPower(p.kind, t)
+            return false
+          }
+          return true
+        })
+
+      syncHud({ power: powerLevel.current, shield: t < shieldUntil.current, rapid: t < rapidUntil.current })
+
       // ===== 绘制 =====
       ctx.clearRect(0, 0, W, H)
-      // 背景星空（轻微闪烁点，增加生动感）
       ctx.fillStyle = '#0b1220'
       ctx.fillRect(0, 0, W, H)
 
-      // 敌弹
-      ctx.fillStyle = '#fb7185'
-      for (const b of eBullets.current) ctx.fillRect(b.x - EBULLET_W / 2, b.y, EBULLET_W, EBULLET_H)
+      // 敌弹（按颜色区分机型弹道）
+      for (const b of eBullets.current) {
+        ctx.fillStyle = b.color
+        ctx.fillRect(b.x - b.size, b.y - b.size, b.size * 2, b.size * 2)
+      }
       // 玩家子弹（带辉光）
       ctx.save()
       ctx.shadowColor = '#22d3ee'
@@ -286,16 +440,19 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
         ctx.stroke()
         ctx.restore()
       }
-      // 玩家飞机（受击闪烁）
+      // 道具
+      for (const p of powerups.current) drawPowerUp(ctx, p)
+      // 玩家飞机（受击闪烁 + 护盾环）
       const blink = t < invulnUntil.current && Math.floor(t / 90) % 2 === 0
+      const shield = t < shieldUntil.current
       ctx.save()
       if (blink) ctx.globalAlpha = 0.35
-      drawPlayer(ctx, px, py, t)
+      drawPlayer(ctx, px, py, t, shield)
       ctx.restore()
 
       raf.current = requestAnimationFrame(loop)
     },
-    [damage, gameOver, spawnEnemy],
+    [applyPower, damage, dropPower, firePlayer, pushEB, spawnEnemy, syncHud],
   )
 
   const start = useCallback(() => {
@@ -360,10 +517,14 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
     if (status === 'playing') aim(e.clientX, e.clientY)
   }
 
+  const powerLabel = hud.power > 1 ? `🔥${hud.power}` : ''
+  const shieldLabel = hud.shield ? '🛡' : ''
+  const rapidLabel = hud.rapid ? '⚡' : ''
+
   return (
     <div className="game-plane">
       <div className="game-score">
-        ✈️ {score} · ❤ {lives}
+        ✈️ {score} · ❤ {lives} {powerLabel} {shieldLabel} {rapidLabel}
       </div>
       <canvas
         ref={canvasRef}
@@ -378,24 +539,34 @@ export default function PlaneWar({ onGameOver }: { onGameOver: (s: number) => vo
       />
       {status !== 'playing' && (
         <div className="game-overlay">
-          <p>{status === 'idle' ? '移动鼠标 / 触摸或 WASD 四向飞行，自动射击；敌机也会反击' : `游戏结束，得分 ${score}`}</p>
+          <p>{status === 'idle' ? '移动鼠标 / 触摸或 WASD 四向飞行，自动射击；击落敌机掉落道具升级' : `游戏结束，得分 ${score}`}</p>
           <button type="button" className="btn-primary game-btn" onClick={start}>
             {status === 'idle' ? '开始游戏' : '再来一局'}
           </button>
         </div>
       )}
-      <p className="game-help">🖱 鼠标 / 触摸 或 WASD 四向飞行 · 自动射击 · 子弹可拦截敌弹 · 敌机会反击</p>
+      <p className="game-help">🖱 鼠标 / 触摸 或 WASD 四向飞行 · 自动射击 · 拾取道具升级（🔥火力 🛡护盾 ⚡急速 ❤生命）· 子弹可拦截敌弹</p>
     </div>
   )
 }
 
-/** 玩家战机：机身渐变 + 蓝色辉光 + 座舱 + 引擎尾焰闪烁 */
-function drawPlayer(ctx: CanvasRenderingContext2D, px: number, py: number, t: number) {
+/** 玩家战机：机身渐变 + 蓝色辉光 + 座舱 + 引擎尾焰闪烁 + 护盾环 */
+function drawPlayer(ctx: CanvasRenderingContext2D, px: number, py: number, t: number, shield: boolean) {
   const halfW = PLAYER_W / 2
   const halfH = PLAYER_H / 2
   const top = py - halfH
   const bot = py + halfH
   ctx.save()
+  if (shield) {
+    ctx.strokeStyle = 'rgba(34,211,238,0.9)'
+    ctx.lineWidth = 2.5
+    ctx.shadowColor = '#22d3ee'
+    ctx.shadowBlur = 10
+    ctx.beginPath()
+    ctx.arc(px, py, halfW + 8, 0, Math.PI * 2)
+    ctx.stroke()
+    ctx.shadowBlur = 0
+  }
   ctx.shadowColor = '#38bdf8'
   ctx.shadowBlur = 10
   const g = ctx.createLinearGradient(0, top, 0, bot)
@@ -436,25 +607,21 @@ function drawPlayer(ctx: CanvasRenderingContext2D, px: number, py: number, t: nu
   ctx.restore()
 }
 
-/** 敌机：机头朝下，红/橙渐变 + 辉光 + 座舱；受击短暂闪白 */
+/** 敌机：机头朝下，按机型配色 + 辉光 + 座舱；受击短暂闪白 */
 function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, t: number) {
-  const px = e.x + ENEMY_W / 2
-  const py = e.y + ENEMY_H / 2
-  const halfW = ENEMY_W / 2
-  const halfH = ENEMY_H / 2
+  const def = ENEMY_DEF[e.kind]
+  const px = e.x + def.w / 2
+  const py = e.y + def.h / 2
+  const halfW = def.w / 2
+  const halfH = def.h / 2
   const top = e.y
-  const bot = e.y + ENEMY_H
+  const bot = e.y + def.h
   ctx.save()
-  ctx.shadowColor = e.big ? '#f59e0b' : '#ef4444'
+  ctx.shadowColor = def.glow
   ctx.shadowBlur = 8
   const g = ctx.createLinearGradient(0, top, 0, bot)
-  if (e.big) {
-    g.addColorStop(0, '#fbbf24')
-    g.addColorStop(1, '#b45309')
-  } else {
-    g.addColorStop(0, '#fca5a5')
-    g.addColorStop(1, '#b91c1c')
-  }
+  g.addColorStop(0, def.grad[0])
+  g.addColorStop(1, def.grad[1])
   ctx.fillStyle = g
   ctx.beginPath()
   ctx.moveTo(px, bot) // 机头朝下
@@ -467,7 +634,7 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, t: number) {
   ctx.fill()
   ctx.shadowBlur = 0
   // 座舱
-  ctx.fillStyle = e.big ? '#7c2d12' : '#7f1d1d'
+  ctx.fillStyle = def.grad[1]
   ctx.beginPath()
   ctx.ellipse(px, py + halfH * 0.25, 3.5, 6, 0, 0, Math.PI * 2)
   ctx.fill()
@@ -483,5 +650,30 @@ function drawEnemy(ctx: CanvasRenderingContext2D, e: Enemy, t: number) {
     ctx.fill()
     ctx.globalAlpha = 1
   }
+  ctx.restore()
+}
+
+/** 道具图标：圆形底色 + 字母/符号 */
+function drawPowerUp(ctx: CanvasRenderingContext2D, p: PowerUp) {
+  const map: Record<PowerKind, { c: string; s: string }> = {
+    power: { c: '#f472b6', s: '🔥' },
+    shield: { c: '#22d3ee', s: '🛡' },
+    rapid: { c: '#facc15', s: '⚡' },
+    life: { c: '#f43f5e', s: '❤' },
+  }
+  const m = map[p.kind]
+  ctx.save()
+  ctx.shadowColor = m.c
+  ctx.shadowBlur = 10
+  ctx.fillStyle = m.c
+  ctx.beginPath()
+  ctx.arc(p.x, p.y, 11, 0, Math.PI * 2)
+  ctx.fill()
+  ctx.shadowBlur = 0
+  ctx.fillStyle = '#0b1220'
+  ctx.font = 'bold 13px sans-serif'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(m.s, p.x, p.y + 0.5)
   ctx.restore()
 }
