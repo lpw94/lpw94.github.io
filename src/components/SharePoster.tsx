@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import QRCode from 'qrcode'
 
 type Props = {
@@ -204,7 +205,10 @@ export default function SharePoster({ open, onClose, title, summary, url, author
 
   if (!open) return null
 
-  return (
+  // 用 portal 挂到 body：脱离所有祖先（任何带 transform/backdrop-filter 的容器都会让
+  // position:fixed 的包含块变成该祖先，页面很长时弹窗就被推到「页面中间」而非「屏幕中间」）。
+  // 挂到 body 后 fixed 必然相对视口，无论页面多长都居中在屏幕上。
+  return createPortal(
     <div className="poster-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
       <div className="poster-modal" role="dialog" aria-modal="true" aria-label="分享海报">
         <div className="poster-modal-head">
@@ -232,6 +236,7 @@ export default function SharePoster({ open, onClose, title, summary, url, author
         {/* 离屏画布，仅用于绘制；展示用上面的 <img> 以便移动端长按 */}
         <canvas ref={canvasRef} style={{ display: 'none' }} />
       </div>
-    </div>
+    </div>,
+    document.body,
   )
 }
