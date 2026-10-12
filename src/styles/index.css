@@ -1174,6 +1174,256 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   .tools-card:hover { transform: none; }
 }
 
+/* ============================================================
+   实用工具箱（在线小工具：计算器/贷款/换算/BMI/二维码）
+   内容区本就是浅色玻璃卡，故面板统一白底 + 深字，用变量适配
+   ============================================================ */
+.toolbox {
+  margin: 0 0 8px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+.toolbox-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  background: #f8fafc;
+}
+.toolbox-tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  font-size: 13.5px;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.toolbox-tab:hover { background: rgba(37, 99, 235, 0.08); color: var(--accent); }
+.toolbox-tab.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.toolbox-tab-icon { font-size: 15px; }
+.toolbox-panel { padding: 18px; }
+.tools-divider { margin: 28px 0 20px; border-top: 1px solid var(--border); }
+.tools-nav-title { margin: 0 0 6px; font-size: 18px; }
+
+/* —— 计算器 —— */
+.calc { max-width: 320px; margin: 0 auto; }
+.calc-screen {
+  background: #0f172a;
+  color: #fff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  text-align: right;
+  margin-bottom: 12px;
+}
+.calc-expr { display: block; min-height: 18px; font-size: 13px; color: #94a3b8; }
+.calc-display { display: block; font-size: 32px; font-weight: 600; word-break: break-all; }
+.calc-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.calc-key {
+  padding: 14px 0;
+  font-size: 18px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--fg);
+  cursor: pointer;
+  transition: background 0.12s, transform 0.06s;
+}
+.calc-key:hover { background: #f1f5f9; }
+.calc-key:active { transform: scale(0.96); }
+.calc-key.fn { color: var(--muted); background: #f8fafc; }
+.calc-key.op { color: var(--accent); font-weight: 600; background: #eff6ff; }
+.calc-key.eq { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 700; }
+.calc-key.eq:hover { background: #1d4ed8; }
+.calc-hint { margin: 12px 0 0; font-size: 12px; color: var(--muted); text-align: center; }
+
+/* —— 贷款计算器 —— */
+.loan { display: grid; grid-template-columns: 240px 1fr; gap: 20px; }
+.loan-form { display: flex; flex-direction: column; gap: 14px; }
+.loan-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
+.loan-field input {
+  padding: 8px 10px;
+  font-size: 14px;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+.loan-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+.loan-methods { display: flex; gap: 8px; }
+.loan-methods button {
+  flex: 1;
+  padding: 8px 0;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--fg);
+}
+.loan-methods button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.loan-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 16px; }
+.loan-stat {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.loan-stat-main { background: #eff6ff; border-color: #bfdbfe; }
+.loan-stat-label { font-size: 12px; color: var(--muted); }
+.loan-stat-value { font-size: 20px; font-weight: 700; color: var(--fg); }
+.loan-stat-interest { color: #dc2626; }
+.loan-stat-sub { font-size: 11px; color: var(--muted); }
+.loan-table-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; font-size: 14px; font-weight: 600; }
+.loan-toggle { font-size: 12px; color: var(--accent); background: none; border: none; cursor: pointer; }
+.loan-table-wrap { max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 10px; }
+.loan-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.loan-table th, .loan-table td { padding: 8px 10px; text-align: right; border-bottom: 1px solid var(--border); white-space: nowrap; }
+.loan-table th { position: sticky; top: 0; background: #f8fafc; color: var(--muted); font-weight: 600; z-index: 1; }
+.loan-table th:first-child, .loan-table td:first-child { text-align: left; }
+.loan-table tbody tr:last-child td { border-bottom: none; }
+
+/* —— 单位换算 —— */
+.unit-cats { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.unit-cat {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: #fff;
+  color: var(--fg);
+}
+.unit-cat:hover { border-color: var(--accent); color: var(--accent); }
+.unit-cat.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.unit-cat-icon { font-size: 14px; }
+.unit-input-row { display: flex; gap: 10px; margin-bottom: 16px; }
+.unit-value {
+  flex: 1;
+  padding: 10px 12px;
+  font-size: 16px;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+.unit-value:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+.unit-select {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  cursor: pointer;
+}
+.unit-results { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+.unit-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f8fafc;
+}
+.unit-row-src { background: #eff6ff; border-color: #bfdbfe; }
+.unit-row-label { font-size: 13px; color: var(--muted); }
+.unit-row-value { font-size: 16px; font-weight: 600; color: var(--fg); }
+
+/* —— BMI —— */
+.bmi { max-width: 480px; }
+.bmi-form { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+.bmi-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
+.bmi-field input {
+  padding: 9px 12px;
+  font-size: 15px;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+.bmi-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+.bmi-result { text-align: center; }
+.bmi-score { display: flex; align-items: baseline; justify-content: center; gap: 6px; }
+.bmi-score-value { font-size: 44px; font-weight: 800; color: var(--fg); }
+.bmi-score-unit { font-size: 14px; color: var(--muted); }
+.bmi-zone {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  border: 2px solid;
+  border-radius: 999px;
+}
+.bmi-advice { margin: 12px 0; font-size: 14px; color: var(--fg); }
+.bmi-bar { display: flex; gap: 4px; height: 10px; border-radius: 999px; overflow: hidden; margin-bottom: 12px; }
+.bmi-bar-seg { flex: 1; }
+.bmi-range { margin: 0; font-size: 14px; color: var(--muted); }
+
+/* —— 二维码 —— */
+.qr { max-width: 420px; }
+.qr-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); margin-bottom: 14px; }
+.qr-field textarea {
+  padding: 10px 12px;
+  font-size: 14px;
+  color: var(--fg);
+  resize: vertical;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+.qr-field textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+.qr-sizes { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; font-size: 13px; color: var(--muted); }
+.qr-sizes button {
+  padding: 6px 12px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--fg);
+}
+.qr-sizes button.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.qr-preview {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 160px;
+  padding: 20px;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  background: #f8fafc;
+}
+.qr-preview img { border-radius: 8px; }
+
+.loan-empty, .unit-empty, .bmi-empty, .qr-empty { color: var(--muted); font-size: 14px; margin: 0; }
+
+/* 窄屏：贷款表单与指标、换算结果改单列 */
+@media (max-width: 640px) {
+  .loan { grid-template-columns: 1fr; }
+  .loan-stats { grid-template-columns: 1fr; }
+  .unit-results { grid-template-columns: 1fr; }
+  .bmi-form { grid-template-columns: 1fr; }
+  .toolbox-panel { padding: 14px; }
+}
+
 /* 广告位 */
 .ad-widget { padding: 0; overflow: hidden; }
 .ad-link { display: block; text-decoration: none; }
