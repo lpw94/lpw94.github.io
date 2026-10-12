@@ -158,6 +158,13 @@ main { min-height: 60vh; }
     gap: 20px;
   }
 }
+/* 移动端（≤720px）：页面只保留中间内容 —— 隐藏左栏（头像/打赏二维码）与右栏小部件。
+   平板（721–1180px）仍维持上下堆叠布局，不受影响。
+   纯 CSS 隐藏（组件不渲染进布局，也不占可访问性树）；宽度复位已由上面 1180 块接管，
+   白卡在手机上自动撑满不横向溢出。 */
+@media (max-width: 720px) {
+  .page-shell .sidebar { display: none; }
+}
 footer { padding: 24px 0; border-top: 1px solid var(--border); text-align: center; }
 .site-uptime { display: inline-block; margin-top: 6px; font-size: 12px; opacity: 0.75; }
 .muted { color: var(--muted); font-size: 14px; }
