@@ -7,6 +7,7 @@ import RichTextEditor from '../components/RichTextEditor'
 import LoginModal from '../components/LoginModal'
 import { CATEGORIES, CATEGORY_LABEL, type Category, type Post } from '../types'
 import { formatDateTime } from '../lib/date'
+import { invalidateHomeCache } from '../pages/Home'
 
 type FormState = {
   /** 编辑中的文章 id；null 表示新建 */
@@ -251,6 +252,8 @@ export default function Admin() {
     sessionUploads.current = new Set()
     closeModal()
     load()
+    // 发布/修改成功后让首页列表缓存失效，回首页能立即看到新内容（不再被 60s TTL 挡住）
+    invalidateHomeCache()
     // 后台静默清理，不阻塞界面
     void cleanupImages(removed, keep)
   }
@@ -303,6 +306,8 @@ export default function Admin() {
     // 正在编辑这篇的话，同步弹窗里的状态，避免显示不一致
     if (form.id === post.id) setForm((prev) => ({ ...prev, status: nextStatus }))
     load()
+    // 发布状态切换后让首页列表缓存失效，回首页立即同步
+    invalidateHomeCache()
   }
 
   const removePost = async (post: Post) => {
@@ -316,6 +321,8 @@ export default function Admin() {
     // 删掉的正是弹窗里这篇，就顺手关掉
     if (form.id === post.id) closeModal()
     load()
+    // 删除后让首页列表缓存失效，回首页立即同步（刚删的不再出现）
+    invalidateHomeCache()
 
     // —— 清理这篇文章的图片：只删"没有其它文章还在引用"的 ——
     // keep：其余文章（含草稿）仍引用的图片地址；万一两张文章用了同一张图，就不会误删

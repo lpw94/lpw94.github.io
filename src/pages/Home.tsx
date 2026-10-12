@@ -12,6 +12,12 @@ type PostsCache = { data: Post[]; ts: number }
 let postsCache: PostsCache | null = null
 const POSTS_CACHE_TTL = 60 * 1000
 
+// 供 Admin 在发布/改状态/删除文章后主动使首页列表缓存失效，
+// 否则发完新文回首页可能被 60s TTL 挡住、看不到刚发布的内容。
+export function invalidateHomeCache() {
+  postsCache = null
+}
+
 export default function Home() {
   const [posts, setPosts] = useState<Post[]>(postsCache?.data ?? [])
   const [loading, setLoading] = useState(!postsCache)
