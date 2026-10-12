@@ -6,9 +6,15 @@ import PostCard from '../components/PostCard'
 
 type Filter = Category | 'all'
 
+// 模块级缓存：文章列表跨路由切换（从详情页回到首页）复用，避免每次都重新请求。
+// 60s TTL：命中且未过期时直接渲染、不发请求；过期则在后台静默刷新（不闪加载态）。
+type PostsCache = { data: Post[]; ts: number }
+let postsCache: PostsCache | null = null
+const POSTS_CACHE_TTL = 60 * 1000
+
 export default function Home() {
-  const [posts, setPosts] = useState<Post[]>([])
-  const [loading, setLoading] = useState(true)
+  const [posts, setPosts] = useState<Post[]>(postsCache?.data ?? [])
+  const [loading, setLoading] = useState(!postsCache)
   const [params, setParams] = useSearchParams()
 
   // 首页文章分页：分页大小可选（每页 5 / 10 / 20 条），切分类或改大小都回到第 1 页
@@ -24,15 +30,26 @@ export default function Home() {
 
   useEffect(() => {
     // 一次性取回全部已发布文章，分类切换在本地完成：
-    // 个人博客文章量不大，这样切分类是瞬间的，也不必为每次点击都打一次网络请求
+    // 个人博客文章量不大，这样切分类是瞬间的，也不必为每次点击都打一次网络请求。
+    // 配合模块级缓存：命中且未过期时直接渲染、不发请求（解决"回首页重复拉列表"）；
+    // 过期或首次访问才真正请求，过期但已有缓存时走后台静默刷新、不闪加载态。
     const load = async () => {
       const { data, error } = await supabase
         .from('posts')
         .select('*')
         .eq('status', 'published')
         .order('published_at', { ascending: false })
-      if (!error && data) setPosts(data as Post[])
+      if (!error && data) {
+        postsCache = { data: data as Post[], ts: Date.now() }
+        setPosts(postsCache.data)
+      }
       setLoading(false)
+    }
+
+    if (postsCache && Date.now() - postsCache.ts < POSTS_CACHE_TTL) {
+      // 命中新鲜缓存：立即展示，不发请求
+      setLoading(false)
+      return
     }
     load()
   }, [])
