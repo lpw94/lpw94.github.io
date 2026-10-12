@@ -1424,6 +1424,104 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   .toolbox-panel { padding: 14px; }
 }
 
+/* ============================================================
+   工具箱通用件（JSON/时间戳/编解码/个税/日期/复利共用）
+   ============================================================ */
+.tl-grid { display: flex; flex-direction: column; gap: 14px; }
+.tl-field { display: flex; flex-direction: column; gap: 6px; font-size: 13px; color: var(--muted); }
+.tl-input, .tl-area {
+  width: 100%;
+  padding: 9px 11px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+}
+.tl-area {
+  resize: vertical;
+  min-height: 96px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+  line-height: 1.5;
+}
+.tl-input:focus, .tl-area:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
+.tl-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.tl-btn {
+  padding: 7px 14px;
+  font-size: 13px;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--fg);
+  transition: border-color 0.15s, background 0.15s, color 0.15s;
+}
+.tl-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.tl-btn:disabled { opacity: 0.5; cursor: default; }
+.tl-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tl-btn.primary:hover { background: #1d4ed8; }
+.tl-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+.tl-msg { margin: 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
+.tl-msg.ok { color: #16a34a; }
+.tl-msg.err { color: #dc2626; }
+.tl-out {
+  margin: 0;
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: #f8fafc;
+  font-family: ui-monospace, SFMono-Regular, Consolas, "Courier New", monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--fg);
+  white-space: pre-wrap;
+  word-break: break-all;
+  min-height: 24px;
+}
+.tl-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+.tl-stat {
+  padding: 12px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: #f8fafc;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.tl-stat-label { font-size: 12px; color: var(--muted); }
+.tl-stat-value { font-size: 19px; font-weight: 700; color: var(--fg); }
+.tl-stat-sm { font-size: 15px; }
+.tl-profit { color: #dc2626; }
+
+/* 个税 / 复利的四宫格输入 */
+.tax-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+/* 日期计算 */
+.date-block { display: flex; flex-direction: column; gap: 12px; }
+.date-block-title { margin: 0; font-size: 15px; }
+.date-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.date-row .tl-input { flex: 1 1 140px; width: auto; }
+.date-row select.tl-input { flex: 0 0 auto; }
+.date-arrow { color: var(--muted); flex: none; }
+.date-num { flex: 0 0 90px !important; }
+.date-result {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  background: #eff6ff;
+}
+.date-result-value { font-size: 20px; font-weight: 700; color: var(--fg); }
+.date-result-week { font-size: 13px; color: var(--accent); }
+
+@media (max-width: 640px) {
+  .tax-grid { grid-template-columns: 1fr; }
+  .tl-stats { grid-template-columns: 1fr 1fr; }
+}
+
 /* 广告位 */
 .ad-widget { padding: 0; overflow: hidden; }
 .ad-link { display: block; text-decoration: none; }

@@ -5,6 +5,12 @@ import LoanCalc from '../components/tools/LoanCalc'
 import UnitConvert from '../components/tools/UnitConvert'
 import BmiCalc from '../components/tools/BmiCalc'
 import QrTool from '../components/tools/QrTool'
+import JsonTool from '../components/tools/JsonTool'
+import TimestampTool from '../components/tools/TimestampTool'
+import CodecTool from '../components/tools/CodecTool'
+import TaxTool from '../components/tools/TaxTool'
+import DateTool from '../components/tools/DateTool'
+import CompoundTool from '../components/tools/CompoundTool'
 
 // 在线小工具：id / 名称 / 图标 / 对应组件（全部纯本地计算）
 const TOOLS: { id: string; name: string; icon: string; Comp: ComponentType }[] = [
@@ -13,6 +19,12 @@ const TOOLS: { id: string; name: string; icon: string; Comp: ComponentType }[] =
   { id: 'unit', name: '单位换算', icon: '📐', Comp: UnitConvert },
   { id: 'bmi', name: 'BMI', icon: '⚕️', Comp: BmiCalc },
   { id: 'qr', name: '二维码', icon: '🔗', Comp: QrTool },
+  { id: 'json', name: 'JSON', icon: '{ }', Comp: JsonTool },
+  { id: 'timestamp', name: '时间戳', icon: '⏱️', Comp: TimestampTool },
+  { id: 'codec', name: '编解码', icon: '🔀', Comp: CodecTool },
+  { id: 'tax', name: '个税', icon: '🧾', Comp: TaxTool },
+  { id: 'date', name: '日期计算', icon: '📅', Comp: DateTool },
+  { id: 'compound', name: '复利', icon: '📈', Comp: CompoundTool },
 ]
 
 export default function Toolbox() {
