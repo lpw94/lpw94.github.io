@@ -8,6 +8,7 @@ import LoginModal from '../components/LoginModal'
 import { CATEGORIES, CATEGORY_LABEL, type Category, type Post } from '../types'
 import { formatDateTime } from '../lib/date'
 import { invalidateHomeCache } from '../pages/Home'
+import { toast } from '../lib/toast'
 
 type FormState = {
   /** 编辑中的文章 id；null 表示新建 */
@@ -68,6 +69,21 @@ export default function Admin() {
   const [saving, setSaving] = useState(false)
   /** 文章列表当前页码（从 1 开始）；列表本身仍由 posts 全量驱动，仅显示切片 */
   const [page, setPage] = useState(1)
+
+  /** 删除二次确认：用自定义模态替代原生 window.confirm，体验更友好 */
+  const [confirmMsg, setConfirmMsg] = useState<string | null>(null)
+  const confirmResolver = useRef<(ok: boolean) => void>(() => {})
+  const askConfirm = (msg: string) =>
+    new Promise<boolean>((resolve) => {
+      confirmResolver.current = resolve
+      setConfirmMsg(msg)
+    })
+  const closeConfirm = (ok: boolean) => {
+    setConfirmMsg(null)
+    const r = confirmResolver.current
+    confirmResolver.current = () => {}
+    r(ok)
+  }
 
   /** 本次表单会话里新上传的图片公开地址（封面 + 正文图）。
       上传即落盘，但只有保存成功后才真正被文章引用；
@@ -155,13 +171,13 @@ export default function Admin() {
       // 路径规范与「Invalid key」相关注意事项见 lib/storage.ts（超 1MB 自动压缩 webp）
       const { url, compressed } = await uploadImage(file, 'covers')
       if (compressed) {
-        alert(`图片已自动压缩：${compressed.beforeKB}KB → ${compressed.afterKB}KB（webp）`)
+        toast(`封面已自动压缩：${compressed.beforeKB}KB → ${compressed.afterKB}KB（webp）`, 'success')
       }
       sessionUploads.current.add(url)
       setForm((prev) => ({ ...prev, cover_url: url }))
     } catch (err) {
       console.error('封面图上传失败', err)
-      alert(`上传失败：${(err as Error).message}`)
+      toast(`上传失败：${(err as Error).message}`, 'error')
     } finally {
       setUploading(false)
       // 清空 value，否则再次选择同一个文件不会触发 change 事件
@@ -173,7 +189,7 @@ export default function Admin() {
   const uploadContentImage = async (file: File) => {
     const { url, compressed } = await uploadImage(file, 'content')
     if (compressed) {
-      console.info(`正文图片已自动压缩：${compressed.beforeKB}KB → ${compressed.afterKB}KB（webp）`)
+      toast(`正文图片已自动压缩：${compressed.beforeKB}KB → ${compressed.afterKB}KB（webp）`, 'success')
     }
     sessionUploads.current.add(url)
     return url
@@ -185,17 +201,17 @@ export default function Admin() {
     // 保存/发布按钮是 type="button"，不走原生表单提交，所以 required 不会自动拦截；
     // 这里手动兜必填校验（标题、路径、正文）。
     if (!form.title.trim()) {
-      alert('标题不能为空')
+      toast('标题不能为空', 'error')
       return
     }
     if (!form.slug.trim()) {
-      alert('路径 (slug) 不能为空')
+      toast('路径 (slug) 不能为空', 'error')
       return
     }
     // 富文本模式下正文是 contentEditable，不是表单控件，HTML 的 required 对它无效，
     // 所以两种模式统一在这里兜一道非空校验
     if (!toPlainText(form.content).trim()) {
-      alert('正文不能为空')
+      toast('正文不能为空', 'error')
       return
     }
 
@@ -222,7 +238,7 @@ export default function Admin() {
 
     setSaving(false)
     if (error) {
-      alert(error.message)
+      toast(error.message, 'error')
       // 保存失败：不动已上传的图片，用户改完可直接重试
       return
     }
@@ -300,7 +316,7 @@ export default function Admin() {
       .eq('id', post.id)
 
     if (error) {
-      alert(error.message)
+      toast(error.message, 'error')
       return
     }
     // 正在编辑这篇的话，同步弹窗里的状态，避免显示不一致
@@ -311,11 +327,12 @@ export default function Admin() {
   }
 
   const removePost = async (post: Post) => {
-    if (!window.confirm(`确定删除《${post.title}》？删除后无法恢复。`)) return
+    const ok = await askConfirm(`确定删除《${post.title}》？删除后无法恢复。`)
+    if (!ok) return
 
     const { error } = await supabase.from('posts').delete().eq('id', post.id)
     if (error) {
-      alert(error.message)
+      toast(error.message, 'error')
       return
     }
     // 删掉的正是弹窗里这篇，就顺手关掉
@@ -323,6 +340,7 @@ export default function Admin() {
     load()
     // 删除后让首页列表缓存失效，回首页立即同步（刚删的不再出现）
     invalidateHomeCache()
+    toast(`已删除《${post.title}》`, 'success')
 
     // —— 清理这篇文章的图片：只删"没有其它文章还在引用"的 ——
     // keep：其余文章（含草稿）仍引用的图片地址；万一两张文章用了同一张图，就不会误删
@@ -603,6 +621,33 @@ export default function Admin() {
             </form>
           </div>
         </div>,
+          document.body,
+        )}
+
+      {confirmMsg &&
+        createPortal(
+          <div className="modal-backdrop" onClick={() => closeConfirm(false)}>
+            <div
+              className="modal confirm-modal"
+              role="alertdialog"
+              aria-modal="true"
+              aria-label="删除确认"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div className="modal-head">
+                <h2>删除确认</h2>
+              </div>
+              <p className="confirm-text">{confirmMsg}</p>
+              <div className="confirm-actions">
+                <button type="button" className="btn-ghost" onClick={() => closeConfirm(false)}>
+                  取消
+                </button>
+                <button type="button" className="btn-danger" onClick={() => closeConfirm(true)}>
+                  删除
+                </button>
+              </div>
+            </div>
+          </div>,
           document.body,
         )}
     </div>

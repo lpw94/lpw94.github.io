@@ -8,6 +8,7 @@ import Gallery from './pages/Gallery'
 import Tools from './pages/Tools'
 import Admin from './pages/Admin'
 import ResetPassword from './pages/ResetPassword'
+import ToastHost from './components/Toast'
 
 export default function App() {
   return (
@@ -28,6 +29,7 @@ export default function App() {
           <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
       </Layout>
+      <ToastHost />
     </BrowserRouter>
   )
 }

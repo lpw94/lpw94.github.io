@@ -1396,6 +1396,59 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
 .btn-primary:hover { background: #1d4ed8; border-color: #1d4ed8; opacity: 1; }
 .btn-primary:disabled { opacity: 0.6; cursor: not-allowed; }
 
+/* ============================================================
+   全局轻提示 Toast（替代原生 alert）：顶部居中浮层、自动消失、不阻断操作
+   ============================================================ */
+.toast-host {
+  position: fixed;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 11000; /* 高于 .modal-backdrop(10000) */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none; /* 整组不挡点击 */
+}
+.toast {
+  pointer-events: auto; /* 单条保持可交互（便于未来加关闭按钮） */
+  max-width: min(92vw, 440px);
+  padding: 10px 16px;
+  border-radius: 10px;
+  font-size: 13.5px;
+  line-height: 1.5;
+  color: #fff;
+  background: #1f2937; /* info 默认深灰 */
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  animation: toast-in 0.22s ease-out;
+}
+.toast-success { background: #16a34a; }
+.toast-error { background: #dc2626; }
+.toast-icon {
+  display: inline-flex;
+  flex: none;
+  width: 18px;
+  height: 18px;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.22);
+  font-size: 12px;
+  font-weight: 700;
+}
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (max-width: 480px) {
+  .toast-host { top: 12px; }
+  .toast { font-size: 13px; }
+}
+
 /* 窄屏：邮箱触发器收窄（必须写在基础规则之后才不会被覆盖） */
 @media (max-width: 720px) {
   .nav-trigger { max-width: 160px; }
