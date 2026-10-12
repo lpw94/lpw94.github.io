@@ -1,14 +1,16 @@
 -- ============================================================
--- 小游戏排行榜：贪吃蛇 / 扫雷 / 2048 / 飞机大战
+-- 小游戏排行榜：贪吃蛇 / 扫雷 / 2048 / 飞机大战 / 俄罗斯方块 / 打砖块
 -- ============================================================
 -- score 语义按游戏不同（前端按游戏排序）：
 --   snake       贪吃蛇：吃到的食物数（越大越好）
 --   minesweeper 扫雷：通关用时秒数（越小越好，仅胜利时提交）
 --   g2048       2048：合成总分（越大越好）
 --   plane       飞机大战：击落敌机得分（越大越好）
+--   tetris      俄罗斯方块：消行得分（越大越好）
+--   breakout    打砖块：击砖得分（越大越好）
 create table if not exists game_scores (
   id bigint generated always as identity primary key,
-  game text not null check (game in ('snake', 'minesweeper', 'g2048', 'plane')),
+  game text not null check (game in ('snake', 'minesweeper', 'g2048', 'plane', 'tetris', 'breakout')),
   -- 昵称：前端截断到 12 字符，不收集任何账号信息
   player text not null,
   score integer not null,
@@ -33,8 +35,8 @@ create index if not exists game_scores_game_score_idx
 
 -- ============================================================
 -- 已部署实例修复：早期版本的 game 列 CHECK 仅含 snake/minesweeper/g2048，
--- 飞机大战(plane) 提交会被拒绝。下面幂等块先删掉该列所有 CHECK 约束，
--- 再加回含 plane 的版本。可反复执行，不影响已有数据。
+-- 后续新增游戏（plane/tetris/breakout）提交会被拒绝。下面幂等块先删掉该列
+-- 所有 CHECK 约束，再加回包含全部 6 个游戏的版本。可反复执行，不影响已有数据。
 -- 在 Supabase SQL Editor 粘贴运行即可。
 -- ============================================================
 do $$
@@ -49,5 +51,5 @@ begin
     execute format('alter table game_scores drop constraint %I', c);
   end loop;
   alter table game_scores add constraint game_scores_game_check
-    check (game in ('snake', 'minesweeper', 'g2048', 'plane'));
+    check (game in ('snake', 'minesweeper', 'g2048', 'plane', 'tetris', 'breakout'));
 end $$;

@@ -5,6 +5,8 @@ import SnakeGame from './games/SnakeGame'
 import MinesweeperGame from './games/MinesweeperGame'
 import Game2048 from './games/Game2048'
 import PlaneWar from './games/PlaneWar'
+import Tetris from './games/Tetris'
+import Breakout from './games/Breakout'
 
 /**
  * 游戏中心（侧边栏入口）：贪吃蛇 / 扫雷 / 2048 三个极简小游戏，
@@ -114,6 +116,8 @@ export default function GameCenter() {
                 {active.id === 'minesweeper' && <MinesweeperGame onGameOver={handleGameOver} />}
                 {active.id === 'g2048' && <Game2048 onGameOver={handleGameOver} />}
                 {active.id === 'plane' && <PlaneWar onGameOver={handleGameOver} />}
+                {active.id === 'tetris' && <Tetris onGameOver={handleGameOver} />}
+                {active.id === 'breakout' && <Breakout onGameOver={handleGameOver} />}
               </div>
 
               {/* 分数提交 */}

@@ -2281,6 +2281,27 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   height: auto;
 }
 
+/* 俄罗斯方块：棋盘 + 下一个预览 */
+.game-tetris-main {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+.game-tetris-side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 96px;
+}
+.game-tetris-next-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+.game-tetris-next { width: 72px; height: 56px; }
+.game-tetris-side .game-help { text-align: left; line-height: 1.7; }
+
 /* 触屏方向盘（贪吃蛇 / 2048 共用） */
 .game-pad {
   display: flex;
