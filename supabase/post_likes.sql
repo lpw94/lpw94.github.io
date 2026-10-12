@@ -11,15 +11,18 @@ create table if not exists post_likes (
 alter table post_likes enable row level security;
 
 -- 点赞数所有人可见
+drop policy if exists "anyone can read post likes" on post_likes;
 create policy "anyone can read post likes"
   on post_likes for select
   using (true);
 
 -- 允许插入/更新（前端通过 rpc 自增，匿名访客也可点赞）
+drop policy if exists "anyone can insert post like" on post_likes;
 create policy "anyone can insert post like"
   on post_likes for insert
   with check (true);
 
+drop policy if exists "anyone can update post like" on post_likes;
 create policy "anyone can update post like"
   on post_likes for update
   using (true);

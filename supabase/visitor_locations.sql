@@ -18,11 +18,13 @@ create table if not exists visitor_locations (
 alter table visitor_locations enable row level security;
 
 -- 匿名访客可读（地图拉取散点）
+drop policy if exists "anyone can read visitor locations" on visitor_locations;
 create policy "anyone can read visitor locations"
   on visitor_locations for select
   using (true);
 
 -- 匿名访客可写（上报自己的粗略坐标）；字段少且无个人信息，风险可控
+drop policy if exists "anyone can insert visitor location" on visitor_locations;
 create policy "anyone can insert visitor location"
   on visitor_locations for insert
   with check (true);

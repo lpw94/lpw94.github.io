@@ -20,11 +20,14 @@ create table if not exists game_scores (
 alter table game_scores enable row level security;
 
 -- 排行榜所有人可见
+-- drop if exists 前置：保证整个文件可反复执行（Supabase SQL Editor 重跑不报 42710）
+drop policy if exists "anyone can read game scores" on game_scores;
 create policy "anyone can read game scores"
   on game_scores for select
   using (true);
 
 -- 任何人都能提交分数（个人博客彩蛋，风险可控）
+drop policy if exists "anyone can insert game score" on game_scores;
 create policy "anyone can insert game score"
   on game_scores for insert
   with check (true);
