@@ -36,19 +36,6 @@ export const SITE_NAV: SiteCategory[] = [
     ],
   },
   {
-    title: 'AI 工具',
-    sites: [
-      { name: 'OpenAI', url: 'https://openai.com', desc: '人工智能实验室' },
-      { name: '豆包', url: 'https://www.doubao.com', desc: '豆包 AI 助手' },
-      { name: 'ChatGPT', url: 'https://chat.openai.com', desc: 'OpenAI 对话助手' },
-      { name: 'Claude', url: 'https://claude.ai', desc: 'Anthropic 对话助手' },
-      { name: 'DeepSeek', url: 'https://chat.deepseek.com', desc: '深度推理模型' },
-      { name: 'Kimi', url: 'https://www.kimi.com', desc: '月之暗面长文本助手' },
-      { name: '通义千问', url: 'https://www.tongyi.com', desc: '阿里 AI 助手' },
-      { name: '元宝', url: 'https://yuanbao.tencent.com', desc: '腾讯 AI 助手' },
-    ],
-  },
-  {
     title: '设计与资源',
     sites: [
       { name: 'iconfont', url: 'https://www.iconfont.cn', desc: '阿里矢量图标库' },
@@ -84,6 +71,28 @@ export const SITE_NAV: SiteCategory[] = [
       { name: 'Supabase', url: 'https://supabase.com', desc: '开箱即用的 Firebase' },
       { name: 'PlanetScale', url: 'https://planetscale.com', desc: 'MySQL 数据库' },
       { name: 'PocketBase', url: 'https://pocketbase.io/', desc: 'PocketBase 是一个 轻量级后端即服务平台' },
+    ],
+  },
+  {
+    title: '地图与位置服务',
+    sites: [
+      // 国内地图开放平台：Web 端地图、定位、地理编码、路径规划
+      { name: '高德开放平台', url: 'https://lbs.amap.com/', desc: '高德地图 API、定位与路径规划' },
+      { name: '百度地图开放平台', url: 'https://lbsyun.baidu.com/', desc: '百度地图 API 与全景图' },
+      { name: '腾讯位置服务', url: 'https://lbs.qq.com/', desc: '腾讯地图 API 与位置大数据' },
+      { name: '天地图', url: 'https://www.tianditu.gov.cn/', desc: '国家地理信息公共服务平台' },
+      // 前端地图库：从轻量到重渲染，按项目体积挑
+      { name: 'Leaflet', url: 'https://leafletjs.com/', desc: '轻量开源二维地图库，插件丰富' },
+      { name: 'OpenLayers', url: 'https://openlayers.org/', desc: '功能全面的开源地图 SDK' },
+      { name: 'MapLibre GL', url: 'https://maplibre.org/', desc: '开源的矢量地图渲染引擎' },
+      { name: 'Mapbox', url: 'https://www.mapbox.com/', desc: '自定义地图样式与矢量瓦片' },
+      { name: 'Cesium', url: 'https://cesium.com/platform/cesiumjs/', desc: 'Web 3D 地球与时空数据可视化' },
+      { name: 'ECharts', url: 'https://echarts.apache.org/zh/index.html', desc: '地图图表，适合数据看板' },
+      // 地图数据与在线工具
+      { name: 'OpenStreetMap', url: 'https://www.openstreetmap.org/', desc: '开放街图，可自由编辑的地图数据' },
+      { name: 'GeoJSON.io', url: 'https://geojson.io/', desc: '在线查看与编辑 GeoJSON' },
+      { name: '坐标转换', url: 'https://tool.lu/coordinate/', desc: 'WGS84 / GCJ02 / BD09 坐标互转' },
+      { name: 'QGIS', url: 'https://qgis.org/', desc: '开源桌面 GIS，处理空间数据' },
     ],
   },
 ]
