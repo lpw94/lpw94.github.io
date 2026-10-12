@@ -8,6 +8,7 @@ import LoginModal from '../components/LoginModal'
 import { CATEGORIES, CATEGORY_LABEL, type Category, type Post } from '../types'
 import { formatDateTime } from '../lib/date'
 import { invalidateHomeCache } from '../pages/Home'
+import BookmarkAdmin from '../components/BookmarkAdmin'
 import { toast } from '../lib/toast'
 
 type FormState = {
@@ -69,6 +70,8 @@ export default function Admin() {
   const [saving, setSaving] = useState(false)
   /** 文章列表当前页码（从 1 开始）；列表本身仍由 posts 全量驱动，仅显示切片 */
   const [page, setPage] = useState(1)
+  /** 后台一级页签：文章管理 / 书签配置 */
+  const [tab, setTab] = useState<'posts' | 'bookmarks'>('posts')
 
   /** 删除二次确认：用自定义模态替代原生 window.confirm，体验更友好 */
   const [confirmMsg, setConfirmMsg] = useState<string | null>(null)
@@ -387,6 +390,28 @@ export default function Admin() {
 
   return (
     <div className="admin">
+      {/* 一级页签：文章管理 / 书签配置 */}
+      <nav className="admin-tabs" aria-label="后台管理页签">
+        <button
+          type="button"
+          className={tab === 'posts' ? 'active' : ''}
+          onClick={() => setTab('posts')}
+        >
+          文章管理
+        </button>
+        <button
+          type="button"
+          className={tab === 'bookmarks' ? 'active' : ''}
+          onClick={() => setTab('bookmarks')}
+        >
+          书签配置
+        </button>
+      </nav>
+
+      {tab === 'bookmarks' ? (
+        <BookmarkAdmin />
+      ) : (
+      <>
       <div className="admin-head">
         <h2>文章列表</h2>
         <button type="button" onClick={openCreate}>
@@ -650,6 +675,8 @@ export default function Admin() {
           </div>,
           document.body,
         )}
+      </>
+      )}
     </div>
   )
 }

@@ -118,6 +118,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Link to="/">首页</Link>
           <Link to="/gallery">展厅</Link>
           <Link to="/toolbox">工具箱</Link>
+          <Link to="/bookmarks">书签</Link>
           <Link to="/tools">工具</Link>
           {/* <Link to="/about">简历</Link> */}
           <Link to="/admin">后台</Link>

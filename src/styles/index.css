@@ -505,6 +505,71 @@ button:hover { opacity: 0.9; }
 .admin-head h2 { margin: 0; }
 .admin-head button { white-space: nowrap; }
 
+/* 后台一级页签：文章管理 / 书签配置 */
+.admin-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.admin-tabs button {
+  padding: 8px 16px;
+  border: none;
+  background: none;
+  color: var(--muted);
+  font-size: 15px;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+}
+.admin-tabs button:hover { color: var(--fg); }
+.admin-tabs button.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+  font-weight: 600;
+}
+
+/* 后台书签表格：网址列 / 介绍列 / 分类标签 */
+.bm-url-cell { word-break: break-all; max-width: 220px; }
+.bm-url-cell a { color: var(--accent); }
+.bm-desc-cell { max-width: 200px; }
+.bm-cat-tag {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 999px;
+  background: var(--accent-soft, rgba(59, 130, 246, 0.12));
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+/* 前台书签页：搜索框 / 分类计数 / 卡片域名 */
+.bm-search { margin-bottom: 20px; }
+.bm-search input {
+  width: 100%;
+  max-width: 480px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card, #fff);
+  color: var(--fg);
+  font-size: 14px;
+}
+.bm-count {
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent-soft, rgba(59, 130, 246, 0.12));
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 500;
+  vertical-align: middle;
+}
+.bm-host {
+  font-size: 12px;
+  color: var(--muted);
+  opacity: 0.8;
+}
+
 /* 新建 / 编辑文章弹窗 */
 .modal-backdrop {
   position: fixed;

@@ -37,3 +37,16 @@ export interface Comment {
   content: string
   created_at: string
 }
+
+/** 个人常用书签：/bookmarks 快速入口 + /admin 后台配置 */
+export interface Bookmark {
+  id: string
+  name: string
+  url: string
+  category: string
+  description: string
+  created_at: string
+}
+
+/** 后台书签分类输入框的常用建议（datalist），可自由输入其它分类 */
+export const BOOKMARK_CATEGORY_HINTS = ['开发', '设计', '学习', '工具', '社交', '娱乐', '其他']
