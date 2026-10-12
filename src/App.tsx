@@ -6,6 +6,7 @@ import PostDetail from './pages/PostDetail'
 import About from './pages/About'
 import Gallery from './pages/Gallery'
 import Tools from './pages/Tools'
+import Toolbox from './pages/Toolbox'
 import Admin from './pages/Admin'
 import ResetPassword from './pages/ResetPassword'
 import ToastHost from './components/Toast'
@@ -25,6 +26,7 @@ export default function App() {
           <Route path="/about" element={<About />} />
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/tools" element={<Tools />} />
+          <Route path="/toolbox" element={<Toolbox />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/reset-password" element={<ResetPassword />} />
         </Routes>
