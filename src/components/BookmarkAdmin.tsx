@@ -52,6 +52,16 @@ export default function BookmarkAdmin() {
     void load()
   }, [])
 
+  // 弹窗打开期间锁住背景滚动（与文章弹窗 / 记事弹窗一致）
+  useEffect(() => {
+    if (!open) return
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prevOverflow
+    }
+  }, [open])
+
   const submit = async () => {
     if (saving) return
     if (!form.name.trim()) {
@@ -168,8 +178,11 @@ export default function BookmarkAdmin() {
         </table>
       )}
 
-      {open && (
-        <div className="modal-backdrop">
+      {/* 必须挂 body：.container 带 backdrop-filter，行内渲染的 position:fixed 会相对
+          容器定位，书签多时容器超高，弹窗被挤到首屏外要滚动才看得到 */}
+      {open &&
+        createPortal(
+          <div className="modal-backdrop">
           <div className="modal" role="dialog" aria-modal="true" aria-label="书签表单">
             <div className="modal-head">
               <h2>{form.id ? '编辑书签' : '添加书签'}</h2>
@@ -247,8 +260,9 @@ export default function BookmarkAdmin() {
               </div>
             </form>
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
 
       {/* 删除二次确认：挂 body 的模态，复用项目既有 .confirm-modal 样式 */}
       {confirmTarget &&
