@@ -1250,8 +1250,12 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
 .tw-hint { margin-top: 6px; font-size: 11px; color: var(--muted); opacity: 0.75; transition: color 0.15s, opacity 0.15s; }
 .tw-main:hover .tw-hint { color: var(--accent); opacity: 1; }
 
-/* 时间组件内弹出的日历面板 */
-.cal { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+/* 时间组件弹出的日历弹窗（modal 变体，格子比侧栏内嵌时大） */
+.cal-modal { max-width: 340px; }
+.cal { margin-top: 4px; }
+.cal-modal .cal-title { font-size: 14px; }
+.cal-modal .cal-wd { font-size: 11px; }
+.cal-modal .cal-cell { font-size: 13px; }
 .cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .cal-title { font-size: 13px; font-weight: 600; color: var(--fg); font-variant-numeric: tabular-nums; }
 .cal-nav {

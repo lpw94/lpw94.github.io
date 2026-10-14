@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -18,32 +19,29 @@ const keyOf = (y: number, m: number, d: number) => `${y}-${pad(m)}-${pad(d)}`
 
 export default function TimeWidget() {
   const [now, setNow] = useState(() => new Date())
-  /** 日历面板展开状态：点击时间组件弹出 / 收起 */
+  /** 日历弹窗开关：点击时间组件弹出 / 收起 */
   const [calOpen, setCalOpen] = useState(false)
   /** 日历当前浏览的年月 */
   const [view, setView] = useState(() => ({ y: new Date().getFullYear(), m: new Date().getMonth() }))
   /** 已标记日期 'YYYY-MM-DD' */
   const [selected, setSelected] = useState<string | null>(null)
-  const rootRef = useRef<HTMLElement>(null)
 
   useEffect(() => {
     const t = setInterval(() => setNow(new Date()), 1000)
     return () => clearInterval(t)
   }, [])
 
-  // 展开期间：点组件外部 / 按 Esc 收起
+  // 弹窗打开期间：锁背景滚动 + Esc 关闭（与站内其它弹窗一致）
   useEffect(() => {
     if (!calOpen) return
-    const onDown = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setCalOpen(false)
-    }
+    const prevOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     const onKey = (e: KeyboardEvent) => {
       if (e.key === 'Escape') setCalOpen(false)
     }
-    document.addEventListener('mousedown', onDown)
     document.addEventListener('keydown', onKey)
     return () => {
-      document.removeEventListener('mousedown', onDown)
+      document.body.style.overflow = prevOverflow
       document.removeEventListener('keydown', onKey)
     }
   }, [calOpen])
@@ -79,13 +77,14 @@ export default function TimeWidget() {
 
   const h = now.getHours()
   return (
-    <section className="widget-card time-widget" ref={rootRef} aria-label="当前时间">
-      {/* 时间展示区整体即开关：点击弹出 / 收起日历 */}
+    <section className="widget-card time-widget" aria-label="当前时间">
+      {/* 时间展示区整体即开关：点击弹出日历弹窗 */}
       <div
         className="tw-main"
         role="button"
         tabIndex={0}
         aria-expanded={calOpen}
+        aria-haspopup="dialog"
         title="点击查看日历"
         onClick={toggleCal}
         onKeyDown={(e) => {
@@ -103,65 +102,98 @@ export default function TimeWidget() {
         <div className="tw-hint">{calOpen ? '点击收起日历' : '点击展开日历'}</div>
       </div>
 
-      {calOpen && (
-        <div className="cal">
-          <div className="cal-head">
-            <button
-              type="button"
-              className="cal-nav"
-              aria-label="上个月"
-              onClick={() => shiftMonth(-1)}
+      {calOpen &&
+        createPortal(
+          <div
+            className="modal-backdrop"
+            onMouseDown={(e) => {
+              // 只有点到遮罩本身才关闭，点弹窗内部不关
+              if (e.target === e.currentTarget) setCalOpen(false)
+            }}
+          >
+            <div
+              className="modal cal-modal"
+              role="dialog"
+              aria-modal="true"
+              aria-label="日历"
             >
-              ‹
-            </button>
-            <span className="cal-title">
-              {view.y} 年 {view.m + 1} 月
-            </span>
-            <button
-              type="button"
-              className="cal-nav"
-              aria-label="下个月"
-              onClick={() => shiftMonth(1)}
-            >
-              ›
-            </button>
-          </div>
-
-          <div className="cal-grid cal-weekdays">
-            {WEEK.map((w) => (
-              <span key={w} className="cal-wd">
-                {w}
-              </span>
-            ))}
-          </div>
-
-          <div className="cal-grid">
-            {cells.map((c, i) =>
-              c === null ? (
-                <span key={`blank-${i}`} className="cal-cell is-blank" />
-              ) : (
+              <div className="modal-head">
+                <h2>日历</h2>
                 <button
-                  key={c}
                   type="button"
-                  className={`cal-cell${
-                    isCurrentMonth && c === now.getDate() ? ' is-today' : ''
-                  }${selected === keyOf(view.y, view.m + 1, c) ? ' is-selected' : ''}`}
-                  onClick={() => setSelected(keyOf(view.y, view.m + 1, c))}
+                  className="modal-close"
+                  onClick={() => setCalOpen(false)}
+                  aria-label="关闭"
                 >
-                  {c}
+                  ×
                 </button>
-              ),
-            )}
-          </div>
+              </div>
 
-          <div className="cal-foot">
-            <span className="cal-selected">{selectedText || '点日期可标记'}</span>
-            <button type="button" className="cal-today" onClick={() => setView({ y: now.getFullYear(), m: now.getMonth() })}>
-              回到今天
-            </button>
-          </div>
-        </div>
-      )}
+              <div className="cal">
+                <div className="cal-head">
+                  <button
+                    type="button"
+                    className="cal-nav"
+                    aria-label="上个月"
+                    onClick={() => shiftMonth(-1)}
+                  >
+                    ‹
+                  </button>
+                  <span className="cal-title">
+                    {view.y} 年 {view.m + 1} 月
+                  </span>
+                  <button
+                    type="button"
+                    className="cal-nav"
+                    aria-label="下个月"
+                    onClick={() => shiftMonth(1)}
+                  >
+                    ›
+                  </button>
+                </div>
+
+                <div className="cal-grid cal-weekdays">
+                  {WEEK.map((w) => (
+                    <span key={w} className="cal-wd">
+                      {w}
+                    </span>
+                  ))}
+                </div>
+
+                <div className="cal-grid">
+                  {cells.map((c, i) =>
+                    c === null ? (
+                      <span key={`blank-${i}`} className="cal-cell is-blank" />
+                    ) : (
+                      <button
+                        key={c}
+                        type="button"
+                        className={`cal-cell${
+                          isCurrentMonth && c === now.getDate() ? ' is-today' : ''
+                        }${selected === keyOf(view.y, view.m + 1, c) ? ' is-selected' : ''}`}
+                        onClick={() => setSelected(keyOf(view.y, view.m + 1, c))}
+                      >
+                        {c}
+                      </button>
+                    ),
+                  )}
+                </div>
+
+                <div className="cal-foot">
+                  <span className="cal-selected">{selectedText || '点日期可标记'}</span>
+                  <button
+                    type="button"
+                    className="cal-today"
+                    onClick={() => setView({ y: now.getFullYear(), m: now.getMonth() })}
+                  >
+                    回到今天
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
     </section>
   )
 }
