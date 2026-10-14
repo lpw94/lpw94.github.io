@@ -577,6 +577,86 @@ button:hover { opacity: 0.9; }
   opacity: 0.8;
 }
 
+/* 记事本页（/notes，登录后可见） */
+.notes-head {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 24px;
+}
+.notes-search { margin-bottom: 20px; }
+.notes-search input {
+  width: 100%;
+  max-width: 480px;
+  padding: 10px 14px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--card, #fff);
+  color: var(--fg);
+  font-size: 14px;
+}
+.notes-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 12px;
+}
+.note-card {
+  display: flex; flex-direction: column; gap: 8px;
+  min-height: 118px; padding: 14px 16px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: #fff; text-align: left; cursor: pointer;
+  transition: border-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+.note-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+.note-card:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.note-title {
+  font-size: 14px; font-weight: 600; color: var(--fg);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.note-title.is-empty { color: var(--muted); font-weight: 500; }
+.note-excerpt {
+  font-size: 12px; color: var(--muted); line-height: 1.6;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden; word-break: break-word;
+}
+.note-foot {
+  margin-top: auto; display: flex; align-items: center; justify-content: space-between;
+  gap: 8px;
+}
+.note-time { font-size: 12px; color: var(--muted); opacity: 0.8; }
+.note-del {
+  border: none; background: none; padding: 2px 6px;
+  color: var(--muted); font-size: 12px; cursor: pointer;
+  border-radius: 6px; transition: color 0.15s, background 0.15s;
+}
+.note-del:hover { color: #dc2626; background: rgba(220, 38, 38, 0.08); }
+
+/* 记事编辑弹窗：比文章弹窗窄一点，文本框自适应高度 */
+.note-modal { max-width: 560px; }
+.note-editor {
+  width: 100%; min-height: 220px; max-height: 420px; padding: 12px 14px;
+  border: 1px solid var(--border); border-radius: 10px;
+  background: var(--card, #fff); color: var(--fg);
+  font-size: 14px; line-height: 1.7; resize: none;
+  overflow-y: auto;
+}
+.note-editor:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+@media (prefers-reduced-motion: reduce) {
+  .note-card { transition: none; }
+  .note-card:hover { transform: none; }
+}
+@media (max-width: 720px) {
+  .notes-head { flex-direction: column; }
+}
+
 /* 新建 / 编辑文章弹窗 */
 .modal-backdrop {
   position: fixed;

@@ -119,6 +119,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Link to="/gallery">展厅</Link>
           <Link to="/toolbox">工具箱</Link>
           <Link to="/bookmarks">书签</Link>
+          {/* 记事本是私密内容：入口仅登录后可见，未登录直接访问 /notes 也会被登录墙拦住 */}
+          {user && <Link to="/notes">记事本</Link>}
           <Link to="/tools">工具</Link>
           {/* <Link to="/about">简历</Link> */}
           <Link to="/admin">后台</Link>

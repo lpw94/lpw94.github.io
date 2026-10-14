@@ -48,5 +48,14 @@ export interface Bookmark {
   created_at: string
 }
 
+/** 私有记事本：/notes 登录后可见，RLS 仅 authenticated 可读写（无 anon 授权） */
+export interface Note {
+  id: string
+  title: string
+  content: string
+  created_at: string
+  updated_at: string
+}
+
 /** 后台书签分类输入框的常用建议（datalist），可自由输入其它分类 */
 export const BOOKMARK_CATEGORY_HINTS = ['开发', '设计', '学习', '工具', '社交', '娱乐', '其他']

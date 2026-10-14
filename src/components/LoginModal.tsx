@@ -11,7 +11,15 @@ type Mode = 'magiclink' | 'password' | 'signup'
 
 // 登录弹窗：默认「密码登录」Tab；未登录访问 /admin 时由 Admin 自动弹出。
 // 登录成功（密码登录）后调用 onClose 关闭弹窗，Admin 通过 onAuthStateChange 识别会话并展示后台。
-export default function LoginModal({ onClose }: { onClose: () => void }) {
+// redirectTo：魔法链接 / 注册验证邮件的回跳地址，默认 /admin；
+// 记事本等其它登录墙页面传入自身路径，登录后回到原页面而不是跳到后台。
+export default function LoginModal({
+  onClose,
+  redirectTo = '/admin',
+}: {
+  onClose: () => void
+  redirectTo?: string
+}) {
   const [mode, setMode] = useState<Mode>('password')
   const [email, setEmail] = useState('lpw94@qq.com')
   const [password, setPassword] = useState('')
@@ -49,7 +57,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
     setLoading(true)
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${SITE_URL}/admin` },
+      options: { emailRedirectTo: `${SITE_URL}${redirectTo}` },
     })
     setLoading(false)
     if (error) setErr(error.message)
@@ -81,7 +89,7 @@ export default function LoginModal({ onClose }: { onClose: () => void }) {
     const { error } = await supabase.auth.signUp({
       email,
       password,
-      options: { emailRedirectTo: `${SITE_URL}/admin` },
+      options: { emailRedirectTo: `${SITE_URL}${redirectTo}` },
     })
     setLoading(false)
     if (error) {
