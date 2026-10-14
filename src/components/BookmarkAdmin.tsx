@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
 import { toast } from '../lib/toast'
-import { invalidateBookmarksCache } from '../pages/Bookmarks'
+import { invalidateToolsCache } from '../pages/Tools'
 import {
   BOOKMARK_CATEGORY_HINTS,
   type Bookmark,
@@ -80,8 +80,8 @@ export default function BookmarkAdmin() {
     setOpen(false)
     setForm(emptyForm())
     void load()
-    // 让前台 /bookmarks 缓存失效，下次进入立即看到最新书签
-    invalidateBookmarksCache()
+    // 让前台 /tools 缓存失效，下次进入立即看到最新书签
+    invalidateToolsCache()
     toast(form.id ? '书签已更新' : '书签已添加', 'success')
   }
 
@@ -99,7 +99,7 @@ export default function BookmarkAdmin() {
       return
     }
     void load()
-    invalidateBookmarksCache()
+    invalidateToolsCache()
     toast(`已删除《${b.name}》`, 'success')
   }
 

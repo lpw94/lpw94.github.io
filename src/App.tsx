@@ -1,4 +1,4 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Helmet } from 'react-helmet-async'
 import Layout from './components/Layout'
 import Home from './pages/Home'
@@ -7,7 +7,6 @@ import About from './pages/About'
 import Gallery from './pages/Gallery'
 import Tools from './pages/Tools'
 import Toolbox from './pages/Toolbox'
-import Bookmarks from './pages/Bookmarks'
 import Notes from './pages/Notes'
 import Admin from './pages/Admin'
 import ResetPassword from './pages/ResetPassword'
@@ -29,7 +28,8 @@ export default function App() {
           <Route path="/gallery" element={<Gallery />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/toolbox" element={<Toolbox />} />
-          <Route path="/bookmarks" element={<Bookmarks />} />
+          {/* 书签已合并进 /tools 常用导航页，旧链接统一跳转过去 */}
+          <Route path="/bookmarks" element={<Navigate to="/tools" replace />} />
           <Route path="/notes" element={<Notes />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/reset-password" element={<ResetPassword />} />

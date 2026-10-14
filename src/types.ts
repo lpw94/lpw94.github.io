@@ -38,7 +38,7 @@ export interface Comment {
   created_at: string
 }
 
-/** 个人常用书签：/bookmarks 快速入口 + /admin 后台配置 */
+/** 个人常用书签：合并进 /tools 常用导航页展示 + /admin 后台配置 */
 export interface Bookmark {
   id: string
   name: string

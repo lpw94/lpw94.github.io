@@ -118,7 +118,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Link to="/">首页</Link>
           <Link to="/gallery">展厅</Link>
           <Link to="/toolbox">工具箱</Link>
-          <Link to="/bookmarks">书签</Link>
+          {/* 书签已合并进「导航」（/tools）：静态工具 + DB 书签同一个页面、同一套功能 */}
+          <Link to="/tools">导航</Link>
           {/* 记事本是私密内容：入口仅登录后可见，未登录直接访问 /notes 也会被登录墙拦住 */}
           {user && <Link to="/notes">记事本</Link>}
           <Link to="/tools">工具</Link>
