@@ -1245,6 +1245,44 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   color: var(--fg);
 }
 .tw-date { font-size: 12px; color: var(--muted); margin-top: 4px; }
+.tw-main { cursor: pointer; border-radius: 8px; }
+.tw-main:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.tw-hint { margin-top: 6px; font-size: 11px; color: var(--muted); opacity: 0.75; transition: color 0.15s, opacity 0.15s; }
+.tw-main:hover .tw-hint { color: var(--accent); opacity: 1; }
+
+/* 时间组件内弹出的日历面板 */
+.cal { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); }
+.cal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.cal-title { font-size: 13px; font-weight: 600; color: var(--fg); font-variant-numeric: tabular-nums; }
+.cal-nav {
+  width: 24px; height: 24px; border: none; border-radius: 6px;
+  background: none; color: var(--muted); font-size: 15px; line-height: 1;
+  cursor: pointer; transition: color 0.15s, background 0.15s;
+}
+.cal-nav:hover { color: var(--accent); background: var(--accent-soft, rgba(59, 130, 246, 0.12)); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 2px; }
+.cal-weekdays { margin-bottom: 2px; }
+.cal-wd { text-align: center; font-size: 10px; color: var(--muted); }
+.cal-cell {
+  aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+  border: none; border-radius: 6px; background: none; padding: 0;
+  font-size: 11px; color: var(--fg); cursor: pointer;
+  font-variant-numeric: tabular-nums; transition: background 0.15s, color 0.15s;
+}
+.cal-cell:hover { background: var(--accent-soft, rgba(59, 130, 246, 0.12)); }
+.cal-cell.is-today { color: var(--accent); font-weight: 700; box-shadow: inset 0 0 0 1px var(--accent); }
+.cal-cell.is-selected { background: var(--accent); color: #fff; font-weight: 600; }
+.cal-cell.is-blank { cursor: default; }
+.cal-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; }
+.cal-selected { font-size: 11px; color: var(--muted); }
+.cal-today {
+  border: none; background: none; padding: 2px 4px;
+  font-size: 11px; color: var(--accent); cursor: pointer; border-radius: 6px;
+}
+.cal-today:hover { background: var(--accent-soft, rgba(59, 130, 246, 0.12)); }
+@media (prefers-reduced-motion: reduce) {
+  .cal-cell, .cal-nav, .tw-hint { transition: none; }
+}
 
 /* 算命组件 */
 .fw-card {
