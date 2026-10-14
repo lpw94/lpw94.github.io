@@ -99,7 +99,7 @@ export default function TimeWidget() {
         <div className="tw-date">
           {now.getFullYear()} 年 {now.getMonth() + 1} 月 {now.getDate()} 日 · 星期{WEEK[now.getDay()]}
         </div>
-        <div className="tw-hint">{calOpen ? '点击收起日历' : '点击展开日历'}</div>
+        {/* <div className="tw-hint">{calOpen ? '点击收起日历' : '点击展开日历'}</div> */}
       </div>
 
       {calOpen &&
