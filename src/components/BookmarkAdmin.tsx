@@ -226,19 +226,33 @@ export default function BookmarkAdmin() {
 
               <div className="field">
                 <label htmlFor="bm-category">分类</label>
-                <input
+                <select
                   id="bm-category"
-                  list="bm-category-hints"
-                  placeholder="输入或选择分类"
-                  value={form.category}
-                  onChange={(e) => setForm({ ...form, category: e.target.value })}
-                />
-                <datalist id="bm-category-hints">
+                  value={BOOKMARK_CATEGORY_HINTS.includes(form.category) ? form.category : '__custom'}
+                  onChange={(e) => {
+                    const v = e.target.value
+                    setForm({ ...form, category: v === '__custom' ? '' : v })
+                  }}
+                >
                   {BOOKMARK_CATEGORY_HINTS.map((c) => (
-                    <option key={c} value={c} />
+                    <option key={c} value={c}>{c}</option>
                   ))}
-                </datalist>
+                  <option value="__custom">自定义…</option>
+                </select>
               </div>
+
+              {/* 选了「自定义…」或编辑历史自定义分类时，显示文本输入框 */}
+              {!BOOKMARK_CATEGORY_HINTS.includes(form.category) && (
+                <div className="field">
+                  <label htmlFor="bm-category-custom">新分类</label>
+                  <input
+                    id="bm-category-custom"
+                    placeholder="输入新分类名称"
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  />
+                </div>
+              )}
 
               <div className="field">
                 <label htmlFor="bm-desc">介绍</label>
