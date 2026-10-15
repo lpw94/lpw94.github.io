@@ -19,6 +19,7 @@
 | `11-blog-seo-share-games.md` | 博客 SEO 与交互再打磨：RSS/Sitemap、社交分享卡片、2048 滑动动画 | `blog-seo-share-games` | 前端 |
 | `12-plane-war-upgrade.md` | 博客小游戏升级：飞机大战的多机型敌机、变向子弹与道具系统 | `plane-war-upgrade` | 前端 |
 | `13-blog-toolbox-bookmarks-games.md` | 博客一天升级实录：工具箱独立页、书签速记、双新游戏与移动端精简 | `blog-toolbox-bookmarks-games` | 前端 |
+| `14-blog-notes-nav-and-fixed-pitfall.md` | 博客再升级实录：私有记事本、导航大合并，和一个 backdrop-filter 定位坑 | `blog-notes-nav-and-fixed-pitfall` | 前端 |
 
 > `05` / `06` / `07` / `08` 是本博客**自身**的建站与技术拆解（含真实踩坑），属于"项目自述"型文章，与其他四篇的通用教程定位不同。
 
