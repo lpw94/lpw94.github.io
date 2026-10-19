@@ -18,6 +18,7 @@ import BackToTop from './BackToTop'
 import ShareButton from './ShareButton'
 import SearchBox from './SearchBox'
 import LockScreen from './LockScreen'
+import { BG_THEMES, DEFAULT_BG_ID } from '../lib/backgrounds'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()
@@ -30,8 +31,45 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [confirmOpen, setConfirmOpen] = useState(false)
   /** 首页锁屏遮罩是否显示 */
   const [locked, setLocked] = useState(false)
+  /** 背景风格：从 localStorage 恢复，非法值（主题被删/篡改）回落到默认 */
+  const [bgId, setBgId] = useState<string>(() => {
+    const saved = localStorage.getItem('bg-theme')
+    return BG_THEMES.some((t) => t.id === saved) ? (saved as string) : DEFAULT_BG_ID
+  })
+  /** 背景风格面板是否展开 */
+  const [bgOpen, setBgOpen] = useState(false)
   // 用于判断点击是否落在下拉外部（点击别处自动收起）
   const menuRef = useRef<HTMLDivElement>(null)
+  const bgRef = useRef<HTMLDivElement>(null)
+
+  const bgTheme = BG_THEMES.find((t) => t.id === bgId) ?? BG_THEMES[0]
+
+  // 其它标签页切换主题时同步过来（避免同一个站两个标签观感不一致）
+  useEffect(() => {
+    const onStorage = (e: StorageEvent) => {
+      if (e.key !== 'bg-theme' || !e.newValue) return
+      if (BG_THEMES.some((t) => t.id === e.newValue)) setBgId(e.newValue)
+    }
+    window.addEventListener('storage', onStorage)
+    return () => window.removeEventListener('storage', onStorage)
+  }, [])
+
+  // 背景面板展开期间：点击外部 / 按 Esc 收起
+  useEffect(() => {
+    if (!bgOpen) return
+    const onPointerDown = (e: MouseEvent) => {
+      if (!bgRef.current?.contains(e.target as Node)) setBgOpen(false)
+    }
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setBgOpen(false)
+    }
+    document.addEventListener('mousedown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+    return () => {
+      document.removeEventListener('mousedown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [bgOpen])
 
   useEffect(() => {
     // 先用本地已有会话恢复一次（普通刷新 / 魔法链接回调后的场景）
@@ -128,8 +166,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      {/* 静态深色渐变背景（与锁屏同款），替代原先显眼的 3D 粒子星河 */}
-      <div className="site-bg" aria-hidden="true" />
+      {/* 静态渐变背景层：风格由顶栏 🎨 切换，key 变化触发淡入过渡 */}
+      <div className="site-bg" key={bgId} style={{ background: bgTheme.bg }} aria-hidden="true" />
       <CursorFX />
       <MusicPlayer />
       <BackToTop />
@@ -148,6 +186,60 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* <Link to="/tools">工具</Link> */}
           {/* <Link to="/about">简历</Link> */}
           <Link to="/admin">后台</Link>
+          <div className="bg-picker" ref={bgRef}>
+            <button
+              type="button"
+              className={`lock-btn bg-btn${bgOpen ? ' active' : ''}`}
+              onClick={() => setBgOpen((v) => !v)}
+              title="切换背景风格"
+              aria-label="切换背景风格"
+              aria-haspopup="menu"
+              aria-expanded={bgOpen}
+            >
+              🎨
+            </button>
+            {bgOpen && (
+              <div className="bg-panel" role="menu" aria-label="背景风格">
+                <div className="bg-panel-head">背景风格</div>
+                <div className="bg-grid">
+                  {BG_THEMES.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      role="menuitemradio"
+                      aria-checked={t.id === bgId}
+                      className={`bg-opt${t.id === bgId ? ' active' : ''}`}
+                      title={t.name}
+                      onClick={() => {
+                        setBgId(t.id)
+                        localStorage.setItem('bg-theme', t.id)
+                        setBgOpen(false)
+                      }}
+                    >
+                      <span className="bg-swatch" style={{ background: t.preview }} aria-hidden="true" />
+                      <span className="bg-name">{t.name}</span>
+                    </button>
+                  ))}
+                </div>
+                <div className="bg-panel-foot">
+                  <span>选择会记住，全站生效</span>
+                  <button
+                    type="button"
+                    className="bg-shuffle"
+                    onClick={() => {
+                      // 随机换一套：排除当前这套，避免「点了没变化」
+                      const pool = BG_THEMES.filter((t) => t.id !== bgId)
+                      const next = pool[Math.floor(Math.random() * pool.length)]
+                      setBgId(next.id)
+                      localStorage.setItem('bg-theme', next.id)
+                    }}
+                  >
+                    🎲 随机
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
           <button
             type="button"
             className="lock-btn"

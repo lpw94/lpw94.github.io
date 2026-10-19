@@ -18,17 +18,19 @@ body {
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
-/* 静态背景层：与锁屏同款的深色渐变，固定视口、置于内容之下、不拦截交互。
-   替代原先显眼的 3D 粒子星河（Background3D 已移除）。 */
+/* 静态渐变背景层：固定视口、置于内容之下、不拦截交互。
+   具体背景值由 JS 按当前主题内联（src/lib/backgrounds.ts），
+   key 变化时重新挂载，借此播放一次淡入作为切换过渡。 */
 .site-bg {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
-  background:
-    radial-gradient(1200px 800px at 20% 20%, rgba(37, 99, 235, 0.42), transparent 60%),
-    radial-gradient(1000px 700px at 85% 75%, rgba(236, 72, 153, 0.38), transparent 60%),
-    linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #0b1020 100%);
+  animation: bgFadeIn .32s ease both;
+}
+@keyframes bgFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 /* 自定义鼠标效果叠加层：发光跟随 + 点击涟漪/粒子，不拦截交互 */
@@ -3017,4 +3019,114 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   .lock-prompt b { font-size: 18px; }
   .lock-input-row input { width: 110px; font-size: 17px; }
   .lock-input-row button { padding: 8px 14px; font-size: 14px; }
+}
+
+/* ===== 顶栏背景风格切换器（🎨） ===== */
+.bg-picker {
+  position: relative;
+  display: inline-flex;
+}
+/* 复用 .lock-btn 的方形按钮外观，仅补「面板展开」态 */
+.bg-btn.active {
+  color: #fff;
+  background: var(--accent);
+  border-color: var(--accent);
+}
+.bg-panel {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  z-index: 200;
+  width: 258px;
+  max-width: calc(100vw - 32px);
+  padding: 12px 12px 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(12px) saturate(150%);
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.22);
+  animation: bgPanelIn .16s ease-out;
+}
+@keyframes bgPanelIn {
+  from { opacity: 0; transform: translateY(-6px); }
+  to { opacity: 1; transform: none; }
+}
+.bg-panel-head {
+  margin: 0 0 10px 2px;
+  font-size: 12px;
+  letter-spacing: .5px;
+  color: var(--muted);
+}
+.bg-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.bg-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 9px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 13px;
+  text-align: left;
+  cursor: pointer;
+  transition: border-color .15s, transform .15s, box-shadow .15s;
+}
+.bg-opt:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+.bg-opt.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.18);
+}
+.bg-swatch {
+  flex: 0 0 auto;
+  width: 22px;
+  height: 22px;
+  border-radius: 7px;
+  /* 深浅背景之间留一圈内描边，避免浅色块在白底上糊掉 */
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.14);
+}
+.bg-name {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.bg-panel-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 10px;
+  padding-top: 8px;
+  border-top: 1px dashed var(--border);
+  font-size: 11px;
+  color: var(--muted);
+}
+/* 面板底部的「🎲 随机」：不关闭面板，方便连点几次挑到满意的那套 */
+.bg-shuffle {
+  flex: 0 0 auto;
+  padding: 3px 9px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg);
+  color: var(--fg);
+  font-size: 11px;
+  cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.bg-shuffle:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .site-bg, .bg-panel { animation: none; }
+  .bg-opt { transition: none; }
 }
