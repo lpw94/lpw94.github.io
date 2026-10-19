@@ -2969,3 +2969,14 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
 }
 
 /* 锁屏只在首页有意义；≤720px 时遮罩照样全屏覆盖，无需特殊适配 */
+
+/* 矮屏（如横屏手机）缩小锁屏元素，保证「点击进入」提示不被裁切（遮罩本身 overflow:hidden 无滚动条） */
+@media (max-height: 560px) {
+  .lock-emoji { width: 60px; height: 60px; font-size: 48px; margin-bottom: 8px; }
+  .lock-title { font-size: clamp(24px, 7vw, 34px); margin-bottom: 4px; }
+  .lock-greet { font-size: 14px; margin-bottom: 2px; }
+  .lock-tagline { margin-bottom: 10px; }
+  .lock-clock { font-size: clamp(40px, 16vw, 64px); }
+  .lock-date { margin-top: 4px; font-size: 12px; }
+  .lock-hint { margin-top: 14px; font-size: 13px; }
+}

@@ -80,6 +80,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [pathname])
 
+  // 首页 2 分钟无操作（鼠标 / 键盘 / 滚动 / 触摸）自动锁屏；解锁后重新计时
+  useEffect(() => {
+    if (pathname !== '/') return
+    const IDLE_MS = 2 * 60 * 1000
+    let timer: number
+    const arm = () => {
+      clearTimeout(timer)
+      // 已锁屏时不再重复挂定时器（避免解锁前反复触发）
+      if (!locked) timer = window.setTimeout(() => setLocked(true), IDLE_MS)
+    }
+    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'wheel']
+    events.forEach((e) => window.addEventListener(e, arm, { passive: true }))
+    arm()
+    return () => {
+      clearTimeout(timer)
+      events.forEach((e) => window.removeEventListener(e, arm))
+    }
+  }, [pathname, locked])
+
   // 确认弹窗打开期间：锁背景滚动 + Esc 取消
   useEffect(() => {
     if (!confirmOpen) return

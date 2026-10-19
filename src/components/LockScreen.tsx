@@ -79,6 +79,15 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
     return () => window.removeEventListener('keydown', onKey)
   }, [onUnlock])
 
+  // 锁屏期间锁住背景滚动，避免遮罩后面还能滚出滚动条
+  useEffect(() => {
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.body.style.overflow = prev
+    }
+  }, [])
+
   return createPortal(
     <div
       className="lock-screen"
