@@ -18,6 +18,7 @@ import MusicPlayer from './MusicPlayer'
 import BackToTop from './BackToTop'
 import ShareButton from './ShareButton'
 import SearchBox from './SearchBox'
+import LockScreen from './LockScreen'
 import { THEMES } from '../lib/themes'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -29,6 +30,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const [menuOpen, setMenuOpen] = useState(false)
   /** 退出登录的二次确认弹窗 */
   const [confirmOpen, setConfirmOpen] = useState(false)
+  /** 首页锁屏遮罩是否显示 */
+  const [locked, setLocked] = useState(false)
   // 用于判断点击是否落在下拉外部（点击别处自动收起）
   const menuRef = useRef<HTMLDivElement>(null)
 
@@ -68,6 +71,14 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       document.removeEventListener('keydown', onKeyDown)
     }
   }, [menuOpen])
+
+  // 首页首次进入（按会话）自动弹一次锁屏遮罩；顶部按钮可随时再次唤起
+  useEffect(() => {
+    if (pathname === '/' && !sessionStorage.getItem('lock-screen-seen')) {
+      setLocked(true)
+      sessionStorage.setItem('lock-screen-seen', '1')
+    }
+  }, [pathname])
 
   // 确认弹窗打开期间：锁背景滚动 + Esc 取消
   useEffect(() => {
@@ -140,6 +151,18 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               </option>
             ))}
           </select>
+          <button
+            type="button"
+            className="lock-btn"
+            onClick={() => {
+              if (pathname !== '/') navigate('/')
+              setLocked(true)
+            }}
+            title="锁屏遮罩：显示首页锁屏"
+            aria-label="显示锁屏遮罩"
+          >
+            🔒
+          </button>
           {user && (
             <div className="nav-user" ref={menuRef}>
               {/* 邮箱本身是下拉触发器，退出登录收进菜单里 */}
@@ -244,6 +267,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </aside>
       )}
       </div>
+      {/* 首页锁屏遮罩：点击任意位置 / Esc / Enter 解锁；顶部 🔒 按钮可再次唤起 */}
+      {locked && pathname === '/' && <LockScreen onUnlock={() => setLocked(false)} />}
     </>
   )
 }
