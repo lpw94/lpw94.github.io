@@ -20,8 +20,13 @@
 | `12-plane-war-upgrade.md` | 博客小游戏升级：飞机大战的多机型敌机、变向子弹与道具系统 | `plane-war-upgrade` | 前端 |
 | `13-blog-toolbox-bookmarks-games.md` | 博客一天升级实录：工具箱独立页、书签速记、双新游戏与移动端精简 | `blog-toolbox-bookmarks-games` | 前端 |
 | `14-blog-notes-nav-and-fixed-pitfall.md` | 博客再升级实录：私有记事本、导航大合并，和一个 backdrop-filter 定位坑 | `blog-notes-nav-and-fixed-pitfall` | 前端 |
+| `15-node-to-python-funeng-sync.md` | 从 Node 到 Python：重写一个水表数据同步脚本，并踩了 OpenCV 的 Python 3.13 大坑 | `node-to-python-funeng-sync` | 后端 |
+| `16-dddocr-captcha-recognition.md` | Python 练手：用 ddddocr 写一个离线验证码识别小工具 | `ddddocr-captcha-recognition` | 后端 |
+| `17-blog-lockscreen-and-background.md` | 博客锁屏与背景减负实录：算术题锁屏、空闲自动锁与静态渐变背景 | `blog-lockscreen-and-background` | 前端 |
 
 > `05` / `06` / `07` / `08` 是本博客**自身**的建站与技术拆解（含真实踩坑），属于"项目自述"型文章，与其他四篇的通用教程定位不同。
+
+> 另有一篇未编号草稿 `python-project-driven-learning.md`（`前端工程师如何项目驱动学 Python`），是「项目驱动学 Python」系列的方法论总纲，可作为本篇的"前传"。
 
 > 分类取值需为：`frontend`（前端）/ `backend`（后端）/ `database`（数据库）/ `industry`（行业）/ `other`（其他）。
 
