@@ -1,7 +1,7 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-// 锁屏遮罩：仅首页展示。点击任意位置 / 按 Esc / Enter 解锁。
+// 锁屏遮罩：仅首页展示。解锁方式 = 一道随机算术题，输入正确答案才解锁。
 // 内容走「有意思」路线：随时间变化的问候、随机吐槽标语、实时时钟、漂浮的趣味 emoji。
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
@@ -18,7 +18,7 @@ function greeting(h: number): string {
 
 /** 随机吐槽 / 鼓励标语，让锁屏不那么无聊 */
 const TAGLINES = [
-  '代码写累了？先进来歇会儿 ☕',
+  '代码写累了？答对题再进来 ☕',
   '今天的 bug 修完了吗 🐛',
   '一杯咖啡，一段代码，一个更好的自己',
   '保持热爱，奔赴山海 🚀',
@@ -26,12 +26,36 @@ const TAGLINES = [
   '键盘敲烂，月薪过万 💻',
   '每一个不眠的夜晚，都在为梦想充电 🌙',
   'Stay hungry, stay foolish',
-  '别卷了，先看会儿我的博客 📚',
+  '别卷了，先答对这道题 📚',
   '这站点是用 React + Supabase 搭的，欢迎翻源码',
 ]
 
 /** 背景漂浮的趣味 emoji */
 const FLOATERS = ['💻', '🚀', '☕', '🌟', '✨', '🔒', '📚', '🐛', '🌙', '🍵']
+
+function rand(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min
+}
+
+type Problem = { a: number; b: number; op: string; answer: number }
+
+/** 随机生成一道简单算术题（+ / - / ×），保证结果是非负整数、难度适中 */
+function makeProblem(): Problem {
+  const op = ['+', '-', '×'][rand(0, 2)]
+  if (op === '+') {
+    const a = rand(2, 19)
+    const b = rand(2, 19)
+    return { a, b, op, answer: a + b }
+  }
+  if (op === '-') {
+    const a = rand(6, 20)
+    const b = rand(1, a - 1)
+    return { a, b, op, answer: a - b }
+  }
+  const a = rand(2, 9)
+  const b = rand(2, 9)
+  return { a, b, op, answer: a * b }
+}
 
 /** 每秒跳动的实时时钟 */
 function useNow() {
@@ -45,12 +69,11 @@ function useNow() {
 
 export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
   const now = useNow()
-  // 标语只在挂载时随机定一次，避免每秒重抽
+  // 标语 / 漂浮物只在挂载时随机定一次，避免每秒重抽
   const tagline = useMemo(
     () => TAGLINES[Math.floor(Math.random() * TAGLINES.length)],
     [],
   )
-  // 漂浮物也只定一次
   const floaters = useMemo(
     () =>
       FLOATERS.map((emoji, i) => ({
@@ -63,21 +86,17 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
     [],
   )
 
-  const hh = String(now.getHours()).padStart(2, '0')
-  const mm = String(now.getMinutes()).padStart(2, '0')
-  const ss = String(now.getSeconds()).padStart(2, '0')
-  const dateStr = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日 星期${
-    WEEK[now.getDay()]
-  }`
+  // 算术题「密码」相关状态
+  const [problem, setProblem] = useState<Problem>(makeProblem)
+  const [value, setValue] = useState('')
+  const [error, setError] = useState('')
+  const [shake, setShake] = useState(false)
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  // 键盘解锁：Esc / Enter 都算
+  // 一进入就聚焦输入框，方便直接作答
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape' || e.key === 'Enter') onUnlock()
-    }
-    window.addEventListener('keydown', onKey)
-    return () => window.removeEventListener('keydown', onKey)
-  }, [onUnlock])
+    inputRef.current?.focus()
+  }, [])
 
   // 锁屏期间锁住背景滚动，避免遮罩后面还能滚出滚动条
   useEffect(() => {
@@ -88,14 +107,40 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
     }
   }, [])
 
+  const triggerShake = () => {
+    setShake(true)
+    window.setTimeout(() => setShake(false), 450)
+  }
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault()
+    const raw = value.trim()
+    if (raw === '') {
+      setError('先输入答案哦 ✍️')
+      triggerShake()
+      return
+    }
+    if (Number(raw) === problem.answer) {
+      onUnlock()
+      return
+    }
+    // 答错：换一道新题，给点挫败感又不会卡死
+    setError('答错啦，已换一道新的 👀')
+    setValue('')
+    setProblem(makeProblem())
+    triggerShake()
+    inputRef.current?.focus()
+  }
+
+  const hh = String(now.getHours()).padStart(2, '0')
+  const mm = String(now.getMinutes()).padStart(2, '0')
+  const ss = String(now.getSeconds()).padStart(2, '0')
+  const dateStr = `${now.getFullYear()} 年 ${now.getMonth() + 1} 月 ${now.getDate()} 日 星期${
+    WEEK[now.getDay()]
+  }`
+
   return createPortal(
-    <div
-      className="lock-screen"
-      role="dialog"
-      aria-modal="true"
-      aria-label="锁屏遮罩"
-      onClick={onUnlock}
-    >
+    <div className="lock-screen" role="dialog" aria-modal="true" aria-label="锁屏">
       <div className="lock-bg" aria-hidden="true">
         {floaters.map((f, i) => (
           <span
@@ -114,10 +159,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
       </div>
 
       <div className="lock-card">
-        <div className="lock-emoji" aria-hidden="true">
-          <span className="lk lk-closed">🔒</span>
-          <span className="lk lk-open">🔓</span>
-        </div>
+        <div className="lock-emoji">🔒</div>
         <h1 className="lock-title">沃哥博客</h1>
         <p className="lock-greet">
           {greeting(now.getHours())}，欢迎来到我的小宇宙
@@ -128,9 +170,34 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
           <span className="lock-sec">:{ss}</span>
         </div>
         <div className="lock-date">{dateStr}</div>
-        <div className="lock-hint">
-          <span className="lock-pulse">👆</span> 点击任意位置进入
-        </div>
+
+        <form className={`lock-form${shake ? ' shake' : ''}`} onSubmit={submit}>
+          <p className="lock-prompt">
+            🔐 解锁：<b>
+              {problem.a} {problem.op} {problem.b} = ?
+            </b>
+          </p>
+          <div className="lock-input-row">
+            <input
+              ref={inputRef}
+              type="text"
+              inputMode="numeric"
+              autoComplete="off"
+              maxLength={4}
+              placeholder="输入答案"
+              value={value}
+              onChange={(e) => {
+                setValue(e.target.value.replace(/\D/g, ''))
+                setError('')
+              }}
+              aria-label="算术题答案"
+            />
+            <button type="submit">解锁</button>
+          </div>
+          <p className="lock-error" role="alert">
+            {error || '\u00A0'}
+          </p>
+        </form>
       </div>
     </div>,
     document.body,

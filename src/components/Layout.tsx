@@ -286,7 +286,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </aside>
       )}
       </div>
-      {/* 首页锁屏遮罩：点击任意位置 / Esc / Enter 解锁；顶部 🔒 按钮可再次唤起 */}
+      {/* 首页锁屏遮罩：答对随机算术题才解锁；顶部 🔒 按钮可再次唤起 */}
       {locked && pathname === '/' && <LockScreen onUnlock={() => setLocked(false)} />}
     </>
   )
