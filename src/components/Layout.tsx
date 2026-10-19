@@ -1,10 +1,9 @@
-import { useEffect, useRef, useState, useMemo } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import ProfileCard from './ProfileCard'
-import Background3D from './Background3D'
 import CursorFX from './CursorFX'
 import TimeWidget from './TimeWidget'
 import FortuneWidget from './FortuneWidget'
@@ -19,7 +18,6 @@ import BackToTop from './BackToTop'
 import ShareButton from './ShareButton'
 import SearchBox from './SearchBox'
 import LockScreen from './LockScreen'
-import { THEMES } from '../lib/themes'
 
 export default function Layout({ children }: { children: React.ReactNode }) {
   const { pathname } = useLocation()
@@ -123,12 +121,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (pathname === '/admin') navigate('/')
   }
 
-  // 背景主题：从 localStorage 恢复，缺省用第一个主题
-  const [themeId, setThemeId] = useState<string>(
-    () => localStorage.getItem('bg-theme') || THEMES[0].id
-  )
-  const theme = useMemo(() => THEMES.find((t) => t.id === themeId) ?? THEMES[0], [themeId])
-
   // 简历页本身就是个人信息详情；文章详情页需要更宽的正文空间（代码块、图片、表格），
   // 信息栏也没有意义 —— 这几种页面都隐藏左侧栏
   const showProfile =
@@ -136,8 +128,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
   return (
     <>
-      <Background3D theme={theme} />
-      <CursorFX theme={theme} />
+      {/* 静态深色渐变背景（与锁屏同款），替代原先显眼的 3D 粒子星河 */}
+      <div className="site-bg" aria-hidden="true" />
+      <CursorFX />
       <MusicPlayer />
       <BackToTop />
       <ShareButton />
@@ -155,21 +148,6 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           {/* <Link to="/tools">工具</Link> */}
           {/* <Link to="/about">简历</Link> */}
           <Link to="/admin">后台</Link>
-          <select
-            className="theme-select"
-            value={themeId}
-            onChange={(e) => {
-              setThemeId(e.target.value)
-              localStorage.setItem('bg-theme', e.target.value)
-            }}
-            aria-label="切换背景主题"
-          >
-            {THEMES.map((t) => (
-              <option key={t.id} value={t.id}>
-                {t.name}
-              </option>
-            ))}
-          </select>
           <button
             type="button"
             className="lock-btn"

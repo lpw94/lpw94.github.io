@@ -11,37 +11,24 @@
 body {
   margin: 0;
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, "PingFang SC", "Microsoft YaHei", sans-serif;
-  /* 深空底色 + 两团蓝紫光晕，作为 3D 粒子背景的兜底（canvas 透明处透出） */
-  background:
-    radial-gradient(1200px 800px at 72% 8%, rgba(56, 82, 168, 0.38), transparent 60%),
-    radial-gradient(1000px 720px at 12% 92%, rgba(120, 52, 160, 0.32), transparent 60%),
-    #060912;
+  /* 深色兜底底色，与 .site-bg 静态渐变一致（canvas 已移除，仅作纯 CSS 兜底） */
+  background: #0f172a;
   color: var(--fg);
   line-height: 1.6;
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; }
-/* 顶部栏背景主题切换 */
-.theme-select {
-  appearance: none;
-  -webkit-appearance: none;
-  font-size: 13px;
-  color: var(--muted);
-  background: #fff;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  padding: 5px 14px;
-  cursor: pointer;
-  margin-left: 4px;
-}
-.theme-select:hover { border-color: var(--accent); }
-.theme-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-/* 全屏 3D 背景层：固定视口、置于内容之下、不拦截交互 */
-.bg3d {
+/* 静态背景层：与锁屏同款的深色渐变，固定视口、置于内容之下、不拦截交互。
+   替代原先显眼的 3D 粒子星河（Background3D 已移除）。 */
+.site-bg {
   position: fixed;
   inset: 0;
   z-index: -1;
   pointer-events: none;
+  background:
+    radial-gradient(1200px 800px at 20% 20%, rgba(37, 99, 235, 0.42), transparent 60%),
+    radial-gradient(1000px 700px at 85% 75%, rgba(236, 72, 153, 0.38), transparent 60%),
+    linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #0b1020 100%);
 }
 
 /* 自定义鼠标效果叠加层：发光跟随 + 点击涟漪/粒子，不拦截交互 */
@@ -52,8 +39,7 @@ a:hover { text-decoration: underline; }
   pointer-events: none;
   mix-blend-mode: screen;
 }
-.bg3d canvas { display: block; }
-/* 内容区玻璃拟态：浅色半透明 + 模糊，既保证深字可读，又让边缘透出炫酷 3D */
+/* 内容区玻璃拟态：浅色半透明 + 模糊，既保证深字可读，又让边缘透出背景渐变 */
 .container {
   /* 作为 .page-shell(flex) 的弹性项：必须显式撑满，否则宽度按内容收缩——
      加载态只有「加载中…」几个字时，白卡会塌成一条细柱 */

@@ -1,13 +1,12 @@
 import { useEffect, useRef } from 'react'
-import type { BgTheme } from '../lib/themes'
 
 /**
  * 点击效果叠加层（Canvas 2D，fixed 全屏，pointer-events:none，不拦截交互）：
- * 点击处涟漪扩散环 + 彩色粒子迸发，随后淡出。配色跟随当前背景主题色相。
+ * 点击处涟漪扩散环 + 彩色粒子迸发，随后淡出。配色固定为锁屏同款蓝色相。
  * 仅在有点击效果运行时才启动动画循环，空闲时不占 CPU。
  * 尊重 prefers-reduced-motion：开启时不生成粒子，仅保留短暂的扩散涟漪。
  */
-export default function CursorFX({ theme }: { theme: BgTheme }) {
+export default function CursorFX() {
   const ref = useRef<HTMLCanvasElement>(null)
 
   useEffect(() => {
@@ -30,7 +29,8 @@ export default function CursorFX({ theme }: { theme: BgTheme }) {
     resize()
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const hue = (theme.hue[0] + theme.hue[1]) / 2
+    // 固定蓝色相（≈#2563eb / 锁屏渐变主色），不再随背景主题变化
+    const hue = 0.61
 
     const particles: {
       x: number; y: number; vx: number; vy: number; life: number; max: number; hue: number
@@ -114,7 +114,7 @@ export default function CursorFX({ theme }: { theme: BgTheme }) {
       window.removeEventListener('pointerdown', spawn)
       window.removeEventListener('resize', resize)
     }
-  }, [theme])
+  }, [])
 
   return <canvas ref={ref} className="cursor-fx" aria-hidden="true" />
 }
