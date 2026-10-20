@@ -119,7 +119,14 @@ async function genFeeds() {
     console.warn('[gh-pages] 缺少 VITE_SUPABASE_URL / VITE_SUPABASE_ANON_KEY，跳过 RSS/Sitemap 生成')
     return
   }
-  const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+  // Secrets 里的地址若误带 /rest/v1 等后缀（从 Dashboard 复制时常见），
+  // createClient 会拼出 .../rest/v1/rest/v1/posts 而 404，feed 直接静默缺失。
+  // 这里与 src/lib/supabase.ts 保持同一套裁剪逻辑。
+  const normalizedUrl = SUPABASE_URL.trim()
+    .replace(/\/(rest|auth|storage|realtime)\/v1\/?$/, '')
+    .replace(/\/+$/, '')
+  console.log(`[gh-pages] 拉取文章：${normalizedUrl}`)
+  const supabase = createClient(normalizedUrl, SUPABASE_ANON_KEY)
   const { data, error } = await supabase
     .from('posts')
     .select('slug, title, published_at, content')
