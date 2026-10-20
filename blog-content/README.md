@@ -23,6 +23,10 @@
 | `15-node-to-python-funeng-sync.md` | 从 Node 到 Python：重写一个水表数据同步脚本，并踩了 OpenCV 的 Python 3.13 大坑 | `node-to-python-funeng-sync` | 后端 |
 | `16-dddocr-captcha-recognition.md` | Python 练手：用 ddddocr 写一个离线验证码识别小工具 | `ddddocr-captcha-recognition` | 后端 |
 | `17-blog-lockscreen-and-background.md` | 博客锁屏与背景减负实录：算术题锁屏、空闲自动锁与静态渐变背景 | `blog-lockscreen-and-background` | 前端 |
+| `18-python-import-variables.md` | Python 入门：引用另一个文件的变量，import 三种写法与常见坑 | `python-import-variables` | 后端 |
+| `19-python-stdlib-four-libraries.md` | Python 常用库四件套：requests 网络请求、json 数据处理、datetime 与文件 IO 串讲 | `python-stdlib-four-libraries` | 后端 |
+| `20-python-venv-conda.md` | Python 依赖隔离：venv 与 conda 怎么选，并动手建一个真实 venv | `python-venv-conda` | 后端 |
+| `21-supervision-intro.md` | 计算机视觉工具库 supervision 入门：模型无关的可视化与三个版本 API 坑 | `supervision-intro` | 后端 |
 
 > `05` / `06` / `07` / `08` 是本博客**自身**的建站与技术拆解（含真实踩坑），属于"项目自述"型文章，与其他四篇的通用教程定位不同。
 
