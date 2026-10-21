@@ -7,7 +7,7 @@ export type Skill = { name: string; value: number }
 export const resume = {
   name: 'woge',
   /** 顶部打字机逐字显示的职位描述 */
-  role: 'Web 前端研发工程师 · 广东深圳 · 热爱折腾的技术人',
+  role: 'Web 全栈研发工程师 · 广东深圳 · 热爱折腾的技术人',
   // 头像加载失败会依次回退到 avatarFallback，再失败则显示 initials 文字
   avatar: '/avatar.png',
   avatarFallback: '/avatar.svg',
@@ -18,7 +18,7 @@ export const resume = {
   github: 'https://github.com/lpw94',
 
   stats: [
-    { label: '前端经验', value: 5, suffix: '年' },
+    { label: '前端经验', value: 20, suffix: '年' },
     { label: '参与项目', value: 20, suffix: '+' },
     { label: '技术文章', value: 30, suffix: '+' },
     { label: '掌握技能', value: 11, suffix: '项' },
@@ -32,10 +32,10 @@ export const resume = {
   ] as InfoItem[],
 
   intents: [
-    { label: '求职类型', value: '全职' },
-    { label: '意向岗位', value: 'Web 前端研发工程师' },
+    { label: '求职类型', value: '全职/日结' },
+    { label: '意向岗位', value: '全栈工程师' },
     { label: '意向城市', value: '广东深圳' },
-    { label: '薪资要求', value: '20K' },
+    { label: '薪资要求', value: '3000' },
     { label: '求职状态', value: '随时到岗' },
   ] as InfoItem[],
 
