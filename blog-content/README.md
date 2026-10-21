@@ -28,6 +28,8 @@
 | `20-python-venv-conda.md` | Python 依赖隔离：venv 与 conda 怎么选，并动手建一个真实 venv | `python-venv-conda` | 后端 |
 | `21-supervision-intro.md` | 计算机视觉工具库 supervision 入门：模型无关的可视化与三个版本 API 坑 | `supervision-intro` | 后端 |
 | `22-fastapi-admin-api.md` | FastAPI 权限路由后端实战：四层架构、参数化鉴权与四个环境级踩坑 | `fastapi-admin-api` | 后端 |
+| `23-admin-web-demo-permission-frontend.md` | 权限路由前端落地：手写请求拦截器、刷新锁与动态菜单路由的四个坑 | `admin-web-demo-permission-frontend` | 前端 |
+| `24-blog-mobile-optimization.md` | 手机端体验优化实录：顶栏压行、字号收敛，和一次差点被 Chrome 骗到的调试 | `blog-mobile-optimization` | 前端 |
 
 > `05` / `06` / `07` / `08` 是本博客**自身**的建站与技术拆解（含真实踩坑），属于"项目自述"型文章，与其他四篇的通用教程定位不同。
 
