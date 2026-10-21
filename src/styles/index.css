@@ -3130,3 +3130,102 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   .site-bg, .bg-panel { animation: none; }
   .bg-opt { transition: none; }
 }
+
+/* 展厅提示：桌面默认只显示鼠标版文案（触屏版在下面的媒体查询里打开） */
+.hint-touch { display: none; }
+
+/* ============================================================
+   移动端体验优化（≤720px）
+   所有规则都限定在媒体查询内，桌面端样式一律不动。
+   实测（390×844）优化前：顶栏 3 行 128px，正文 h1 为浏览器默认 32px/行高 51px。
+   ============================================================ */
+@media (max-width: 720px) {
+  /* ---- 顶部栏：3 行压到 2 行 ----
+     原来是 logo / 导航整行 / 搜索框整行；现在让搜索框与 logo 同行、
+     只吃剩余宽度，导航单独一行，顶栏高度约 128px → 96px。 */
+  .site-header {
+    padding: 8px 12px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    gap: 8px;
+  }
+  .logo { flex: 0 0 auto; font-size: 16px; }
+  .search-box { flex: 1 1 auto; order: 0; min-width: 0; max-width: none; }
+  .search-input { padding: 6px 12px; font-size: 13px; }
+  /* 注意：分类筛选和分页也是 <nav> 元素，这里必须限定在顶栏内，
+     否则 justify-content:center 会让横向滚动的分类栏从中间被裁掉。 */
+  .site-header nav {
+    width: 100%;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 2px 10px;
+  }
+  .site-header nav a { flex: 0 0 auto; font-size: 13px; padding: 4px 0; }
+  .lock-btn { width: 34px; height: 34px; font-size: 15px; border-radius: 9px; }
+  .nav-trigger { max-width: 118px; font-size: 12px; }
+
+  /* ---- 文章正文 ----
+     h1 用浏览器默认 32px 在 390 宽下要占四行（205px 高），收紧到 23px。 */
+  .post-detail h1 { font-size: 23px; line-height: 1.38; letter-spacing: 0; }
+  .post-detail .post-meta { flex-wrap: wrap; gap: 6px 10px; font-size: 12px; }
+  /* 每一项都不许内部折行（优化前「2026-10-20」被拆成两行） */
+  .post-detail .post-meta > * { white-space: nowrap; }
+  .post-detail .content { font-size: 15px; line-height: 1.78; }
+  .rich-content h2 { margin: 20px 0 8px; font-size: 19px; }
+  .rich-content h3 { margin: 16px 0 6px; font-size: 16px; }
+  .rich-content pre { font-size: 12px; }
+  /* 表格在手机上整体横向滚动，不撑破正文 */
+  .rich-content table { display: block; overflow-x: auto; font-size: 13px; }
+
+  /* ---- 首页卡片：留白与标题收紧，一屏多看一条 ---- */
+  .post-card { padding: 14px; border-radius: 12px; }
+  .post-card h2 { margin: 6px 0 4px; font-size: 18px; line-height: 1.42; }
+  .post-card img { height: 150px; }
+
+  /* ---- 分类筛选 / 工具箱 tab：单行横向滑动，省掉换行占位 ---- */
+  .category-filter,
+  .toolbox-tabs {
+    flex-wrap: nowrap;
+    /* 必须显式左对齐：上面 720 断点里有条 nav { justify-content:center }，
+       而分类栏本身是 <nav>，居中会让溢出内容向两侧各裁一半 */
+    justify-content: flex-start;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .category-filter::-webkit-scrollbar,
+  .toolbox-tabs::-webkit-scrollbar { display: none; }
+  .category-filter button,
+  .toolbox-tab { flex: 0 0 auto; }
+  .toolbox-tab { padding: 8px 12px; }
+
+  /* ---- 按钮触控尺寸：手机上可点面积别太小 ---- */
+  .post-pager-btns button,
+  .home-pager button { min-height: 38px; }
+
+  /* ---- 安全区：刘海屏左右、底部横条 ---- */
+  .page-shell {
+    padding-left: max(10px, env(safe-area-inset-left));
+    padding-right: max(10px, env(safe-area-inset-right));
+  }
+  .mp-fab { bottom: max(16px, env(safe-area-inset-bottom)); }
+  footer { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
+
+  /* ---- 弹窗高度用 dvh，避免移动浏览器地址栏导致的 100vh 偏差 ---- */
+  .modal { max-height: calc(100dvh - 24px); }
+
+  /* ---- 展厅提示：触屏换一套文案（没有「滚轮」这回事） ---- */
+  .hint-touch { display: inline; }
+  .hint-pointer { display: none; }
+}
+
+/* 触屏设备：去掉「点完一直亮着」的粘滞 hover 态 */
+@media (hover: none) {
+  .post-card:hover { border-color: var(--border); text-decoration: none; }
+  .tools-card:hover,
+  .note-card:hover { transform: none; }
+}
+
+/* 全站点按高亮块（iOS/Android 点击时的灰色方块） */
+html { -webkit-tap-highlight-color: transparent; }

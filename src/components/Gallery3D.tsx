@@ -78,13 +78,17 @@ export default function Gallery3D({ onSelect }: Props) {
     scene.background = new THREE.Color(0x0b1020)
     scene.fog = new THREE.Fog(0x0b1020, 12, 28)
 
+    // ── 窄屏（竖屏手机）适配 ──
+    // 容器宽高比 < 0.95 时水平视野很窄，原参数会把后墙两侧的画框裁掉一半；
+    // 这里增大 fov 并把相机后移，让「后墙 3 + 左右各 1」整体落在视野内。
+    let narrow = host.clientWidth / host.clientHeight < 0.95
     const camera = new THREE.PerspectiveCamera(
-      55,
+      narrow ? 70 : 55,
       host.clientWidth / host.clientHeight,
       0.1,
       100,
     )
-    camera.position.set(0, 1.8, 5.2)
+    camera.position.set(0, narrow ? 2.1 : 1.8, narrow ? 7.4 : 5.2)
 
     const renderer = new THREE.WebGLRenderer({ antialias: true })
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
@@ -98,7 +102,7 @@ export default function Gallery3D({ onSelect }: Props) {
     controls.dampingFactor = 0.06
     controls.enablePan = false
     controls.minDistance = 2.2
-    controls.maxDistance = 8
+    controls.maxDistance = narrow ? 14 : 8
     // 限制俯仰，避免钻到地板下或飞到屋顶上
     controls.minPolarAngle = 0.85
     controls.maxPolarAngle = 1.62
@@ -256,6 +260,15 @@ export default function Gallery3D({ onSelect }: Props) {
       const h = host.clientHeight
       if (!w || !h) return
       camera.aspect = w / h
+      // 横竖屏切换时重新套用相机参数（否则转屏后画框又会被裁）
+      const nowNarrow = w / h < 0.95
+      if (nowNarrow !== narrow) {
+        narrow = nowNarrow
+        camera.fov = narrow ? 70 : 55
+        camera.position.set(0, narrow ? 2.1 : 1.8, narrow ? 7.4 : 5.2)
+        controls.target.set(0, 1.6, -1)
+        controls.maxDistance = narrow ? 14 : 8
+      }
       camera.updateProjectionMatrix()
       renderer.setSize(w, h)
     }

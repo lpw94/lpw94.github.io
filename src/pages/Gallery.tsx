@@ -34,7 +34,10 @@ export default function Gallery() {
 
       <div className="gallery-head">
         <h1 className="gallery-title">3D 个人展厅</h1>
-        <p className="gallery-hint muted">🖱️ 拖拽旋转 · 滚轮缩放 · 点击画框查看项目详情</p>
+        <p className="gallery-hint muted">
+          <span className="hint-pointer">🖱️ 拖拽旋转 · 滚轮缩放 · 点击画框查看项目详情</span>
+          <span className="hint-touch">👆 单指拖动旋转 · 双指缩放 · 点画框看详情</span>
+        </p>
       </div>
 
       <div className="gallery3d-wrap">
