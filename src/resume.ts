@@ -4,6 +4,30 @@ export type Stat = { label: string; value: number; suffix: string }
 export type InfoItem = { label: string; value: string }
 export type Skill = { name: string; value: number }
 
+// 技能单独抽出来，好让「掌握技能」这个统计项直接取 skills.length，
+// 以后增删技能不用再手动改数字（以前写死 11，加完条目就会对不上）。
+const skills: Skill[] = [
+  // 前端
+  { name: 'HTML5 + CSS3', value: 95 },
+  { name: 'JavaScript (ES6+)', value: 92 },
+  { name: 'React / React Hooks', value: 92 },
+  { name: 'Vue', value: 90 },
+  { name: 'TypeScript', value: 88 },
+  { name: 'UI 组件库（Ant Design / Element）', value: 86 },
+  { name: '状态管理（Redux / dva / Pinia）', value: 85 },
+  { name: '数据可视化（ECharts / Three.js）', value: 82 },
+  // 服务端 / 全栈
+  { name: 'Node.js 服务端（Express / NestJS）', value: 84 },
+  { name: 'Python 全栈（FastAPI / Django / 脚本自动化）', value: 78 },
+  { name: '数据库（PostgreSQL / Supabase / MySQL）', value: 80 },
+  // AI 与工程化
+  { name: 'AI 应用开发（大模型 API / Prompt / RAG）', value: 78 },
+  { name: '前端工程化（Vite / Webpack / UmiJS）', value: 80 },
+  { name: '部署运维（Docker / Nginx / CI-CD）', value: 76 },
+  { name: '微信小程序', value: 76 },
+  { name: 'Angular', value: 75 },
+]
+
 export const resume = {
   name: 'woge',
   /** 顶部打字机逐字显示的职位描述 */
@@ -21,7 +45,7 @@ export const resume = {
     { label: '前端经验', value: 20, suffix: '年' },
     { label: '参与项目', value: 20, suffix: '+' },
     { label: '技术文章', value: 30, suffix: '+' },
-    { label: '掌握技能', value: 11, suffix: '项' },
+    { label: '掌握技能', value: skills.length, suffix: '项' },
   ] as Stat[],
 
   info: [
@@ -44,17 +68,5 @@ export const resume = {
   intro:
     '具备独立分析和解决问题的能力；有较好的团队协作和沟通能力，有强烈的责任心；具有良好的沟通表达、团队协作能力，有较强的学习能力和探索精神，责任心强。',
 
-  skills: [
-    { name: 'HTML5 + CSS3', value: 95 },
-    { name: 'JavaScript (ES6+)', value: 92 },
-    { name: 'React / React Hooks', value: 92 },
-    { name: 'Vue', value: 90 },
-    { name: 'TypeScript', value: 88 },
-    { name: 'UI 组件库（Ant Design / Element）', value: 86 },
-    { name: '状态管理（Redux / dva / Pinia）', value: 85 },
-    { name: '数据可视化（ECharts / Three.js）', value: 82 },
-    { name: '前端工程化（Vite / Webpack / UmiJS）', value: 80 },
-    { name: 'Angular', value: 75 },
-    { name: 'Node.js / 微信小程序', value: 70 },
-  ] as Skill[],
+  skills,
 }
