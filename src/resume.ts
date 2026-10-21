@@ -34,7 +34,7 @@ export const resume = {
   intents: [
     { label: '求职类型', value: '全职/日结' },
     { label: '意向岗位', value: '全栈工程师' },
-    { label: '意向城市', value: '广东深圳' },
+    { label: '意向城市', value: '全国可空降' },
     { label: '薪资要求', value: '3000' },
     { label: '求职状态', value: '随时到岗' },
   ] as InfoItem[],
