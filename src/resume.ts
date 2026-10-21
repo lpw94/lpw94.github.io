@@ -16,6 +16,10 @@ const skills: Skill[] = [
   { name: 'UI 组件库（Ant Design / Element）', value: 86 },
   { name: '状态管理（Redux / dva / Pinia）', value: 85 },
   { name: '数据可视化（ECharts / Three.js）', value: 82 },
+  // 跨端 / 桌面端
+  { name: 'uni-app 跨端（H5 / 小程序 / App）', value: 78 },
+  { name: 'Electron 桌面端（大屏 / 工具类应用）', value: 80 },
+  { name: '微信小程序', value: 76 },
   // 服务端 / 全栈
   { name: 'Node.js 服务端（Express / NestJS）', value: 84 },
   { name: 'Python 全栈（FastAPI / Django / 脚本自动化）', value: 78 },
@@ -24,7 +28,6 @@ const skills: Skill[] = [
   { name: 'AI 应用开发（大模型 API / Prompt / RAG）', value: 78 },
   { name: '前端工程化（Vite / Webpack / UmiJS）', value: 80 },
   { name: '部署运维（Docker / Nginx / CI-CD）', value: 76 },
-  { name: '微信小程序', value: 76 },
   { name: 'Angular', value: 75 },
 ]
 
