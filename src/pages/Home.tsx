@@ -23,10 +23,11 @@ export default function Home() {
   const [loading, setLoading] = useState(!postsCache)
   const [params, setParams] = useSearchParams()
 
-  // 首页文章分页：分页大小可选（每页 5 / 10 / 20 条），切分类或改大小都回到第 1 页
+  // 首页文章分页：分页大小可选（每页 5 / 10 / 20 条），默认每页 10 条；
+  // 切分类或改大小都回到第 1 页
   const PAGE_SIZES = [5, 10, 20]
   const [page, setPage] = useState(1)
-  const [pageSize, setPageSize] = useState(5)
+  const [pageSize, setPageSize] = useState(10)
 
   // 分类状态放在 URL 上（?category=tech），刷新页面和分享链接都能保持
   const raw = params.get('category')
