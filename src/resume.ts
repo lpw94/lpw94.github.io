@@ -4,7 +4,14 @@ export type Stat = { label: string; value: number; suffix: string }
 export type InfoItem = { label: string; value: string }
 export type Skill = { name: string; value: number }
 // 项目经验：points 里写「做了什么 + 解决什么问题」，比罗列技术栈更有说服力
-export type Project = { name: string; role: string; stack: string[]; points: string[] }
+// period 用「YYYY.MM – YYYY.MM / 至今」的写法，展示在标题右侧
+export type Project = {
+  name: string
+  role: string
+  period: string
+  stack: string[]
+  points: string[]
+}
 
 // 技能单独抽出来，好让「掌握技能」这个统计项直接取 skills.length，
 // 以后增删技能不用再手动改数字（以前写死 11，加完条目就会对不上）。
@@ -70,11 +77,12 @@ export const resume = {
 
   traits: ['独立解决问题', '团队协作', '责任心强', '学习能力', '探索精神', '沟通表达'],
 
-  // 由新到旧排列
+  // 由新到旧排列（按结束时间倒序）
   projects: [
     {
       name: '富能智慧运维大屏（富士康烟台工厂）',
       role: '前端负责人 · 全栈开发',
+      period: '2025.03 – 至今',
       stack: ['React 17', 'UmiJS 3', 'TypeScript', 'Ant Design', 'ECharts', 'Three.js', 'Electron'],
       points: [
         '承担能源与设备监控两条主线，落地首页、楼宇、设备、视频、工单等大屏模块',
@@ -84,17 +92,9 @@ export const resume = {
       ],
     },
     {
-      name: '广西科技大学智慧水务大屏 · ChatBot',
-      role: '前端开发',
-      stack: ['Vue', '语音识别', 'CSS 动画'],
-      points: [
-        '实现语音输入与可拖拽悬浮入口，用固定尺寸垂直居中布局保证多分辨率下按钮位置一致',
-        '弹窗始终定位在悬浮按钮上方、隐藏滚动条，并加入桌面宠物走动与蹦跳动效',
-      ],
-    },
-    {
       name: '个人技术博客（本站）',
       role: '全栈开发 · 独立完成',
+      period: '2026.02 – 至今',
       stack: ['React 18', 'Vite', 'TypeScript', 'Supabase', 'GitHub Actions'],
       points: [
         'Supabase 承载文章与业务数据，RLS 区分匿名只读与登录可写，私有记事本仅本人可见',
@@ -103,8 +103,19 @@ export const resume = {
       ],
     },
     {
+      name: '广西科技大学智慧水务大屏 · ChatBot',
+      role: '前端开发',
+      period: '2026.05 – 2026.08',
+      stack: ['Vue', '语音识别', 'CSS 动画'],
+      points: [
+        '实现语音输入与可拖拽悬浮入口，用固定尺寸垂直居中布局保证多分辨率下按钮位置一致',
+        '弹窗始终定位在悬浮按钮上方、隐藏滚动条，并加入桌面宠物走动与蹦跳动效',
+      ],
+    },
+    {
       name: '后台管理系统 · 权限路由',
       role: '前端开发',
+      period: '2025.11 – 2026.03',
       stack: ['React', 'React Router', 'TypeScript'],
       points: [
         '手写请求拦截器与刷新锁，解决 token 过期时并发请求重复刷新的问题',
@@ -114,6 +125,7 @@ export const resume = {
     {
       name: '大屏分辨率适配 Demo',
       role: '前端开发',
+      period: '2025.08 – 2025.10',
       stack: ['React', 'rem 适配', 'React Intl'],
       points: [
         '把 5120×1728 设计稿适配到 1920×1080 等常见分辨率，rem 统一换算落地',

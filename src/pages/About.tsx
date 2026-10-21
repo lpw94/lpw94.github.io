@@ -170,6 +170,7 @@ export default function About() {
                 <div className="project-head">
                   <h3 className="project-name">{p.name}</h3>
                   <span className="project-role">{p.role}</span>
+                  <span className="project-period">{p.period}</span>
                 </div>
                 <div className="project-stack">
                   {p.stack.map((t) => (

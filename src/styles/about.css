@@ -412,6 +412,13 @@
   background: rgba(99, 102, 241, 0.14);
   border: 1px solid rgba(99, 102, 241, 0.26);
 }
+.project-period {
+  margin-left: auto;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0.6;
+  font-variant-numeric: tabular-nums;
+}
 .project-stack {
   display: flex;
   flex-wrap: wrap;
@@ -484,6 +491,7 @@
   .hero { padding: 34px 16px 28px; }
   .card { padding: 18px 16px; }
   .project { padding: 14px; }
+  .project-period { margin-left: 0; }
   .project-points li { font-size: 13px; line-height: 1.7; }
 }
 
