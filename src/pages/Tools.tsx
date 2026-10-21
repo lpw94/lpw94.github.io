@@ -126,7 +126,7 @@ export default function Tools() {
   return (
     <div className="tools-page">
       <Helmet>
-        <title>常用导航 · 沃哥博客</title>
+        <title>常用导航 · woge博客</title>
       </Helmet>
 
       <h1 className="tools-title">常用导航</h1>

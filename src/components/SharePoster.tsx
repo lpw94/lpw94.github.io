@@ -58,7 +58,7 @@ function wrapText(ctx: CanvasRenderingContext2D, text: string, maxWidth: number,
  * 移动端长按弹出的 `<img>` 保存到相册。刻意只使用同域头像 + 本地生成的二维码，
  * 不绘制远程封面图，避免 canvas 被跨域图片污染后 toDataURL 抛安全错误。
  */
-export default function SharePoster({ open, onClose, title, summary, url, author, siteName = '沃哥博客', avatar = '/avatar.png' }: Props) {
+export default function SharePoster({ open, onClose, title, summary, url, author, siteName = 'woge博客', avatar = '/avatar.png' }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const [poster, setPoster] = useState('')
   const [saving, setSaving] = useState(false)

@@ -15,7 +15,7 @@ import GiscusComments from '../components/GiscusComments'
 import SharePoster from '../components/SharePoster'
 
 const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://lpw94.github.io'
-const SITE_NAME = '沃哥博客'
+const SITE_NAME = 'woge博客'
 // 发布者的 X / Twitter 账号（用于 twitter:site）；没有或想改就改这里
 const TWITTER_SITE = '@lpw94'
 

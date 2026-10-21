@@ -48,7 +48,7 @@ export const GALLERY_PROJECTS: GalleryProject[] = [
   },
   {
     id: 'blog',
-    title: '沃哥博客（本站）',
+    title: 'woge博客（本站）',
     description:
       'React 18 + Vite + TypeScript + Supabase 全栈个人博客：文章 / 搜索 / 目录 / 点赞 / Giscus 评论、8 套可切换的渐变主题背景、算术题锁屏与 2 分钟空闲自动锁、私有记事本（RLS 仅登录可读写）、书签与工具合并的常用导航、RSS / Sitemap / SEO，以及飞机大战等小游戏和这间 3D 展厅。',
     tech: ['React 18', 'Vite', 'TypeScript', 'Supabase', 'Three.js'],

@@ -29,7 +29,7 @@ export default function Gallery() {
   return (
     <div className="gallery-page">
       <Helmet>
-        <title>展厅 · 沃哥博客</title>
+        <title>展厅 · woge博客</title>
       </Helmet>
 
       <div className="gallery-head">

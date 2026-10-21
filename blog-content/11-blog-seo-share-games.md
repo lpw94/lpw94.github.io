@@ -47,7 +47,7 @@ if (!process.env.VITE_SUPABASE_URL && existsSync('.env')) {
 
 ### 4. 顺手把格式补全
 
-原来的 RSS 只有骨架，按 RSS 2.0 补了：每篇 `description`（正文纯文本前 200 字，含 `&`→`&amp;` 转义）、`language`、`atom:self` 自链接、`lastBuildDate`，日期缺失自动回退。Sitemap 从"只有文章"扩成 **静态页 + 文章页**：`/`、`/about`、`/gallery`、`/tools` 加上 `/post/:slug`（`/admin`、`/reset-password` 不收录）。`robots.txt` 占位域名改成 `https://lpw94.github.io/sitemap.xml`，RSS 链接标题改成"沃哥博客 RSS"。
+原来的 RSS 只有骨架，按 RSS 2.0 补了：每篇 `description`（正文纯文本前 200 字，含 `&`→`&amp;` 转义）、`language`、`atom:self` 自链接、`lastBuildDate`，日期缺失自动回退。Sitemap 从"只有文章"扩成 **静态页 + 文章页**：`/`、`/about`、`/gallery`、`/tools` 加上 `/post/:slug`（`/admin`、`/reset-password` 不收录）。`robots.txt` 占位域名改成 `https://lpw94.github.io/sitemap.xml`，RSS 链接标题改成"woge博客 RSS"。
 
 > 验证：写了 `FEEDS_OFFLINE_MOCK=1` 离线自测开关，XML 格式（含转义）先跑通；真实拉取在本地沙箱被屏蔽外联，脚本按 best-effort 告警跳过不崩，CI 有网络 + secrets 会生成真实文件。本地 mock 产物生成后会删掉，避免污染 `vite preview`。
 
@@ -65,7 +65,7 @@ if (!process.env.VITE_SUPABASE_URL && existsSync('.env')) {
 // Open Graph 补齐
 <meta property="og:image" content={shareImage} />        {/* 优先文章封面，无则回退 /avatar.png */}
 <meta property="og:image:alt" content={post.title} />
-<meta property="og:site_name" content="沃哥博客" />
+<meta property="og:site_name" content="woge博客" />
 <meta property="og:locale" content="zh_CN" />
 <meta property="article:modified_time" content={post.updated_at || post.published_at || ''} />
 <meta property="article:section" content={CATEGORY_LABEL[post.category] || '技术'} />
@@ -95,7 +95,7 @@ if (!process.env.VITE_SUPABASE_URL && existsSync('.env')) {
   datePublished: post.published_at,
   dateModified: post.updated_at || post.published_at,
   author: { "@type": "Person", name: profile.name },
-  publisher: { "@type": "Organization", name: "沃哥博客",
+  publisher: { "@type": "Organization", name: "woge博客",
     logo: { "@type": "ImageObject", url: `${SITE_URL}/avatar.png` } },
   mainEntityOfPage: `${SITE_URL}/post/${post.slug}`
 })}

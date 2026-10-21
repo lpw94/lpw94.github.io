@@ -34,7 +34,7 @@ export default function Toolbox() {
   return (
     <div className="tools-page">
       <Helmet>
-        <title>工具箱 · 沃哥博客</title>
+        <title>工具箱 · woge博客</title>
       </Helmet>
 
       <h1 className="tools-title">实用工具箱</h1>

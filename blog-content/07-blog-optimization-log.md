@@ -167,7 +167,7 @@ const handleKeyDown = (e: React.KeyboardEvent) => {
 
 ## 五、顺带：站点品牌统一
 
-把站点标题从「关于WO的网络世界」统一更名为「沃哥博客」（`App.tsx` / `About.tsx` 的 Helmet 标题与 OG 站点名），并同步更新简历页的技能栈与"掌握技能"数量（8 → 11 项）。
+把站点标题从「关于WO的网络世界」统一更名为「WOGE博客」（`App.tsx` / `About.tsx` 的 Helmet 标题与 OG 站点名），并同步更新简历页的技能栈与"掌握技能"数量（8 → 11 项）。
 
 ## 六、小结
 

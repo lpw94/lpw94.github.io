@@ -10,7 +10,7 @@ import { createClient } from '@supabase/supabase-js'
 loadDotEnv()
 
 const SITE_URL = (process.env.VITE_SITE_URL || 'https://lpw94.github.io').replace(/\/+$/, '')
-const SITE_TITLE = '沃哥博客'
+const SITE_TITLE = 'woge博客'
 const SITE_DESC = '基于 React + Supabase 的个人博客'
 
 // 1) SPA fallback

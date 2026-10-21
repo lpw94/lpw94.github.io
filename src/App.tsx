@@ -16,9 +16,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <Helmet>
-        <title>沃哥博客</title>
+        <title>woge博客</title>
         <meta name="description" content="基于 React + Supabase 的个人博客" />
-        <meta property="og:site_name" content="沃哥博客" />
+        <meta property="og:site_name" content="woge博客" />
       </Helmet>
       <Layout>
         <Routes>

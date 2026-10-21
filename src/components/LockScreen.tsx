@@ -160,7 +160,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 
       <div className="lock-card">
         <div className="lock-emoji">🔒</div>
-        <h1 className="lock-title">沃哥博客</h1>
+        <h1 className="lock-title">woge博客</h1>
         <p className="lock-greet">
           {greeting(now.getHours())}，欢迎来到我的小宇宙
         </p>

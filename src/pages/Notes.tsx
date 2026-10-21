@@ -155,7 +155,7 @@ export default function Notes() {
     return (
       <div className="tools-page">
         <Helmet>
-          <title>记事本 · 沃哥博客</title>
+          <title>记事本 · woge博客</title>
         </Helmet>
         <p className="muted">加载中…</p>
       </div>
@@ -166,7 +166,7 @@ export default function Notes() {
     return (
       <div className="login-gate">
         <Helmet>
-          <title>记事本 · 沃哥博客</title>
+          <title>记事本 · woge博客</title>
         </Helmet>
         {showLogin && (
           <LoginModal onClose={() => setShowLogin(false)} redirectTo="/notes" />
@@ -192,7 +192,7 @@ export default function Notes() {
   return (
     <div className="tools-page">
       <Helmet>
-        <title>记事本 · 沃哥博客</title>
+        <title>记事本 · woge博客</title>
       </Helmet>
 
       <div className="notes-head">
