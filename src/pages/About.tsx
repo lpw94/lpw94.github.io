@@ -161,8 +161,35 @@ export default function About() {
           </div>
         </section>
 
-        {/* 自我评价 */}
+        {/* 项目经验 */}
         <section className="card reveal" style={{ animationDelay: '0.35s' }}>
+          <h2 className="card-title">项目经验</h2>
+          <div className="projects">
+            {resume.projects.map((p) => (
+              <article key={p.name} className="project">
+                <div className="project-head">
+                  <h3 className="project-name">{p.name}</h3>
+                  <span className="project-role">{p.role}</span>
+                </div>
+                <div className="project-stack">
+                  {p.stack.map((t) => (
+                    <span key={t} className="stack-tag">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+                <ul className="project-points">
+                  {p.points.map((pt) => (
+                    <li key={pt}>{pt}</li>
+                  ))}
+                </ul>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        {/* 自我评价 */}
+        <section className="card reveal" style={{ animationDelay: '0.45s' }}>
           <h2 className="card-title">自我评价</h2>
           <p className="desc">{resume.intro}</p>
           <div className="tags">
@@ -175,7 +202,7 @@ export default function About() {
         </section>
 
         {/* 技能特长 */}
-        <section className="card reveal" style={{ animationDelay: '0.45s' }}>
+        <section className="card reveal" style={{ animationDelay: '0.55s' }}>
           <h2 className="card-title">技能特长</h2>
           <div className="skills">
             {resume.skills.map((s, index) => (

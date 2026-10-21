@@ -370,6 +370,88 @@
   to { background-position: 200% 0; }
 }
 
+/* 项目经验 */
+.projects {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+.project {
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: rgba(127, 127, 127, 0.06);
+  border: 1px solid rgba(127, 127, 127, 0.14);
+  transition: background 0.25s ease, border-color 0.25s ease, transform 0.25s ease;
+}
+.project:hover {
+  transform: translateX(3px);
+  background: rgba(99, 102, 241, 0.09);
+  border-color: rgba(99, 102, 241, 0.3);
+}
+.project-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+.project-name {
+  margin: 0;
+  padding: 0;
+  border: none;
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+.project-role {
+  padding: 2px 9px;
+  border-radius: 999px;
+  font-size: 12px;
+  white-space: nowrap;
+  color: #6366f1;
+  background: rgba(99, 102, 241, 0.14);
+  border: 1px solid rgba(99, 102, 241, 0.26);
+}
+.project-stack {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.stack-tag {
+  padding: 2px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: var(--font-mono, ui-monospace, monospace);
+  opacity: 0.75;
+  background: rgba(127, 127, 127, 0.14);
+}
+.project-points {
+  margin: 0;
+  padding-left: 18px;
+  list-style: none;
+}
+.project-points li {
+  position: relative;
+  margin-bottom: 5px;
+  font-size: 14px;
+  line-height: 1.75;
+  opacity: 0.82;
+}
+.project-points li:last-child {
+  margin-bottom: 0;
+}
+.project-points li::before {
+  content: '';
+  position: absolute;
+  left: -14px;
+  top: 10px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #6366f1, #ec4899);
+}
+
 .about-footer {
   position: relative;
   z-index: 1;
@@ -400,6 +482,9 @@
   .skills { grid-template-columns: 1fr; }
   .name { font-size: 26px; }
   .hero { padding: 34px 16px 28px; }
+  .card { padding: 18px 16px; }
+  .project { padding: 14px; }
+  .project-points li { font-size: 13px; line-height: 1.7; }
 }
 
 @media (prefers-reduced-motion: reduce) {
