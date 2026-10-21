@@ -19,3 +19,7 @@ vite.config.d.ts
 .vscode/
 *.log
 .playwright-cli/
+
+# 发布用的临时文件（可能含 service_role key，禁止提交）
+.workbuddy/tmp/
+.publish-tmp/
