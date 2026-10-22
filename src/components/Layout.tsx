@@ -108,9 +108,25 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     }
   }, [menuOpen])
 
-  // 锁屏改为纯手动：只由顶栏的 🔒 按钮唤起，不再首次进入自动弹、也不做空闲自动锁。
-  // （原来的「首页首访自动锁一次」和「2 分钟无操作自动锁」都已移除，
-  //   避免刷新页面就被锁屏挡在首页外面。）
+  // 锁屏只有两个入口：顶栏 🔒 手动唤起 + 首页 5 分钟无操作自动锁。
+  // 「首访自动锁一次」已彻底移除——那个会让每个新会话打开站点直接被锁屏挡住首页。
+  useEffect(() => {
+    if (pathname !== '/') return
+    const IDLE_MS = 5 * 60 * 1000
+    let timer: number
+    const arm = () => {
+      clearTimeout(timer)
+      // 已锁屏时不再重复挂定时器（避免解锁前反复触发）
+      if (!locked) timer = window.setTimeout(() => setLocked(true), IDLE_MS)
+    }
+    const events = ['mousemove', 'mousedown', 'keydown', 'scroll', 'touchstart', 'wheel']
+    events.forEach((e) => window.addEventListener(e, arm, { passive: true }))
+    arm()
+    return () => {
+      clearTimeout(timer)
+      events.forEach((e) => window.removeEventListener(e, arm))
+    }
+  }, [pathname, locked])
 
   // 确认弹窗打开期间：锁背景滚动 + Esc 取消
   useEffect(() => {
