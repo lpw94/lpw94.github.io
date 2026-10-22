@@ -20,3 +20,13 @@
 ## 用户偏好
 - 需求沟通用 @文件:行号 + @command://fix；代码改动最小化、保留已有逻辑不重构；
   按「数据库→类型→页面→路由→样式→构建→提交」分块推进，提交在 dev 分支（不主动推 main）。
+
+## 样式坑位（踩过的，别再犯）
+- **CSS grid 隐式列 + nowrap 文本 = 整页横向溢出**：`.related-list` 曾是 `display:grid` 无显式
+  列定义，隐式列按 max-content 计算，而 `.related-title` 是 `white-space:nowrap`，390 屏上把
+  卡片撑到 641px、document.scrollWidth 666。修法：`grid-template-columns: minmax(0,1fr)` +
+  卡片 `min-width:0`。任何「列表 + 单行省略标题」的布局都要显式 `minmax(0,1fr)`。
+- 裸 `nav { justify-content:center }` 会误伤 `.category-filter` 等非顶栏 nav → 断言选择器要
+  收敛成 `.site-header nav`。
+- 弹窗在含 `backdrop-filter` 的容器里 `position:fixed` 会被当成包含块 → 用 `createPortal` 挂 body。
+- 改完文件要 `touch` 一次，避免 vite dev 提供陈旧 transform。
