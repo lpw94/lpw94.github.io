@@ -176,8 +176,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
           <Link to="/tools">导航</Link>
           {/* 记事本是私密内容：入口仅登录后可见，未登录直接访问 /notes 也会被登录墙拦住 */}
           {user && <Link to="/notes">记事本</Link>}
+          {/* 简历页桌面端走左侧 ProfileCard 的「个人简历」，移动端侧栏被隐藏，这里补一个入口 */}
+          <Link to="/about" className="nav-about">简历</Link>
           {/* <Link to="/tools">工具</Link> */}
-          {/* <Link to="/about">简历</Link> */}
           <Link to="/admin">后台</Link>
           <div className="bg-picker" ref={bgRef}>
             <button
