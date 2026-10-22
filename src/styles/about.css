@@ -250,34 +250,6 @@
   background: linear-gradient(180deg, #6366f1, #ec4899);
 }
 
-/* 基本信息 */
-.info-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 12px;
-}
-.info-item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 12px 14px;
-  border-radius: 12px;
-  background: rgba(127, 127, 127, 0.06);
-  transition: background 0.25s ease;
-}
-.info-item:hover {
-  background: rgba(99, 102, 241, 0.14);
-}
-.info-label {
-  min-width: 44px;
-  font-size: 13px;
-  opacity: 0.65;
-}
-.info-value {
-  font-size: 15px;
-  font-weight: 600;
-}
-
 /* 求职意向 */
 .intent {
   display: flex;
@@ -485,7 +457,6 @@
 
 @media (max-width: 720px) {
   .stats { grid-template-columns: repeat(2, 1fr); }
-  .info-grid,
   .skills { grid-template-columns: 1fr; }
   .name { font-size: 26px; }
   .hero { padding: 34px 16px 28px; }

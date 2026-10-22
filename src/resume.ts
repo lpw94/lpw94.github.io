@@ -50,6 +50,7 @@ export const resume = {
   initials: 'WO',
 
   email: 'lpw9494@gmail.com',
+  phone: '13058165962',
   location: '广东深圳',
   github: 'https://github.com/lpw94',
 
@@ -60,13 +61,7 @@ export const resume = {
     { label: '掌握技能', value: skills.length, suffix: '项' },
   ] as Stat[],
 
-  info: [
-    { label: '姓名', value: '沃哥' },
-    { label: '邮箱', value: 'lpw9494@gmail.com' },
-    { label: '电话', value: '13058165962' },
-    { label: '地址', value: '广东深圳' },
-  ] as InfoItem[],
-
+  // 基本信息（姓名 / 邮箱 / 电话 / 地址）已合并到头部名片，不再单独成块
   intents: [
     { label: '求职类型', value: '全职/日结' },
     { label: '意向岗位', value: '全栈工程师' },
