@@ -254,4 +254,4 @@ uv run python -c "import sqlalchemy"  # 又变回 2.1 了
 
 > **下一步打算**：把这套拦截器逻辑搬进真正的 admin-web 工程；或者先把后端欠的 `UserUpdate` 接口和角色/菜单 CRUD 补完再接。你更想先做哪个？
 >
-> 系列前传：[前端工程师如何项目驱动学 Python](https://lpw94.github.io/posts/python-project-driven-learning)
+> 系列前传：[前端工程师如何项目驱动学 Python](https://lpw94.github.io/post/python-project-driven-learning)

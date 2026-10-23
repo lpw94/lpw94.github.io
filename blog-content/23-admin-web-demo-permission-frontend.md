@@ -418,4 +418,4 @@ npm run build      # ✓ built，产物 1.08 MB / gzip 345 KB
 
 > **踩坑提醒**：`/api/roles` 当前守卫是 `menu:read`，不是 `role:read`。如果你按路径名去猜权限，一定会猜错。
 >
-> 系列前传：[FastAPI 权限路由后端实战](https://lpw94.github.io/posts/fastapi-admin-api) · [前端工程师如何项目驱动学 Python](https://lpw94.github.io/posts/python-project-driven-learning)
+> 系列前传：[FastAPI 权限路由后端实战](https://lpw94.github.io/post/fastapi-admin-api) · [前端工程师如何项目驱动学 Python](https://lpw94.github.io/post/python-project-driven-learning)
