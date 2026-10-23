@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState, type CSSProperties } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { resume } from '../resume'
+import { SITE_NAME, SITE_URL } from '../lib/site'
 import '../styles/about.css'
 
 const ROLE_TEXT = resume.role
 
-const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://lpw94.github.io'
-const SITE_NAME = 'woge博客'
 const PAGE_URL = `${SITE_URL}/about`
 const OG_IMAGE = `${SITE_URL}/avatar.png`
 const PAGE_TITLE = `${resume.name} · Web 全栈研发工程师 · 广东深圳`

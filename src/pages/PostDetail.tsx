@@ -13,9 +13,8 @@ import { CATEGORY_LABEL, type Post, type Comment } from '../types'
 import { profile } from '../profile'
 import GiscusComments from '../components/GiscusComments'
 import SharePoster from '../components/SharePoster'
+import { SITE_NAME, SITE_URL } from '../lib/site'
 
-const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://lpw94.github.io'
-const SITE_NAME = 'woge博客'
 // 发布者的 X / Twitter 账号（用于 twitter:site）；没有或想改就改这里
 const TWITTER_SITE = '@lpw94'
 

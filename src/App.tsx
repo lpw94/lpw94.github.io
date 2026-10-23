@@ -18,7 +18,11 @@ export default function App() {
       <Helmet>
         <title>woge博客</title>
         <meta name="description" content="基于 React + Supabase 的个人博客" />
+        <meta property="og:type" content="website" />
         <meta property="og:site_name" content="woge博客" />
+        <meta property="og:title" content="woge博客" />
+        <meta property="og:description" content="基于 React + Supabase 的个人博客" />
+        <meta property="og:locale" content="zh_CN" />
       </Helmet>
       <Layout>
         <Routes>

@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
+import { SITE_URL } from '../lib/site'
 
-// 回跳地址：优先用构建时注入的正式域名（VITE_SITE_URL），
-// 这样无论在本地(localhost)还是线上生成链接，回跳都指向生产站点，
-// 避免误把 redirect_to 写成 http://localhost:3000 导致点链接后又弹回本地。
-const SITE_URL = (import.meta.env.VITE_SITE_URL as string) || window.location.origin
+// 回跳地址用当前站点的 origin（见 lib/site.ts）：
+// 线上就是 https://lpw94.github.io，本地就是 localhost，
+// 不要再用 VITE_SITE_URL —— 部署环境的 secret 指到了 Supabase 项目地址，
+// 会把魔法链接的 redirect_to 写成 supabase.co，点开会落到一个不存在的页面。
 
 type Mode = 'magiclink' | 'password' | 'signup'
 
