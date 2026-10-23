@@ -175,6 +175,44 @@
   fill: currentColor;
 }
 
+/* ---------- 导出 PDF ---------- */
+.print-bar {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin: -4px 0 16px;
+}
+.print-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 999px;
+  border: 1px solid rgba(99, 102, 241, 0.35);
+  background: rgba(99, 102, 241, 0.12);
+  color: #4f46e5;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.print-btn:hover {
+  transform: translateY(-2px);
+  background: rgba(99, 102, 241, 0.2);
+}
+.print-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+.print-hint {
+  font-size: 12px;
+  opacity: 0.55;
+}
+
 /* ---------- 数据 ---------- */
 .stats {
   position: relative;
@@ -341,6 +379,13 @@
 @keyframes barFlow {
   to { background-position: 200% 0; }
 }
+/* 没进技能条的零散技能，一句话带过 */
+.skills-extra {
+  margin: 16px 0 0;
+  font-size: 12px;
+  line-height: 1.7;
+  opacity: 0.65;
+}
 
 /* 项目经验 */
 .projects {
@@ -464,6 +509,184 @@
   .project { padding: 14px; }
   .project-period { margin-left: 0; }
   .project-points li { font-size: 13px; line-height: 1.7; }
+  /* 4 个联系方式 chip 在 390 宽下会排 3 行，收紧后落到 2 行 */
+  .chips { gap: 8px; }
+  .chip { padding: 6px 11px; font-size: 12px; gap: 5px; }
+  .chip .icon { width: 13px; height: 13px; }
+  .print-bar { justify-content: center; margin: -6px 0 16px; }
+  .print-hint { display: none; }
+}
+
+/* ---------- 打印 / 导出 PDF ---------- */
+/* 简历最终要变成一份 PDF 发给 HR，所以打印版单独排一套：
+   白底黑字、去掉装饰层、强制技能条上色、控制分页不要把项目卡片切两半 */
+@media print {
+  @page {
+    margin: 12mm 10mm;
+  }
+
+  html,
+  body {
+    background: #fff !important;
+  }
+
+  /* 站点外壳与浮动件都不进纸面 */
+  .site-bg,
+  .site-header,
+  .sidebar,
+  .music-player,
+  .share-fab,
+  .cursor-fx,
+  .orbs,
+  .caret,
+  .print-bar,
+  .about-footer,
+  body > footer,
+  .page-shell footer {
+    display: none !important;
+  }
+
+  .about-page {
+    max-width: none;
+    padding: 0;
+    overflow: visible;
+    color: #111;
+  }
+
+  /* 头部：渐变底 + 白色文字在打印时不可靠，改成白底黑字 + 一条渐变分隔线 */
+  .hero {
+    margin-bottom: 12px;
+    padding: 0 0 10px;
+    border-radius: 0;
+    border-bottom: 2px solid #4f46e5;
+    background: none !important;
+    box-shadow: none;
+    color: #111;
+    animation: none;
+  }
+  .hero::after {
+    display: none;
+  }
+  .avatar-wrap {
+    width: 60px;
+    height: 60px;
+    margin: 0 auto 8px;
+  }
+  .avatar-ring {
+    display: none;
+  }
+  .name {
+    margin: 0 0 4px;
+    font-size: 20px;
+    letter-spacing: 0;
+    color: #111;
+  }
+  .role {
+    margin: 0 0 10px;
+    font-size: 12px;
+    opacity: 1;
+    color: #555;
+  }
+  .chip {
+    padding: 2px 8px;
+    font-size: 10px;
+    color: #333;
+    background: none;
+    border-color: #bbb;
+    backdrop-filter: none;
+  }
+  .chip .icon {
+    width: 10px;
+    height: 10px;
+  }
+
+  /* 卡片：白底 + 细边框，去掉毛玻璃与阴影 */
+  .stats,
+  .card {
+    margin-bottom: 12px;
+    background: #fff !important;
+    border: 1px solid #d8d8d8;
+    backdrop-filter: none;
+    box-shadow: none;
+  }
+  .stat,
+  .project,
+  .intent-item {
+    background: #fff !important;
+    backdrop-filter: none;
+  }
+  .intent-item {
+    border: 1px solid #d8d8d8;
+    background: none !important;
+  }
+  .tag,
+  .stack-tag {
+    background: #f2f2f2 !important;
+    border-color: #ccc;
+  }
+  .card-title {
+    margin-bottom: 10px;
+    font-size: 14px;
+  }
+  .project-points li::before {
+    background: #666;
+  }
+  .chip:hover,
+  .card:hover,
+  .stat:hover,
+  .project:hover,
+  .intent-item:hover,
+  .tag:hover {
+    transform: none;
+    box-shadow: none;
+  }
+
+  /* 渐变文字打印时会变透明，改回实色 */
+  .stat-num {
+    background: none !important;
+    -webkit-background-clip: border-box;
+    background-clip: border-box;
+    color: #111 !important;
+    -webkit-text-fill-color: #111;
+    font-size: 20px;
+  }
+
+  /* 技能条的长度是靠渐变画的，不强制上色会印成一条空槽 */
+  .skill-track {
+    background: #e6e6e6;
+  }
+  .skill-bar {
+    background: #4f46e5 !important;
+    animation: none !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* 分页：项目卡片不跨页断开，标题不落单在页尾 */
+  .project,
+  .stat,
+  .skill,
+  .intent-item {
+    break-inside: avoid;
+    page-break-inside: avoid;
+  }
+  .card {
+    break-inside: auto;
+  }
+  .card-title {
+    break-after: avoid;
+    page-break-after: avoid;
+  }
+
+  /* 入场动画在纸面上没意义，未跑完还会留下 opacity: 0 */
+  .reveal {
+    animation: none !important;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

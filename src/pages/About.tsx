@@ -5,6 +5,41 @@ import '../styles/about.css'
 
 const ROLE_TEXT = resume.role
 
+const SITE_URL = import.meta.env.VITE_SITE_URL || 'https://lpw94.github.io'
+const SITE_NAME = 'woge博客'
+const PAGE_URL = `${SITE_URL}/about`
+const OG_IMAGE = `${SITE_URL}/avatar.png`
+const PAGE_TITLE = `${resume.name} · Web 全栈研发工程师 · 广东深圳`
+const PAGE_DESC = `${resume.name}（沃哥）的个人简历：${resume.role}。${resume.projects.length} 段项目经验，覆盖 React / Vue 大屏、Node.js 与 Python 服务端、AI 应用开发。`
+
+// 结构化数据：让搜索与社交平台能识别「这是一个工程师的简历」
+const PERSON_LD = {
+  '@context': 'https://schema.org',
+  '@type': 'Person',
+  name: resume.name,
+  alternateName: '沃哥',
+  jobTitle: 'Web 全栈研发工程师',
+  description: PAGE_DESC,
+  url: PAGE_URL,
+  image: OG_IMAGE,
+  email: `mailto:${resume.email}`,
+  telephone: `+86-${resume.phone}`,
+  address: {
+    '@type': 'PostalAddress',
+    addressLocality: '深圳',
+    addressRegion: '广东',
+    addressCountry: 'CN',
+  },
+  sameAs: [resume.github],
+  knowsAbout: resume.skills.map((s) => s.name),
+}
+
+const PrintIcon = () => (
+  <svg viewBox="0 0 24 24" className="icon" aria-hidden="true">
+    <path d="M7 2.5h10a1.5 1.5 0 0 1 1.5 1.5v3.5H5.5V4A1.5 1.5 0 0 1 7 2.5Zm-3 6h16A1.5 1.5 0 0 1 21.5 10v6h-3.5v-2.5h-12V16H2.5v-6A1.5 1.5 0 0 1 4 8.5Zm4 5h8V21H8v-7.5Z" />
+  </svg>
+)
+
 const MailIcon = () => (
   <svg viewBox="0 0 24 24" className="icon" aria-hidden="true">
     <path d="M2 6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6Zm2.2.5L12 12.7l7.8-6.2H4.2Z" />
@@ -75,8 +110,18 @@ export default function About() {
   return (
     <>
       <Helmet>
-        <title>woge博客</title>
-        <meta name="description" content={`${resume.name} · ${resume.role}`} />
+        <title>{PAGE_TITLE}</title>
+        <meta name="description" content={PAGE_DESC} />
+        <link rel="canonical" href={PAGE_URL} />
+        <meta property="og:type" content="profile" />
+        <meta property="og:site_name" content={SITE_NAME} />
+        <meta property="og:locale" content="zh_CN" />
+        <meta property="og:title" content={PAGE_TITLE} />
+        <meta property="og:description" content={PAGE_DESC} />
+        <meta property="og:url" content={PAGE_URL} />
+        <meta property="og:image" content={OG_IMAGE} />
+        <meta name="twitter:card" content="summary" />
+        <script type="application/ld+json">{JSON.stringify(PERSON_LD)}</script>
       </Helmet>
 
       <div className="about-page">
@@ -131,6 +176,15 @@ export default function About() {
             </div>
           </div>
         </header>
+
+        {/* 导出 PDF：走浏览器打印，版式由 about.css 的 @media print 接管 */}
+        <div className="print-bar">
+          <button type="button" className="print-btn" onClick={() => window.print()}>
+            <PrintIcon />
+            导出 PDF
+          </button>
+          <span className="print-hint">按 A4 排版，可直接投递</span>
+        </div>
 
         {/* 数据概览 */}
         <section className="stats reveal" style={{ animationDelay: '0.05s' }}>
@@ -223,6 +277,7 @@ export default function About() {
               </div>
             ))}
           </div>
+          <p className="skills-extra">{resume.alsoSkills}</p>
         </section>
 
         <div className="about-footer">保持热爱，奔赴山海 · Powered by React + Supabase</div>

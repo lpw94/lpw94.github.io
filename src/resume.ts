@@ -13,32 +13,29 @@ export type Project = {
   points: string[]
 }
 
-// 技能单独抽出来，好让「掌握技能」这个统计项直接取 skills.length，
+// 技能单独抽出来，好让「核心技能」这个统计项直接取 skills.length，
 // 以后增删技能不用再手动改数字（以前写死 11，加完条目就会对不上）。
+// 只留 12 条核心项：清单太长会占掉近一屏，反而稀释信息密度；
+// 其余零散技能折进 alsoSkills 一句话里。
 const skills: Skill[] = [
-  // 前端
   { name: 'HTML5 + CSS3', value: 95 },
   { name: 'JavaScript (ES6+)', value: 92 },
   { name: 'React / React Hooks', value: 92 },
   { name: 'Vue', value: 90 },
   { name: 'TypeScript', value: 88 },
-  { name: 'UI 组件库（Ant Design / Element）', value: 86 },
-  { name: '状态管理（Redux / dva / Pinia）', value: 85 },
   { name: '数据可视化（ECharts / Three.js）', value: 82 },
-  // 跨端 / 桌面端
-  { name: 'uni-app 跨端（H5 / 小程序 / App）', value: 78 },
-  { name: 'Electron 桌面端（大屏 / 工具类应用）', value: 80 },
-  { name: '微信小程序', value: 76 },
-  // 服务端 / 全栈
   { name: 'Node.js 服务端（Express / NestJS）', value: 84 },
   { name: 'Python 全栈（FastAPI / Django / 脚本自动化）', value: 78 },
   { name: '数据库（PostgreSQL / Supabase / MySQL）', value: 80 },
-  // AI 与工程化
+  { name: 'Electron 桌面端（大屏 / 工具类应用）', value: 80 },
+  { name: 'uni-app 跨端（H5 / 小程序 / App）', value: 78 },
   { name: 'AI 应用开发（大模型 API / Prompt / RAG）', value: 78 },
-  { name: '前端工程化（Vite / Webpack / UmiJS）', value: 80 },
-  { name: '部署运维（Docker / Nginx / CI-CD）', value: 76 },
-  { name: 'Angular', value: 75 },
 ]
+
+/** 没进技能条、但仍值得一提的技术，以一句话列在技能卡底部 */
+const alsoSkills =
+  '也熟悉：Ant Design / Element、Redux / dva / Pinia、UmiJS / Vite / Webpack、Docker / Nginx / CI-CD、微信小程序、Angular'
+
 
 export const resume = {
   name: 'woge',
@@ -57,7 +54,7 @@ export const resume = {
     { label: '前端经验', value: 20, suffix: '年' },
     { label: '参与项目', value: 20, suffix: '+' },
     { label: '技术文章', value: 30, suffix: '+' },
-    { label: '掌握技能', value: skills.length, suffix: '项' },
+    { label: '核心技能', value: skills.length, suffix: '项' },
   ] as Stat[],
 
   // 基本信息（姓名 / 邮箱 / 电话 / 地址）已合并到头部名片，不再单独成块
@@ -132,4 +129,5 @@ export const resume = {
     '能独立承担前端、Node.js 与 Python 服务端的完整开发，并把大模型能力（Prompt / RAG）落地到实际业务中；具备独立分析和解决问题的能力；有较好的团队协作和沟通能力，有强烈的责任心；具有良好的沟通表达、团队协作能力，有较强的学习能力和探索精神，责任心强。',
 
   skills,
+  alsoSkills,
 }
