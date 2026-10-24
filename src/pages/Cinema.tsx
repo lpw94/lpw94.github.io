@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import { Helmet } from 'react-helmet-async'
 import { FILMS } from '../lib/cinema'
+import { loadBili, parseBv, playerUrl, saveBili, watchUrl, type BiliRef } from '../lib/bilibili'
 import {
   OUONNKI_LOCKED_BY_ENV,
   clearUrl,
@@ -15,21 +16,23 @@ import '../styles/cinema.css'
 const PAGE_URL = `${SITE_URL}/cinema`
 const OG_IMAGE = `${SITE_URL}/avatar.png`
 
-/** 数据源：本地片单 / OuonnkiTV 站点内嵌 */
-type Source = 'local' | 'ouonnki'
+/** 数据源：本地片单 / B 站影视播放器 / OuonnkiTV 站点内嵌 */
+type Source = 'local' | 'bili' | 'ouonnki'
 const SOURCE_KEY = 'cinema-source'
 
 function loadSource(): Source {
   try {
-    return localStorage.getItem(SOURCE_KEY) === 'ouonnki' ? 'ouonnki' : 'local'
+    const v = localStorage.getItem(SOURCE_KEY)
+    return v === 'ouonnki' || v === 'bili' ? v : 'local'
   } catch {
     return 'local'
   }
 }
 
 /**
- * 放映厅，两个数据源：
+ * 放映厅，三个数据源：
  *  · 本地片单 —— 上方一块屏幕播放当前影片，下方片单点一下换片（数据在 src/lib/cinema.ts）
+ *  · B 站影视 —— 用 B 站官方嵌入播放器放任意视频，粘链接即看（解析在 src/lib/bilibili.ts）
  *  · OuonnkiTV —— iframe 内嵌自己部署的 OuonnkiTV 站点，地址在页面里填或写在 .env
  */
 export default function Cinema() {
@@ -77,6 +80,30 @@ export default function Cinema() {
     return () => window.removeEventListener('keydown', onKeyDown)
   }, [source, step])
 
+  // ── B 站影视播放器 ─────────────────────────────────────
+  const [bili, setBili] = useState<BiliRef | null>(loadBili)
+  const [biliDraft, setBiliDraft] = useState('')
+  /** 没记住过视频时直接进输入态，省一次点击 */
+  const [biliEditing, setBiliEditing] = useState<boolean>(() => !loadBili())
+  const [biliError, setBiliError] = useState<string | null>(null)
+  /** 换视频 / 重新加载时换 key，强制 iframe 重载 */
+  const [biliKey, setBiliKey] = useState(0)
+  const biliRef = useRef<HTMLDivElement | null>(null)
+
+  const commitBili = (e: FormEvent) => {
+    e.preventDefault()
+    const ref = parseBv(biliDraft)
+    if (!ref) {
+      setBiliError('没找到 BV 号：粘贴 bilibili.com/video/BV… 的完整链接，或直接填 BV 号（b23.tv 短链请先点开复制）')
+      return
+    }
+    setBili(ref)
+    saveBili(ref)
+    setBiliEditing(false)
+    setBiliError(null)
+    setBiliKey((k) => k + 1)
+  }
+
   // ── OuonnkiTV 内嵌 ─────────────────────────────────────
   const [ouonnkiUrl, setOuonnkiUrl] = useState<string>(loadUrl)
   const [draft, setDraft] = useState<string>(loadUrl)
@@ -116,8 +143,7 @@ export default function Cinema() {
     setUrlError(null)
   }
 
-  const toggleFullscreen = () => {
-    const el = embedRef.current
+  const toggleFullscreen = (el: HTMLElement | null) => {
     if (!el) return
     if (document.fullscreenElement) void document.exitFullscreen()
     else void el.requestFullscreen?.()
@@ -131,12 +157,12 @@ export default function Cinema() {
         <title>放映厅 · {SITE_NAME}</title>
         <meta
           name="description"
-          content={`放映厅：${FILMS.length} 部开放授权短片在线播放，也可内嵌自己部署的 OuonnkiTV 站点。`}
+          content={`放映厅：${FILMS.length} 部开放授权短片在线播放，可用 B 站官方播放器看任意影视视频，也可内嵌自己部署的 OuonnkiTV 站点。`}
         />
         <link rel="canonical" href={PAGE_URL} />
         <meta property="og:type" content="website" />
         <meta property="og:title" content={`放映厅 · ${SITE_NAME}`} />
-        <meta property="og:description" content="开放授权短片放映厅，或内嵌自己的 OuonnkiTV 站点。" />
+        <meta property="og:description" content="开放授权短片放映厅，B 站官方播放器看任意影视，或内嵌自己的 OuonnkiTV 站点。" />
         <meta property="og:url" content={PAGE_URL} />
         <meta property="og:image" content={OG_IMAGE} />
         <meta name="twitter:card" content="summary_large_image" />
@@ -148,7 +174,9 @@ export default function Cinema() {
           <p className="cinema-sub">
             {source === 'local'
               ? '开放授权短片 · 点片单即换片，← → 也能切'
-              : '内嵌自己的 OuonnkiTV 站点 · 片源由该站点自行配置'}
+              : source === 'bili'
+                ? 'B 站官方播放器 · 粘视频链接即看，影视 / 纪录片都行'
+                : '内嵌自己的 OuonnkiTV 站点 · 片源由该站点自行配置'}
           </p>
         </div>
         <div className="cinema-tabs" role="tablist" aria-label="放映数据源">
@@ -160,6 +188,15 @@ export default function Cinema() {
             onClick={() => switchSource('local')}
           >
             本地片单
+          </button>
+          <button
+            type="button"
+            role="tab"
+            aria-selected={source === 'bili'}
+            className={`cinema-tab${source === 'bili' ? ' active' : ''}`}
+            onClick={() => switchSource('bili')}
+          >
+            B 站影视
           </button>
           <button
             type="button"
@@ -296,6 +333,108 @@ export default function Cinema() {
             </ul>
           </section>
         </>
+      ) : source === 'bili' ? (
+        <section className="cinema-embed cinema-bili">
+          {bili && !biliEditing ? (
+            <>
+              <div className="cinema-embed-bar">
+                <span className="cinema-embed-host" title={watchUrl(bili)}>
+                  player.bilibili.com · {bili.bvid}
+                  {bili.page > 1 ? ` · P${bili.page}` : ''}
+                </span>
+                <div className="cinema-embed-actions">
+                  <button
+                    type="button"
+                    className="cinema-embed-btn"
+                    onClick={() => setBiliKey((k) => k + 1)}
+                  >
+                    重新加载
+                  </button>
+                  <button
+                    type="button"
+                    className="cinema-embed-btn"
+                    onClick={() => toggleFullscreen(biliRef.current)}
+                  >
+                    全屏
+                  </button>
+                  <a className="cinema-embed-btn" href={watchUrl(bili)} target="_blank" rel="noreferrer">
+                    在 B 站打开 ↗
+                  </a>
+                  <button
+                    type="button"
+                    className="cinema-embed-btn"
+                    onClick={() => {
+                      setBiliDraft(bili.bvid)
+                      setBiliError(null)
+                      setBiliEditing(true)
+                    }}
+                  >
+                    换个视频
+                  </button>
+                </div>
+              </div>
+
+              <div className="cinema-embed-frame cinema-bili-frame" ref={biliRef}>
+                <iframe
+                  key={`${bili.bvid}-${bili.page}-${biliKey}`}
+                  src={playerUrl(bili)}
+                  title={`B 站视频 ${bili.bvid}`}
+                  allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
+              </div>
+
+              <p className="cinema-embed-note">
+                这是 B 站官方嵌入式播放器，画面来自 B 站。<strong>能不能看取决于该视频的版权与分区权限</strong>——
+                遇到「视频不可见」「大会员专属」，点「在 B 站打开」用登录态看。弹幕默认关闭，想开就去 B 站原页。
+              </p>
+            </>
+          ) : (
+            <div className="cinema-setup">
+              <h2>用 B 站看影视</h2>
+              <p>
+                B 站有大量正版影视、纪录片和公开课。把视频链接或 BV 号粘进来，就能在这个页面里直接播
+                （播放器是 B 站官方提供的嵌入页，不是搬运）。
+              </p>
+              <form className="cinema-form" onSubmit={commitBili}>
+                <input
+                  className="cinema-input"
+                  type="text"
+                  inputMode="url"
+                  placeholder="https://www.bilibili.com/video/BV1xx411x7xx 或 BV1xx411x7xx"
+                  value={biliDraft}
+                  onChange={(e) => {
+                    setBiliDraft(e.target.value)
+                    setBiliError(null)
+                  }}
+                  aria-label="B 站视频链接或 BV 号"
+                />
+                <button type="submit" className="cinema-btn-primary">
+                  播放
+                </button>
+                {bili && (
+                  <button
+                    type="button"
+                    className="cinema-embed-btn"
+                    onClick={() => {
+                      setBiliDraft(bili.bvid)
+                      setBiliError(null)
+                      setBiliEditing(false)
+                    }}
+                  >
+                    取消
+                  </button>
+                )}
+              </form>
+              {biliError && <p className="cinema-warn">{biliError}</p>}
+              <p className="cinema-hint">
+                支持 <code>bilibili.com/video/BV…</code>、<code>m.bilibili.com</code> 以及带 <code>?p=2</code> 的分 P 链接；
+                <code>b23.tv</code> 短链先在浏览器里打开，复制展开后的地址。
+              </p>
+            </div>
+          )}
+        </section>
       ) : (
         <section className="cinema-embed">
           {ouonnkiUrl && !editing ? (
@@ -312,7 +451,7 @@ export default function Cinema() {
                   >
                     重新加载
                   </button>
-                  <button type="button" className="cinema-embed-btn" onClick={toggleFullscreen}>
+                  <button type="button" className="cinema-embed-btn" onClick={() => toggleFullscreen(embedRef.current)}>
                     全屏
                   </button>
                   <a className="cinema-embed-btn" href={ouonnkiUrl} target="_blank" rel="noreferrer">

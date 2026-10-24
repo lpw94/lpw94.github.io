@@ -41,4 +41,6 @@
 - **`display: contents` 的父级不能替子元素抬层级**：`.mp-host{display:contents}` 不生成盒子，
   它身上的 `position:fixed + z-index:9997` 不建立层叠上下文，所以浮层（如 `.aplayer-list`）
   必须自己声明 `z-index`，否则会退回 auto 被 `.sidebar`(60) 之类的普通内容盖住。
+- **按比例的容器要防断点覆盖**：`.cinema-embed-frame` 在 720 断点写死 `height:62vh`，
+  新增 `aspect-ratio:16/9` 的子类必须在媒体查询里再声明一次 `height:auto`，否则手机上按 62vh 算。
 - 改完文件要 `touch` 一次，避免 vite dev 提供陈旧 transform。

@@ -343,6 +343,13 @@
   border-radius: 0;
   border: 0;
 }
+
+/* ---------- B 站播放器：按 16:9 收窄，别让播放器上下留大片黑边 ---------- */
+.cinema-bili-frame {
+  height: auto;
+  aspect-ratio: 16 / 9;
+  max-height: min(78vh, 720px);
+}
 .cinema-embed-note,
 .cinema-hint {
   margin: 0;
@@ -355,6 +362,7 @@
   padding: 1px 5px;
   border-radius: 4px;
   font-size: 11px;
+  color: var(--fg);
   background: rgba(127, 127, 127, 0.16);
 }
 .cinema-warn {
@@ -469,6 +477,10 @@
   /* 内嵌区在手机上用视口高度的百分比，避免只剩一条细缝 */
   .cinema-embed-frame {
     height: 62vh;
+  }
+  /* B 站播放器例外：视频按 16:9 收窄，62vh 会把画面拉出大黑边 */
+  .cinema-bili-frame {
+    height: auto;
   }
   .cinema-embed-actions {
     margin-left: 0;
