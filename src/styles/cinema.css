@@ -24,14 +24,6 @@
   font-size: 13px;
   color: var(--muted);
 }
-.cinema-count {
-  padding: 4px 12px;
-  border-radius: 999px;
-  font-size: 12px;
-  color: var(--muted);
-  border: 1px solid rgba(127, 127, 127, 0.24);
-  background: rgba(127, 127, 127, 0.07);
-}
 
 /* ---------- 屏幕 ---------- */
 .cinema-screen {
@@ -259,6 +251,179 @@
   opacity: 0.85;
 }
 
+/* ---------- 数据源切换 ---------- */
+.cinema-tabs {
+  display: inline-flex;
+  gap: 2px;
+  padding: 3px;
+  border-radius: 999px;
+  background: rgba(127, 127, 127, 0.1);
+  border: 1px solid rgba(127, 127, 127, 0.2);
+}
+.cinema-tab {
+  padding: 5px 14px;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+}
+.cinema-tab:hover {
+  color: var(--fg);
+}
+.cinema-tab.active {
+  background: rgba(99, 102, 241, 0.92);
+  color: #fff;
+}
+
+/* ---------- OuonnkiTV 内嵌 ---------- */
+.cinema-embed {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.cinema-embed-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cinema-embed-host {
+  min-width: 0;
+  font-size: 12px;
+  color: var(--muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.cinema-embed-actions {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.cinema-embed-btn {
+  padding: 5px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--fg);
+  text-decoration: none;
+  background: transparent;
+  border: 1px solid rgba(127, 127, 127, 0.28);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.cinema-embed-btn:hover {
+  background: rgba(99, 102, 241, 0.14);
+  border-color: rgba(99, 102, 241, 0.4);
+  color: var(--fg);
+  text-decoration: none;
+}
+.cinema-embed-frame {
+  position: relative;
+  height: min(76vh, 760px);
+  border-radius: 14px;
+  overflow: hidden;
+  background: #0b1020;
+  border: 1px solid rgba(127, 127, 127, 0.22);
+}
+.cinema-embed-frame iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+/* 全屏时容器铺满，圆角和边框都去掉 */
+.cinema-embed-frame:fullscreen {
+  height: 100%;
+  border-radius: 0;
+  border: 0;
+}
+.cinema-embed-note,
+.cinema-hint {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--muted);
+}
+.cinema-embed-note code,
+.cinema-setup code {
+  padding: 1px 5px;
+  border-radius: 4px;
+  font-size: 11px;
+  background: rgba(127, 127, 127, 0.16);
+}
+.cinema-warn {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: #f59e0b;
+}
+
+/* 未配置时的引导与配置表单 */
+.cinema-setup {
+  padding: 26px 22px;
+  border-radius: 14px;
+  background: rgba(127, 127, 127, 0.07);
+  border: 1px dashed rgba(127, 127, 127, 0.32);
+}
+.cinema-setup h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+.cinema-setup p {
+  margin: 0 0 14px;
+  font-size: 13px;
+  line-height: 1.75;
+  color: var(--muted);
+}
+.cinema-form {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cinema-input {
+  flex: 1 1 300px;
+  min-width: 0;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 14px;
+  color: var(--fg);
+  background: rgba(127, 127, 127, 0.12);
+  border: 1px solid rgba(127, 127, 127, 0.3);
+}
+.cinema-input::placeholder {
+  color: var(--muted);
+}
+.cinema-input:focus {
+  outline: 2px solid rgba(99, 102, 241, 0.5);
+  outline-offset: 1px;
+}
+.cinema-btn-primary {
+  padding: 9px 20px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  color: #fff;
+  background: linear-gradient(120deg, #4f46e5, #7c3aed);
+  border: 0;
+  cursor: pointer;
+  transition: filter 0.2s ease, transform 0.2s ease;
+}
+.cinema-btn-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+.cinema-setup .cinema-warn,
+.cinema-setup .cinema-hint {
+  margin-top: 12px;
+}
+
 /* ---------- 移动端 ---------- */
 @media (max-width: 720px) {
   .cinema-page {
@@ -287,6 +452,38 @@
   }
   .cinema-steps {
     justify-content: space-between;
+  }
+
+  /* 数据源切换占满一行，点击区域更大 */
+  .cinema-head {
+    align-items: flex-start;
+  }
+  .cinema-tabs {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .cinema-tab {
+    flex: 1 1 0;
+    text-align: center;
+  }
+  /* 内嵌区在手机上用视口高度的百分比，避免只剩一条细缝 */
+  .cinema-embed-frame {
+    height: 62vh;
+  }
+  .cinema-embed-actions {
+    margin-left: 0;
+    width: 100%;
+  }
+  .cinema-embed-btn {
+    flex: 1 1 auto;
+    text-align: center;
+  }
+  .cinema-setup {
+    padding: 18px 14px;
+  }
+  .cinema-input,
+  .cinema-btn-primary {
+    flex: 1 1 100%;
   }
 }
 

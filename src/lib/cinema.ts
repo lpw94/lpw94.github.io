@@ -8,7 +8,8 @@
 //
 // colors 是没有封面图时海报的渐变起止色；想用真封面就填 poster（图片 URL）。
 export type FilmSource =
-  | { type: 'mp4'; src: string }
+  /** 原生 <video> 播放；fallback 是主地址播不了时自动换上的备用地址（如服务端转码流） */
+  | { type: 'mp4'; src: string; fallback?: string }
   | { type: 'iframe'; src: string }
 
 export type Film = {
