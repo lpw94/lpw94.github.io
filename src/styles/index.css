@@ -2013,7 +2013,10 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
    这里挪到右下并收窄；层级压在弹窗 10000、宠物 9998 之下。
    ============================================================ */
 
-/* 挂载点不占位，播放器定位由 APlayer 自己的 CSS 负责 */
+/* 挂载点不占位，播放器定位由 APlayer 自己的 CSS 负责。
+   注意：display:contents 的元素不生成盒子，它身上的 position/z-index 不建立层叠上下文，
+   所以 .aplayer-body 与 .aplayer-list 必须各自声明 z-index，否则展开的列表会被
+   侧边栏(.sidebar z-index:60) 这类普通内容盖住。 */
 .mp-host { display: contents; }
 
 /* ---------- 位置：右下角 ---------- */
@@ -2051,6 +2054,7 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   width: 360px;
   max-width: calc(100vw - 40px);
   margin: 0;
+  z-index: 9997; /* 父级 .mp-host 是 display:contents，不会替它抬层，这里必须自己声明 */
   border: 1px solid var(--border);
   border-radius: 14px;
   overflow-y: auto;

@@ -15,6 +15,11 @@
   LoginModal 有可选 redirectTo 参数（默认 /admin）。
 - 新增 SQL 表的工作流：写 `supabase/*.sql`（幂等 policy + grant），由用户在 Supabase SQL
   Editor 手动执行；本地无 .env/service_role，无法代跑 SQL。
+- 悬浮音乐播放器（2026-10-24 重写，提交 1cfc72b）：`aplayer@1.10.1`（npm，不用 CDN）+ 自实现
+  Meting 协议（`src/lib/meting.ts`）拉网易云歌单；先探测可播性再建列表，缓存 6 小时。
+  歌单 ID 默认 2884035（云音乐原创榜，可播率最高 46%），可用 `VITE_NETEASE_PLAYLIST` 覆盖。
+- 本机网络：**jsdelivr 不可达**（用 npm 包或 elemecdn）；`api.i-meto.com` + 网易云音频域都带
+  CORS `*`，浏览器可直接 fetch；supabase.co 仍被阻断。
 - 构建命令用受管 node：`C:/Users/lpw94/.workbuddy/binaries/node/versions/22.22.2-6/npm run build`。
 
 ## 用户偏好
@@ -29,4 +34,11 @@
 - 裸 `nav { justify-content:center }` 会误伤 `.category-filter` 等非顶栏 nav → 断言选择器要
   收敛成 `.site-header nav`。
 - 弹窗在含 `backdrop-filter` 的容器里 `position:fixed` 会被当成包含块 → 用 `createPortal` 挂 body。
+- APlayer 覆盖样式时记住三点：① 默认贴**左下角**且 `z-index:99`；② 播放器盒子是 `content-box`，
+  实际宽度 = width + 18px（折叠把手 padding）+ 2px 边框；③ 列表开关是 `.aplayer-icon-menu`
+  （不是 `-list`），折叠态靠 `aplayer-list-hide` 的 `max-height:0 !important`。
+  量尺寸要等 `transition: all .3s` 结束，否则拿到中间值。
+- **`display: contents` 的父级不能替子元素抬层级**：`.mp-host{display:contents}` 不生成盒子，
+  它身上的 `position:fixed + z-index:9997` 不建立层叠上下文，所以浮层（如 `.aplayer-list`）
+  必须自己声明 `z-index`，否则会退回 auto 被 `.sidebar`(60) 之类的普通内容盖住。
 - 改完文件要 `touch` 一次，避免 vite dev 提供陈旧 transform。
