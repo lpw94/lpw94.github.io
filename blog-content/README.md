@@ -31,6 +31,7 @@
 | `23-admin-web-demo-permission-frontend.md` | 权限路由前端落地：手写请求拦截器、刷新锁与动态菜单路由的四个坑 | `admin-web-demo-permission-frontend` | 前端 |
 | `24-blog-mobile-optimization.md` | 手机端体验优化实录：顶栏压行、字号收敛，和一次差点被 Chrome 骗到的调试 | `blog-mobile-optimization` | 前端 |
 | `25-admin-permission-menu-grant.md` | 授权 = 勾菜单：权限模型的最后一环，以及 Alembic 迁移与删除保护实战 | `admin-permission-menu-grant` | 后端 |
+| `26-sensitive-config-externalization.md` | 敏感配置外置实战：公开仓库里的一次完整凭据治理，含历史重写与自查脚本 | `sensitive-config-externalization` | 后端 |
 
 > `05` / `06` / `07` / `08` 是本博客**自身**的建站与技术拆解（含真实踩坑），属于"项目自述"型文章，与其他四篇的通用教程定位不同。
 
