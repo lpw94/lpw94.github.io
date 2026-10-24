@@ -171,6 +171,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <nav>
           <Link to="/">首页</Link>
           <Link to="/gallery">展厅</Link>
+          <Link to="/cinema">放映厅</Link>
           <Link to="/toolbox">工具箱</Link>
           {/* 书签已合并进「导航」（/tools）：静态工具 + DB 书签同一个页面、同一套功能 */}
           <Link to="/tools">导航</Link>

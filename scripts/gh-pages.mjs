@@ -76,7 +76,7 @@ ${items}
 }
 
 function buildSitemap(posts) {
-  const staticPages = ['', '/about', '/gallery', '/tools']
+  const staticPages = ['', '/about', '/gallery', '/cinema', '/tools']
   const staticUrls = staticPages
     .map(
       (path) =>

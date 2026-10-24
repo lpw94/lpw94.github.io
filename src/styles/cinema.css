@@ -1,0 +1,301 @@
+/* 放映厅页样式（独立文件，作用域统一挂在 .cinema- 前缀上） */
+
+.cinema-page {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  padding-bottom: 12px;
+}
+
+/* ---------- 页头 ---------- */
+.cinema-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.cinema-title {
+  margin: 0;
+  font-size: 22px;
+}
+.cinema-sub {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.cinema-count {
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--muted);
+  border: 1px solid rgba(127, 127, 127, 0.24);
+  background: rgba(127, 127, 127, 0.07);
+}
+
+/* ---------- 屏幕 ---------- */
+.cinema-screen {
+  scroll-margin-top: calc(var(--header-h) + 12px);
+}
+.cinema-frame {
+  position: relative;
+  aspect-ratio: 16 / 9;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(127, 127, 127, 0.22);
+  box-shadow: 0 18px 40px -22px rgba(0, 0, 0, 0.65);
+}
+.cinema-media {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+  background: #000;
+  object-fit: contain;
+}
+.cinema-now {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+  backdrop-filter: blur(4px);
+}
+.cinema-now-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #ef4444;
+  box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6);
+  animation: cinemaPulse 1.8s ease-out infinite;
+}
+@keyframes cinemaPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.55); }
+  70% { box-shadow: 0 0 0 7px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* ---------- 影片信息 ---------- */
+.cinema-meta {
+  margin-top: 14px;
+  padding: 16px 18px;
+  border-radius: 14px;
+  background: rgba(127, 127, 127, 0.07);
+  border: 1px solid rgba(127, 127, 127, 0.18);
+}
+.cinema-meta-top {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cinema-film-title {
+  margin: 0;
+  font-size: 18px;
+}
+.cinema-film-sub {
+  font-size: 13px;
+  color: var(--muted);
+}
+.cinema-film-facts {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+.cinema-film-desc {
+  margin: 10px 0 0;
+  font-size: 14px;
+  line-height: 1.75;
+}
+.cinema-film-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+.cinema-tag {
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-size: 12px;
+  color: var(--muted);
+  background: rgba(99, 102, 241, 0.12);
+  border: 1px solid rgba(99, 102, 241, 0.22);
+}
+.cinema-steps {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(127, 127, 127, 0.18);
+}
+.cinema-step {
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 13px;
+  color: var(--fg);
+  background: transparent;
+  border: 1px solid rgba(127, 127, 127, 0.28);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
+}
+.cinema-step:hover {
+  background: rgba(99, 102, 241, 0.14);
+  border-color: rgba(99, 102, 241, 0.4);
+  transform: translateY(-1px);
+}
+.cinema-step-index {
+  font-size: 12px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- 片单 ---------- */
+.cinema-section-title {
+  margin: 0 0 12px;
+  font-size: 16px;
+}
+.cinema-list {
+  display: grid;
+  /* 显式列定义：隐式列会按 max-content 撑，卡片里的单行标题会把整页顶宽 */
+  grid-template-columns: repeat(auto-fill, minmax(258px, 1fr));
+  gap: 12px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.cinema-item {
+  min-width: 0;
+}
+.cinema-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  min-width: 0;
+  padding: 10px;
+  border-radius: 12px;
+  text-align: left;
+  color: var(--fg);
+  background: rgba(127, 127, 127, 0.07);
+  border: 1px solid rgba(127, 127, 127, 0.18);
+  cursor: pointer;
+  transition: transform 0.22s ease, border-color 0.22s ease, background 0.22s ease;
+}
+.cinema-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.1);
+}
+.cinema-card.active {
+  border-color: rgba(99, 102, 241, 0.55);
+  box-shadow: 0 0 0 1px rgba(99, 102, 241, 0.35) inset;
+}
+.cinema-poster {
+  position: relative;
+  flex: 0 0 auto;
+  width: 96px;
+  height: 64px;
+  border-radius: 8px;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 5px 7px;
+  box-sizing: border-box;
+}
+.cinema-poster-index {
+  font-size: 11px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.85);
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+.cinema-poster-badge {
+  font-size: 10px;
+  color: #fff;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.42);
+  white-space: nowrap;
+}
+.cinema-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+.cinema-card-title {
+  font-size: 14px;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.cinema-card-desc {
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--muted);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
+}
+.cinema-card-facts {
+  font-size: 11px;
+  color: var(--muted);
+  opacity: 0.85;
+}
+
+/* ---------- 移动端 ---------- */
+@media (max-width: 720px) {
+  .cinema-page {
+    gap: 18px;
+  }
+  .cinema-title {
+    font-size: 20px;
+  }
+  .cinema-meta {
+    padding: 14px;
+  }
+  .cinema-film-title {
+    font-size: 16px;
+  }
+  /* 时间与出处换行后不再右飘 */
+  .cinema-film-facts {
+    margin-left: 0;
+    flex: 1 1 100%;
+  }
+  .cinema-list {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .cinema-poster {
+    width: 84px;
+    height: 56px;
+  }
+  .cinema-steps {
+    justify-content: space-between;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cinema-now-dot {
+    animation: none;
+  }
+  .cinema-card:hover,
+  .cinema-step:hover {
+    transform: none;
+  }
+}

@@ -5,6 +5,7 @@ import Home from './pages/Home'
 import PostDetail from './pages/PostDetail'
 import About from './pages/About'
 import Gallery from './pages/Gallery'
+import Cinema from './pages/Cinema'
 import Tools from './pages/Tools'
 import Toolbox from './pages/Toolbox'
 import Notes from './pages/Notes'
@@ -30,6 +31,7 @@ export default function App() {
           <Route path="/post/:slug" element={<PostDetail />} />
           <Route path="/about" element={<About />} />
           <Route path="/gallery" element={<Gallery />} />
+          <Route path="/cinema" element={<Cinema />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/toolbox" element={<Toolbox />} />
           {/* 书签已合并进 /tools 常用导航页，旧链接统一跳转过去 */}
