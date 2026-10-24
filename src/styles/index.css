@@ -363,7 +363,7 @@ button:hover { opacity: 0.9; }
 .back-to-top {
   position: fixed;
   right: 22px;
-  bottom: 84px;
+  bottom: 104px;
   z-index: 9997;
   width: 46px;
   height: 46px;
@@ -394,12 +394,12 @@ button:hover { opacity: 0.9; }
   .share-btn:hover { transform: none; }
 }
 
-/* 分享按钮：固定在右下角。由于音乐播放器(music)占最底(bottom:22)、返回顶部占其上方(bottom:84)，
-   分享按钮改放「返回顶部」正上方(bottom:138)，三者竖向排开互不遮挡；菜单向上展开。 */
+/* 分享按钮：固定在右下角。音乐播放器占最底（bottom:20，高约 66 → 顶到 86），
+   所以返回顶部让到 104，分享按钮再往上到 158，三者竖向排开互不遮挡；菜单向上展开。 */
 .share-fab {
   position: fixed;
   right: 22px;
-  bottom: 138px;
+  bottom: 158px;
   z-index: 9997;
   display: flex;
   flex-direction: column;
@@ -2008,207 +2008,168 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
 }
 
 /* ============================================================
-   悬浮音乐播放器（右下；层级低于宠物 9998 / 弹窗 10000）
+   轻量悬浮音乐播放器（APlayer + 网易云歌单）
+   APlayer 自带 fixed 定位在左下角（left:0 / max-width:400 / z-index:99），
+   这里挪到右下并收窄；层级压在弹窗 10000、宠物 9998 之下。
    ============================================================ */
-.mp-fab {
-  position: fixed;
-  right: 22px;
-  bottom: 22px;
-  z-index: 9997;
-  width: 54px;
-  height: 54px;
-  padding: 0;
-  border-radius: 50%;
-  background: var(--accent);
-  color: #fff;
-  font-size: 22px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.35);
-  transition: transform 0.15s, box-shadow 0.15s;
-}
-.mp-fab:hover { transform: scale(1.08); opacity: 1; }
-/* 播放中：外围旋转光环 */
-.mp-fab.playing::before {
-  content: '';
-  position: absolute;
-  inset: -5px;
-  border-radius: 50%;
-  background: conic-gradient(var(--accent), transparent 40%, var(--accent));
-  animation: mpSpin 2.4s linear infinite;
-  z-index: -1;
-}
-.mp-fab.playing::after {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  border-radius: 50%;
-  background: var(--accent);
-  z-index: -1;
-}
 
-.mp-panel {
-  position: fixed;
-  right: 22px;
-  bottom: 88px;
+/* 挂载点不占位，播放器定位由 APlayer 自己的 CSS 负责 */
+.mp-host { display: contents; }
+
+/* ---------- 位置：右下角 ---------- */
+.aplayer.aplayer-fixed {
+  left: auto;
+  right: 20px;
+  bottom: 20px;
+  width: auto;
+  max-width: 340px;
   z-index: 9997;
-  width: 300px;
-  max-width: calc(100vw - 44px);
-  padding: 14px;
-  border-radius: 14px;
+}
+.aplayer.aplayer-fixed .aplayer-body {
+  left: auto;
+  right: 20px;
+  bottom: 20px;
+  width: 340px;
+  max-width: calc(100vw - 40px);
+  z-index: 9997;
   border: 1px solid var(--border);
-  background: rgba(255, 255, 255, 0.88);
+  border-radius: 14px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.92);
   backdrop-filter: blur(14px) saturate(1.3);
   -webkit-backdrop-filter: blur(14px) saturate(1.3);
   box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
 }
 
-.mp-head { display: flex; align-items: center; gap: 10px; }
-.mp-cover {
-  flex: 0 0 44px;
-  width: 44px;
-  height: 44px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 20px;
-  color: #fff;
-  background: linear-gradient(135deg, var(--accent), #7c3aed);
-  box-shadow: inset 0 0 0 3px rgba(255, 255, 255, 0.25);
-}
-.mp-cover.spin { animation: mpSpin 6s linear infinite; }
-.mp-info { flex: 1; min-width: 0; }
-.mp-title {
-  font-size: 14px;
-  font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.mp-artist { font-size: 12px; }
-.mp-collapse {
-  flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border-radius: 8px;
-  background: transparent;
-  color: var(--muted);
-  font-size: 14px;
-}
-.mp-collapse:hover { background: rgba(0, 0, 0, 0.06); color: var(--fg); opacity: 1; }
-
-.mp-progress {
-  margin-top: 12px;
-  height: 6px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.08);
-  cursor: pointer;
-  overflow: hidden;
-}
-.mp-progress-fill {
-  height: 100%;
-  border-radius: 3px;
-  background: var(--accent);
-  transition: width 0.2s linear;
-}
-.mp-times {
-  display: flex;
-  justify-content: space-between;
-  font-size: 11px;
-  margin-top: 4px;
-  font-variant-numeric: tabular-nums;
+/* 播放列表：展开时浮在播放器上方 */
+.aplayer.aplayer-fixed .aplayer-list {
+  position: fixed;
+  left: auto;
+  right: 20px;
+  bottom: 92px;
+  /* 360 = 340 内容 + 18 折叠把手 + 2 边框，与播放条外边缘对齐 */
+  width: 360px;
+  max-width: calc(100vw - 40px);
+  margin: 0;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow-y: auto;
+  background: rgba(255, 255, 255, 0.96);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.18);
 }
 
-.mp-error { margin: 6px 0 0; font-size: 12px; color: #dc2626; }
+/* ---------- 折叠态：66×66 圆角小卡 ---------- */
+.aplayer.aplayer-fixed.aplayer-narrow .aplayer-body {
+  border-radius: 16px;
+}
+/* 右侧那条 18px 的展开把手：改成半透明深色，箭头用白色 */
+.aplayer.aplayer-fixed .aplayer-miniswitcher {
+  width: 18px;
+  background: rgba(15, 23, 42, 0.42);
+  border-radius: 0 16px 16px 0;
+}
+.aplayer.aplayer-fixed .aplayer-miniswitcher:hover { background: rgba(15, 23, 42, 0.6); }
+.aplayer.aplayer-fixed .aplayer-miniswitcher .aplayer-icon path { fill: #fff; }
+.aplayer.aplayer-fixed .aplayer-miniswitcher .aplayer-icon:hover path { fill: #fff; }
 
-.mp-controls {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 14px;
-  margin-top: 10px;
+/* 展开态：把手退回浅色，别在白色条上抢视线 */
+.aplayer.aplayer-fixed:not(.aplayer-narrow) .aplayer-miniswitcher {
+  background: rgba(127, 127, 127, 0.14);
+  border-radius: 0 14px 14px 0;
 }
-.mp-controls button {
-  width: 38px;
-  height: 38px;
-  padding: 0;
-  border-radius: 50%;
-  font-size: 15px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.mp-controls .mp-play {
-  width: 46px;
-  height: 46px;
-  font-size: 18px;
-  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
-}
-.mp-controls button:hover { opacity: 0.85; }
+.aplayer.aplayer-fixed:not(.aplayer-narrow) .aplayer-miniswitcher:hover { background: rgba(127, 127, 127, 0.26); }
+.aplayer.aplayer-fixed:not(.aplayer-narrow) .aplayer-miniswitcher .aplayer-icon path { fill: #64748b; }
+.aplayer.aplayer-fixed:not(.aplayer-narrow) .aplayer-miniswitcher .aplayer-icon:hover path { fill: #334155; }
 
-.mp-volume {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-  font-size: 14px;
-}
-.mp-volume input[type='range'] {
-  flex: 1;
+/* ---------- 展开态内部：去掉 APlayer 的硬边白底，跟随卡片 ---------- */
+.aplayer .aplayer-info,
+.aplayer.aplayer-fixed .aplayer-info { border-top: none; background: transparent; }
+.aplayer .aplayer-pic { border-radius: 12px 0 0 12px; }
+.aplayer .aplayer-list ol li { border-top: 1px solid rgba(127, 127, 127, 0.12); }
+.aplayer .aplayer-list ol li:hover { background: rgba(37, 99, 235, 0.06); }
+.aplayer .aplayer-list ol li.aplayer-list-light { background: rgba(37, 99, 235, 0.1); }
+.aplayer .aplayer-list ol li .aplayer-list-index,
+.aplayer .aplayer-list ol li .aplayer-list-author { color: var(--muted); }
+
+/* 站点全局给 input/button 加过 padding、边框、背景，会污染 APlayer 内部控件 */
+.aplayer input,
+.aplayer button {
   padding: 0;
   border: none;
+  border-radius: 0;
   background: transparent;
-  accent-color: var(--accent);
-  height: 20px;
-  cursor: pointer;
+  color: inherit;
 }
+.aplayer .aplayer-volume-wrap input[type='range'] { accent-color: var(--accent); }
 
-.mp-list {
-  margin: 12px 0 0;
-  padding: 8px 0 0;
-  border-top: 1px solid var(--border);
-  list-style: none;
-  max-height: 132px;
-  overflow-y: auto;
-}
-.mp-list li button {
-  width: 100%;
+/* ---------- 准备中 / 失败时的占位胶囊 ---------- */
+.mp-boot {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 9997;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   gap: 8px;
-  padding: 7px 8px;
-  border-radius: 8px;
-  background: transparent;
+  max-width: calc(100vw - 40px);
+  padding: 10px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  line-height: 1.4;
   color: var(--fg);
-  font-size: 13px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid var(--border);
+  box-shadow: 0 10px 28px rgba(15, 23, 42, 0.14);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.mp-boot-dot {
+  flex: 0 0 8px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: mpPulse 1s ease-in-out infinite;
+}
+.mp-boot-error {
+  background: rgba(255, 255, 255, 0.94);
+  color: #b91c1c;
+  border-color: rgba(185, 28, 28, 0.3);
+  cursor: pointer;
   text-align: left;
 }
-.mp-list li button:hover { background: rgba(0, 0, 0, 0.05); opacity: 1; }
-.mp-list li button.active { background: rgba(37, 99, 235, 0.08); }
-.mp-list li button.active .mp-list-title { color: var(--accent); font-weight: 600; }
-.mp-list .mp-list-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-.mp-list .muted { font-size: 11px; flex: 0 0 auto; }
+.mp-boot-error:hover { opacity: 1; border-color: rgba(185, 28, 28, 0.5); }
 
-@keyframes mpSpin {
-  to { transform: rotate(360deg); }
+@keyframes mpPulse {
+  0%, 100% { opacity: 0.35; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mp-cover.spin,
-  .mp-fab.playing::before { animation: none; }
+  .mp-boot-dot { animation: none; }
 }
 
 @media (max-width: 720px) {
-  .mp-fab { right: 16px; bottom: 16px; }
-  .mp-panel { right: 16px; bottom: 80px; width: calc(100vw - 32px); }
+  .aplayer.aplayer-fixed { right: 12px; bottom: max(12px, env(safe-area-inset-bottom)); }
+  /* content-box：宽度要减去 18px 把手 + 2px 边框，右边距才是均匀的 12px */
+  .aplayer.aplayer-fixed .aplayer-body {
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+    width: calc(100vw - 44px);
+    max-width: 420px;
+  }
+  .aplayer.aplayer-fixed .aplayer-list {
+    right: 12px;
+    bottom: calc(84px + env(safe-area-inset-bottom));
+    width: calc(100vw - 26px);
+    max-width: 422px;
+  }
+  .mp-boot {
+    right: 12px;
+    bottom: max(12px, env(safe-area-inset-bottom));
+  }
 }
 
 /* ---------- 3D 个人展厅 ---------- */
@@ -3218,7 +3179,7 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
     padding-left: max(10px, env(safe-area-inset-left));
     padding-right: max(10px, env(safe-area-inset-right));
   }
-  .mp-fab { bottom: max(16px, env(safe-area-inset-bottom)); }
+  .mp-boot { bottom: max(12px, env(safe-area-inset-bottom)); }
   footer { padding-bottom: max(24px, env(safe-area-inset-bottom)); }
 
   /* ---- 弹窗高度用 dvh，避免移动浏览器地址栏导致的 100vh 偏差 ---- */
