@@ -114,16 +114,19 @@ export default function LoginModal({
     setMsg('重置密码邮件已发送，请按邮件中的链接设置新密码。')
   }
 
+  // 同一个弹窗给后台 / 记事本 / 放映厅共用：只有回跳 /admin 时才是「后台登录」
+  const title = redirectTo === '/admin' ? '后台登录' : '登录后继续'
+
   return createPortal(
     <div className="modal-backdrop">
       <div
         className="modal login-modal"
         role="dialog"
         aria-modal="true"
-        aria-label="后台登录"
+        aria-label={title}
       >
         <div className="modal-head">
-          <h2>后台登录</h2>
+          <h2>{title}</h2>
           <button type="button" className="modal-close" onClick={onClose} aria-label="关闭">
             ×
           </button>

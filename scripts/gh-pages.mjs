@@ -76,7 +76,8 @@ ${items}
 }
 
 function buildSitemap(posts) {
-  const staticPages = ['', '/about', '/gallery', '/cinema', '/tools']
+  // /cinema 需要登录才能看，别进 sitemap（搜索引擎抓到的只有登录墙）
+  const staticPages = ['', '/about', '/gallery', '/tools']
   const staticUrls = staticPages
     .map(
       (path) =>

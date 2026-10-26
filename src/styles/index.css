@@ -111,6 +111,17 @@ nav a { margin-left: 0; color: var(--muted); }
   padding: 32px 0;
 }
 main { min-height: 60vh; }
+/* 登录墙：后台 / 记事本 / 放映厅共用，句子居中撑点高度，别让白卡空成一片 */
+.login-gate {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 46vh;
+  padding: 32px 20px;
+  text-align: center;
+}
+.login-gate a { margin-left: 6px; white-space: nowrap; }
 /* 无侧栏页面（如简历页）：正文占满整行 */
 .layout.no-sidebar { grid-template-columns: minmax(0, 1fr); }
 

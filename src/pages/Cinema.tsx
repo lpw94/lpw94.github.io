@@ -1,5 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
+import type { User } from '@supabase/supabase-js'
 import { Helmet } from 'react-helmet-async'
+import { supabase } from '../lib/supabase'
+import LoginModal from '../components/LoginModal'
 import { FILMS } from '../lib/cinema'
 import { loadBili, parseBv, playerUrl, saveBili, watchUrl, type BiliRef } from '../lib/bilibili'
 import {
@@ -36,7 +39,34 @@ function loadSource(): Source {
  *  · OuonnkiTV —— iframe 内嵌自己部署的 OuonnkiTV 站点，地址在页面里填或写在 .env
  */
 export default function Cinema() {
+  // ── 登录墙 ─────────────────────────────────────────────
+  // 放映厅只对登录用户开放：未登录时不渲染片单与播放器（iframe 也就不会去拉第三方资源）
+  const [user, setUser] = useState<User | null>(null)
+  /** 会话恢复中：先不渲染登录墙，避免每次进入都闪一下「请先登录」 */
+  const [booting, setBooting] = useState(true)
+  const [showLogin, setShowLogin] = useState(false)
+
   const [source, setSource] = useState<Source>(loadSource)
+
+  useEffect(() => {
+    // 先用本地已有会话恢复一次（普通刷新 / 魔法链接回调后的场景）
+    supabase.auth.getSession().then(({ data }) => {
+      setUser(data.session?.user ?? null)
+      setBooting(false)
+    })
+
+    // 魔法链接回调时 URL 里的 token 由 supabase-js 异步解析，只查一次会误判成未登录
+    const { data: sub } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+    })
+
+    return () => sub.subscription.unsubscribe()
+  }, [])
+
+  // 未登录自动弹登录框；拿到会话立即收起（与记事本页一致）
+  useEffect(() => {
+    if (!booting) setShowLogin(!user)
+  }, [user, booting])
 
   // ── 本地片单 ───────────────────────────────────────────
   const [currentId, setCurrentId] = useState(FILMS[0]?.id ?? '')
@@ -150,6 +180,45 @@ export default function Cinema() {
   }
 
   const mixedContent = ouonnkiUrl ? isMixedContent(ouonnkiUrl) : false
+
+  // 会话恢复完成前展示加载态，避免每次进入都闪一下登录墙
+  if (booting) {
+    return (
+      <div className="cinema-page">
+        <Helmet>
+          <title>放映厅 · {SITE_NAME}</title>
+        </Helmet>
+        <p className="muted">加载中…</p>
+      </div>
+    )
+  }
+
+  // 未登录：只留标题和登录引导，片单 / 播放器一概不渲染
+  if (!user) {
+    return (
+      <div className="login-gate">
+        <Helmet>
+          <title>放映厅 · {SITE_NAME}</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Helmet>
+        {showLogin && <LoginModal onClose={() => setShowLogin(false)} redirectTo="/cinema" />}
+        <p className="muted">
+          放映厅只对登录用户开放，请先登录后观看。
+          {!showLogin && (
+            <a
+              href="#"
+              onClick={(e) => {
+                e.preventDefault()
+                setShowLogin(true)
+              }}
+            >
+              点击登录
+            </a>
+          )}
+        </p>
+      </div>
+    )
+  }
 
   return (
     <div className="cinema-page">

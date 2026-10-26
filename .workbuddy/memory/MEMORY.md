@@ -13,6 +13,15 @@
 - `/notes` 记事本（2026-10-14 新增，提交 8749b9d）：`notes` 表**私有**，RLS 仅 authenticated
   可读写、不授权 anon；页面即管理界面（无需 admin tab），导航入口仅登录后显示；
   LoginModal 有可选 redirectTo 参数（默认 /admin）。
+- 登录墙模式（Notes / Cinema / Admin 三处一致）：页面内自己订阅
+  `supabase.auth.getSession()` + `onAuthStateChange`（**项目没有 AuthContext**），
+  `booting` 时先渲染「加载中」避免闪登录墙，未登录渲染 `.login-gate` + `LoginModal redirectTo=本页路径`。
+  LoginModal 标题按 redirectTo 派生：`/admin` → 「后台登录」，其它 → 「登录后继续」。
+  需要登录的页面不要进 sitemap（`scripts/gh-pages.mjs` 的 staticPages）。
+- `/cinema` 放映厅（2026-10-24 建）：三个 tab —— 本地片单 / B 站影视 / OuonnkiTV；
+  2026-10-26 加登录墙（内容与导航入口：入口保留、内容需登录）。
+  B 站用官方嵌入页 `player.bilibili.com/player.html?bvid=&p=`，整站 www.bilibili.com 有
+  X-Frame-Options 不能嵌；`tv.cctv.com` 直播页能嵌但被版权拦截播不了（别再试）。
 - 新增 SQL 表的工作流：写 `supabase/*.sql`（幂等 policy + grant），由用户在 Supabase SQL
   Editor 手动执行；本地无 .env/service_role，无法代跑 SQL。
 - 悬浮音乐播放器（2026-10-24 重写，提交 1cfc72b）：`aplayer@1.10.1`（npm，不用 CDN）+ 自实现
