@@ -29,6 +29,8 @@
   歌单 ID 默认 2884035（云音乐原创榜，可播率最高 46%），可用 `VITE_NETEASE_PLAYLIST` 覆盖。
 - 本机网络：**jsdelivr 不可达**（用 npm 包或 elemecdn）；`api.i-meto.com` + 网易云音频域都带
   CORS `*`，浏览器可直接 fetch；supabase.co 仍被阻断。
+  无头 Chrome 验证 `lpw94.github.io` **不要带 `--proxy-server`**（会 chrome-error），直连即可；
+  访问 cctv / bilibili 这类外站才需要代理。
 - 构建命令用受管 node：`C:/Users/lpw94/.workbuddy/binaries/node/versions/22.22.2-6/npm run build`。
 
 ## 用户偏好
