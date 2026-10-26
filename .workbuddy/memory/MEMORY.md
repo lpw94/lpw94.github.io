@@ -4,6 +4,19 @@
 - React 18 + Vite + TypeScript + Supabase，dev 分支开发，推 main 触发 GitHub Actions 部署 lpw94.github.io。
 - 文章存 Supabase `posts` 表（RLS：authenticated 可写、anon 只读已发布）；RSS/sitemap 由
   `scripts/gh-pages.mjs` 构建时拉已发布文章生成（best-effort，缺 .env 不阻断构建）。
+- **发文可自助完成，不用再让用户去 /admin 粘贴**（2026-10-26 打通）：
+  `scripts/publish/` 三件套（`extract-token.mjs` 从日常 Chrome Profile 4 的 leveldb
+  抽登录 JWT → `cdp-eval.mjs` 在带代理的 headless Chrome 里求值 → `expr-publish.js`
+  按 slug 幂等 upsert）。**不需要 service_role key。**
+  ⚠️ `scripts/publish/` **只保留本地、已加进 .gitignore**——`extract-token.mjs`
+  会从浏览器 leveldb 抽登录 JWT，这工具不适合出现在公开仓库里。
+  - 两个头必须分清：`apikey`=anon key（`.env` 的 VITE_SUPABASE_ANON_KEY），
+    `Authorization: Bearer`=用户 JWT。反了会得到 401 / 42501。
+  - token 只走环境变量→stdout 管道，不落盘、不进命令行参数；JWT 有效期约 1 小时。
+  - 本机直连 `*.supabase.co` 仍全挂（HTTP 000），**请求必须放到浏览器上下文里发**；
+    Chrome 要带 `--proxy-server=http://127.0.0.1:<当前代理端口>`（端口每次会话都变）。
+  - CDP 端点只监听 `127.0.0.1`；默认 9336 常被占，新实例换端口（用 9340）。
+  - 验证文章渲染用 CDP 读 `document.body.innerText`，不能靠 curl（SPA 深链接 404 正常）。
 
 ## 功能模块与数据表
 - 常用导航 `/tools`（2026-10-14 合并，提交 916cb37）：静态 `src/sites.ts` + DB `bookmarks`
@@ -24,6 +37,7 @@
   X-Frame-Options 不能嵌；`tv.cctv.com` 直播页能嵌但被版权拦截播不了（别再试）。
 - 新增 SQL 表的工作流：写 `supabase/*.sql`（幂等 policy + grant），由用户在 Supabase SQL
   Editor 手动执行；本地无 .env/service_role，无法代跑 SQL。
+  （注：**发文章**已可自助，见上方「发文可自助完成」；代跑 SQL 仍需用户。）
 - 悬浮音乐播放器（2026-10-24 重写，提交 1cfc72b）：`aplayer@1.10.1`（npm，不用 CDN）+ 自实现
   Meting 协议（`src/lib/meting.ts`）拉网易云歌单；先探测可播性再建列表，缓存 6 小时。
   歌单 ID 默认 2884035（云音乐原创榜，可播率最高 46%），可用 `VITE_NETEASE_PLAYLIST` 覆盖。

@@ -23,3 +23,9 @@ vite.config.d.ts
 # 发布用的临时文件（可能含 service_role key，禁止提交）
 .workbuddy/tmp/
 .publish-tmp/
+
+# 发布工具（本地保留，不入库）
+# 原因：extract-token.mjs 会从浏览器 leveldb 里抽取登录 JWT ——
+# 这类工具不适合出现在公开仓库里。脚本本身不含密钥，但放进公开仓库
+# 等于把「怎么从本机浏览器捞出登录态」写成教程。
+scripts/publish/
