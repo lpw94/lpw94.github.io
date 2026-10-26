@@ -19,7 +19,7 @@
   LoginModal 标题按 redirectTo 派生：`/admin` → 「后台登录」，其它 → 「登录后继续」。
   需要登录的页面不要进 sitemap（`scripts/gh-pages.mjs` 的 staticPages）。
 - `/cinema` 放映厅（2026-10-24 建）：三个 tab —— 本地片单 / B 站影视 / OuonnkiTV；
-  2026-10-26 加登录墙（内容与导航入口：入口保留、内容需登录）。
+  2026-10-26 加登录墙，**入口与内容都要登录**（`{user && <Link to="/cinema">}`，与 /notes 一致）。
   B 站用官方嵌入页 `player.bilibili.com/player.html?bvid=&p=`，整站 www.bilibili.com 有
   X-Frame-Options 不能嵌；`tv.cctv.com` 直播页能嵌但被版权拦截播不了（别再试）。
 - 新增 SQL 表的工作流：写 `supabase/*.sql`（幂等 policy + grant），由用户在 Supabase SQL
