@@ -33,6 +33,7 @@
 | `25-admin-permission-menu-grant.md` | 授权 = 勾菜单：权限模型的最后一环，以及 Alembic 迁移与删除保护实战 | `admin-permission-menu-grant` | 后端 |
 | `26-sensitive-config-externalization.md` | 敏感配置外置实战：公开仓库里的一次完整凭据治理，含历史重写与自查脚本 | `sensitive-config-externalization` | 后端 |
 | `27-meter-data-excel-export.md` | 水表取数与 Excel 导出实战：五个接口契约陷阱，和一份报表该有哪些列 | `meter-data-excel-export` | 后端 |
+| `28-celebrity-recognition-dual-engine.md` | 名人识别实战：CLIP 零样本 + 人脸特征库双引擎，和准确率从 77.8% 提到 90% 的三步 | `celebrity-recognition-dual-engine` | 后端 |
 
 > `05` / `06` / `07` / `08` 是本博客**自身**的建站与技术拆解（含真实踩坑），属于"项目自述"型文章，与其他四篇的通用教程定位不同。
 
