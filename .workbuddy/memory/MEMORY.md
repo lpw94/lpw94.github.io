@@ -6,15 +6,30 @@
   `scripts/gh-pages.mjs` 构建时拉已发布文章生成（best-effort，缺 .env 不阻断构建）。
 - **发文可自助完成，不用再让用户去 /admin 粘贴**（2026-10-26 打通）：
   `scripts/publish/` 三件套（`extract-token.mjs` 从日常 Chrome Profile 4 的 leveldb
-  抽登录 JWT → `cdp-eval.mjs` 在带代理的 headless Chrome 里求值 → `expr-publish.js`
+  抽登录 JWT → `cdp-eval.mjs` 在 headless Chrome 里求值 → `expr-publish.js`
   按 slug 幂等 upsert）。**不需要 service_role key。**
   ⚠️ `scripts/publish/` **只保留本地、已加进 .gitignore**——`extract-token.mjs`
   会从浏览器 leveldb 抽登录 JWT，这工具不适合出现在公开仓库里。
   - 两个头必须分清：`apikey`=anon key（`.env` 的 VITE_SUPABASE_ANON_KEY），
     `Authorization: Bearer`=用户 JWT。反了会得到 401 / 42501。
   - token 只走环境变量→stdout 管道，不落盘、不进命令行参数；JWT 有效期约 1 小时。
-  - 本机直连 `*.supabase.co` 仍全挂（HTTP 000），**请求必须放到浏览器上下文里发**；
-    Chrome 要带 `--proxy-server=http://127.0.0.1:<当前代理端口>`（端口每次会话都变）。
+  - 本机直连 `*.supabase.co` 仍全挂（curl/node 都是 ECONNRESET / HTTP 000，
+    TLS 握手被中间设备打断，`openssl s_client` 显示 `Cipher is (NONE)`），
+    **请求必须放到浏览器上下文里发**。
+    ⚠️ **2026-10-26 更新：Chrome 可以直连，不必带 `--proxy-server`**——
+    旧记忆说「必须带代理」，实测是那次代理端口恰好有效；现在代理端口失效时
+    **直连反而能通**（Chrome 页面内 fetch Supabase 返回 200）。
+    带代理反而翻车：代理不通时连 `lpw94.github.io` 都加载不出来，
+    页面 origin 变成 `null`，CORS 预检被拒 → 所有 fetch 报 `Failed to fetch`。
+    **判断依据是 `window.location.origin` 是否为 `null`**，不是猜。
+  - ⚠️ **`--headless=new` 在本机会秒退**（826ms），必须用 `--headless=old`。
+  - ⚠️ **Chrome 进程不能跨命令存活**：Bash 命令一结束就被回收，
+    所以「起 Chrome → CDP 求值 → 关 Chrome」必须在**同一个命令/脚本**里完成
+    （`scripts/publish/publish-post.mjs` 就是这么写的）。
+  - **access_token 过期后 refresh_token 也救不回来**：Supabase 每次刷新都轮换
+    refresh_token，旧的下次就报 `refresh_token_not_found`（本地 4 个全废）。
+    唯一解是**用户在浏览器重新登录一次** → 新 refresh_token 写进 leveldb。
+    leveldb 里同 key 有多个版本，按文件 mtime 取最新、文件内取最靠后的那个。
   - CDP 端点只监听 `127.0.0.1`；默认 9336 常被占，新实例换端口（用 9340）。
   - 验证文章渲染用 CDP 读 `document.body.innerText`，不能靠 curl（SPA 深链接 404 正常）。
 
