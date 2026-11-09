@@ -31,6 +31,15 @@
     但只要浏览器**最近登录过**，leveldb 里就有新的可用。
     → **正确做法：先试 refresh_token，失败再回退密码登录**（见下），别一上来就断定要走密码。
     leveldb 里同 key 有多个版本，按文件 mtime 取最新、文件内取最靠后的那个。
+  - ✅ **2026-11-09 更正：凭证优先级改为「现成 access_token 优先」，且必须扫 Chrome + Edge**：
+    `scripts/publish/extract-access.mjs` 扫两个浏览器**所有 profile** 的 leveldb，
+    抽 `"access_token":"eyJ..."`，解 JWT 校验 `iss` 含项目 ID、`aud=authenticated`、
+    `exp>now`，取「最晚过期且未过期」的；`publish-post.mjs` 优先级改为
+    **① access_token → ② refresh_token → ③ 密码登录**。
+    用户刚登录 `/admin` 后 ① 直接可用，**不会触发 refresh_token 轮换**，v20 解不了也不再是阻碍。
+    之前「三个 refresh_token 全废」有一半是 `extract-refresh.mjs` **只扫 Chrome、
+    漏了用户在 Edge 里登录写下的新会话**（Edge Default 的 019611.log）造成的。
+    → **以后发文先扫两个浏览器，别只盯 Chrome Profile 4。**
   - ✅ **兜底路径：Chrome 密码库 + DPAPI 解密**（2026-10-29 打通，全程无需用户操作）：
     `%LOCALAPPDATA%\Google\Chrome\User Data\<Profile>\Login Data`（SQLite）
     → 表 `logins` 的 `origin_url`/`username_value`/`password_value`；
@@ -42,8 +51,10 @@
     🔴 **2026-11-09 失效**：Chrome 升级后该条记录的 `password_value` 已是 `v20` 前缀，
     DPAPI 解密返回 `not-v10`，密码兜底整条链路走不通（另修了该脚本两个真 bug：
     `import ctypes.wintypes` 没绑定 `wintypes` → NameError；`DATA_BLOB.pbData` 应为 `c_void_p`）。
-    同日三个 leveldb refresh_token 也全是 `refresh_token_not_found`。
-    → **此时只能让用户在浏览器登录一次 `/admin` 换出新 refresh_token，或改用 service_role key**；
+    同日三个 leveldb refresh_token 也全是 `refresh_token_not_found`（其中一部分原因是
+    `extract-refresh.mjs` 只扫 Chrome，漏了 Edge 里的新会话，见上方 2026-11-09 更正）。
+    → **密码兜底已不可靠，别再指望它**；让用户在浏览器登录一次 `/admin`，
+    然后用 `extract-access.mjs` 直接取新 access_token 即可发布（已实测第 31 篇 201 成功）。
     CI 只有 anon key，RLS 不允许写库，帮不上忙。
   - ⚠️ `api.github.com` 直连也被阻断 → 查 Actions 状态用 **WebFetch**（服务端出口）。
   - 本地 `npm run build` 里 `gh-pages.mjs` 拉文章会 `fetch failed` → **本地没 RSS/Sitemap 很正常**，
