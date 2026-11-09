@@ -9,7 +9,16 @@ import { createClient } from '@supabase/supabase-js'
 // 这里手动读一下 .env（不覆盖已存在的 process.env，CI 走 workflow env 优先）。
 loadDotEnv()
 
-const SITE_URL = (process.env.VITE_SITE_URL || 'https://lpw94.github.io').replace(/\/+$/, '')
+// 部署环境的 VITE_SITE_URL secret 曾被误设成 Supabase 项目地址（*.supabase.co），
+// 直接采用会让 RSS/Sitemap 里所有链接指向 API 域而不是博客域。
+// 前端 src/lib/site.ts 已用 window.location.origin 规避，这里做同样的防御：
+// 只有「非 supabase.co 的 http(s) 地址」才采用，否则回退到 GitHub Pages 固定域名。
+const RAW_SITE_URL = (process.env.VITE_SITE_URL || '').trim()
+const SITE_URL = (
+  /^https?:\/\//i.test(RAW_SITE_URL) && !/supabase\.co/i.test(RAW_SITE_URL)
+    ? RAW_SITE_URL
+    : 'https://lpw94.github.io'
+).replace(/\/+$/, '')
 const SITE_TITLE = 'woge博客'
 const SITE_DESC = '基于 React + Supabase 的个人博客'
 
