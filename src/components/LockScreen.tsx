@@ -1,8 +1,10 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import FishTank from './FishTank'
 
-// 锁屏遮罩：仅首页展示。解锁方式 = 一道随机算术题，输入正确答案才解锁。
-// 内容走「有意思」路线：随时间变化的问候、随机吐槽标语、实时时钟、漂浮的趣味 emoji。
+// 锁屏遮罩：仅首页展示。背景是一缸由 Canvas 实时演算的生态鱼缸（见 FishTank）。
+// 解锁方式 = 一道随机算术题，输入正确答案才解锁。
+// 文案走「有意思」路线：随时间变化的问候、随机吐槽标语、实时时钟、水下的鱼群。
 
 const WEEK = ['日', '一', '二', '三', '四', '五', '六']
 
@@ -18,20 +20,17 @@ function greeting(h: number): string {
 
 /** 随机吐槽 / 鼓励标语，让锁屏不那么无聊 */
 const TAGLINES = [
-  '代码写累了？答对题再进来 ☕',
+  '鱼群都游过来了，先答对这道题再喂它们 🐟',
+  '水草在摇，气泡在升，这道题也算一算',
+  '别急，养鱼和写代码都要有耐心',
   '今天的 bug 修完了吗 🐛',
-  '一杯咖啡，一段代码，一个更好的自己',
-  '保持热爱，奔赴山海 🚀',
+  '保持热爱，奔赴山海 🌊',
   '好记性不如烂笔头，好代码不如常重构',
   '键盘敲烂，月薪过万 💻',
-  '每一个不眠的夜晚，都在为梦想充电 🌙',
+  '水清则无鱼？不，这里水清鱼也多',
   'Stay hungry, stay foolish',
-  '别卷了，先答对这道题 📚',
   '这站点是用 React + Supabase 搭的，欢迎翻源码',
 ]
-
-/** 背景漂浮的趣味 emoji */
-const FLOATERS = ['💻', '🚀', '☕', '🌟', '✨', '🔒', '📚', '🐛', '🌙', '🍵']
 
 function rand(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min
@@ -69,20 +68,9 @@ function useNow() {
 
 export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
   const now = useNow()
-  // 标语 / 漂浮物只在挂载时随机定一次，避免每秒重抽
+  // 标语只在挂载时随机定一次，避免每秒重抽
   const tagline = useMemo(
     () => TAGLINES[Math.floor(Math.random() * TAGLINES.length)],
-    [],
-  )
-  const floaters = useMemo(
-    () =>
-      FLOATERS.map((emoji, i) => ({
-        emoji,
-        left: `${(i * 9.5 + Math.random() * 6) % 100}%`,
-        delay: `${(Math.random() * 6).toFixed(2)}s`,
-        duration: `${(7 + Math.random() * 6).toFixed(2)}s`,
-        size: `${18 + Math.random() * 22}px`,
-      })),
     [],
   )
 
@@ -116,7 +104,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
     e.preventDefault()
     const raw = value.trim()
     if (raw === '') {
-      setError('先输入答案哦 ✍️')
+      setError('鱼说：先把答案写上 🐠')
       triggerShake()
       return
     }
@@ -125,7 +113,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
       return
     }
     // 答错：换一道新题，给点挫败感又不会卡死
-    setError('答错啦，已换一道新的 👀')
+    setError('答错啦，鱼群散了，换一道 👀')
     setValue('')
     setProblem(makeProblem())
     triggerShake()
@@ -141,29 +129,18 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 
   return createPortal(
     <div className="lock-screen" role="dialog" aria-modal="true" aria-label="锁屏">
-      <div className="lock-bg" aria-hidden="true">
-        {floaters.map((f, i) => (
-          <span
-            key={i}
-            className="lock-floater"
-            style={{
-              left: f.left,
-              animationDelay: f.delay,
-              animationDuration: f.duration,
-              fontSize: f.size,
-            }}
-          >
-            {f.emoji}
-          </span>
-        ))}
+      <FishTank />
+      <div className="tank-glass" aria-hidden="true" />
+
+      <div className="tank-badge">
+        <span className="tank-live-dot" />
+        生态鱼缸 · 实时
       </div>
 
       <div className="lock-card">
-        <div className="lock-emoji">🔒</div>
+        <div className="lock-emoji">🐠</div>
         <h1 className="lock-title">技术博客</h1>
-        <p className="lock-greet">
-          {greeting(now.getHours())}，欢迎来到我的小宇宙
-        </p>
+        <p className="lock-greet">{greeting(now.getHours())}，欢迎浮上水面透口气</p>
         <p className="lock-tagline">{tagline}</p>
         <div className="lock-clock">
           {hh}:{mm}
@@ -173,7 +150,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
 
         <form className={`lock-form${shake ? ' shake' : ''}`} onSubmit={submit}>
           <p className="lock-prompt">
-            🔐 解锁：<b>
+            🔑 算对了开门：<b>
               {problem.a} {problem.op} {problem.b} = ?
             </b>
           </p>
@@ -197,6 +174,7 @@ export default function LockScreen({ onUnlock }: { onUnlock: () => void }) {
           <p className="lock-error" role="alert">
             {error || '\u00A0'}
           </p>
+          <p className="lock-hint">💡 动动鼠标，鱼会给你让路；点一下水面会冒气泡</p>
         </form>
       </div>
     </div>,

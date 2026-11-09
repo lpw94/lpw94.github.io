@@ -2820,7 +2820,7 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   border-color: var(--accent);
 }
 
-/* ===== 首页锁屏遮罩 ===== */
+/* ===== 首页锁屏：模拟生态鱼缸 ===== */
 .lock-screen {
   position: fixed;
   inset: 0;
@@ -2830,93 +2830,121 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   justify-content: center;
   overflow: hidden;
   color: #fff;
-  background:
-    radial-gradient(1200px 800px at 20% 20%, rgba(37, 99, 235, 0.55), transparent 60%),
-    radial-gradient(1000px 700px at 85% 75%, rgba(236, 72, 153, 0.5), transparent 60%),
-    linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #0b1020 100%);
-  background-size: 200% 200%, 200% 200%, 100% 100%;
-  animation: lockBgShift 18s ease-in-out infinite;
+  background: radial-gradient(120% 110% at 50% 0%, #12657a 0%, #0a3a4a 42%, #04121a 100%);
+  isolation: isolate;
 }
-@keyframes lockBgShift {
-  0% { background-position: 0% 0%, 100% 100%, 0 0; }
-  50% { background-position: 100% 50%, 0% 50%, 0 0; }
-  100% { background-position: 0% 0%, 100% 100%, 0 0; }
-}
-/* 背景漂浮的趣味 emoji，缓慢上浮 + 淡入淡出，营造「有意思」的氛围 */
-.lock-bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
-.lock-floater {
+/* 鱼缸画布铺满整个遮罩；卡片在它上层，点空白处才会冒气泡 */
+.lock-tank { position: absolute; inset: 0; z-index: 0; }
+.lock-tank canvas { display: block; width: 100%; height: 100%; }
+/* 缸壁：斜向反光 + 四角暗角，做出「隔着一层玻璃」的观感 */
+.tank-glass {
   position: absolute;
-  bottom: -40px;
-  opacity: 0;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.35));
-  animation-name: lockFloat;
-  animation-timing-function: ease-in-out;
-  animation-iteration-count: infinite;
+  inset: 0;
+  z-index: 1;
+  pointer-events: none;
+  background:
+    linear-gradient(118deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.035) 14%, rgba(255, 255, 255, 0) 28%),
+    linear-gradient(198deg, rgba(255, 255, 255, 0.05) 0%, rgba(255, 255, 255, 0) 20%),
+    radial-gradient(125% 95% at 50% 42%, rgba(0, 0, 0, 0) 42%, rgba(0, 0, 0, 0.42) 100%);
+  box-shadow: inset 0 0 140px rgba(0, 6, 10, 0.6);
 }
-@keyframes lockFloat {
-  0% { transform: translateY(0) rotate(0deg); opacity: 0; }
-  15% { opacity: .85; }
-  85% { opacity: .85; }
-  100% { transform: translateY(-105vh) rotate(40deg); opacity: 0; }
+/* 左上角「运行中」小徽标 */
+.tank-badge {
+  position: absolute;
+  top: 18px;
+  left: 20px;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(148, 233, 222, 0.26);
+  background: rgba(4, 32, 42, 0.42);
+  color: rgba(226, 255, 250, 0.86);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(6px);
 }
+.tank-live-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #34d399;
+  animation: tankPulse 2.4s ease-out infinite;
+}
+@keyframes tankPulse {
+  0% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0.55); }
+  70% { box-shadow: 0 0 0 7px rgba(52, 211, 153, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
+}
+
+/* 玻璃面板：半透明深青 + 模糊，卡片外的鱼照样看得见 */
 .lock-card {
   position: relative;
-  z-index: 1;
+  z-index: 3;
+  width: min(452px, calc(100vw - 32px));
+  padding: 24px 30px 18px;
   text-align: center;
-  padding: 12px 24px;
+  border-radius: 24px;
+  border: 1px solid rgba(148, 233, 222, 0.22);
+  background: linear-gradient(180deg, rgba(6, 38, 50, 0.5) 0%, rgba(4, 20, 28, 0.62) 100%);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(14px) saturate(1.15);
+  -webkit-backdrop-filter: blur(14px) saturate(1.15);
   user-select: none;
 }
 .lock-emoji {
-  position: relative;
-  width: 64px;
-  height: 64px;
-  margin: 0 auto 10px;
+  width: 58px;
+  height: 58px;
+  margin: 0 auto 4px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 52px;
-  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.45));
-  animation: lockBob 3s ease-in-out infinite;
+  font-size: 44px;
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.45));
+  animation: lockBob 3.4s ease-in-out infinite;
 }
 @keyframes lockBob {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+  0%, 100% { transform: translateY(0) rotate(-3deg); }
+  50% { transform: translateY(-7px) rotate(3deg); }
 }
 .lock-title {
   margin: 0 0 8px;
-  font-size: clamp(30px, 6vw, 52px);
+  font-size: clamp(28px, 5.6vw, 46px);
   font-weight: 800;
-  letter-spacing: 2px;
-  text-shadow: 0 4px 24px rgba(0, 0, 0, 0.5);
+  letter-spacing: 3px;
+  text-shadow: 0 0 30px rgba(94, 234, 212, 0.35), 0 4px 20px rgba(0, 0, 0, 0.45);
 }
 .lock-greet {
   margin: 0 0 6px;
-  font-size: clamp(15px, 2.4vw, 20px);
-  color: rgba(255, 255, 255, 0.92);
+  font-size: clamp(14px, 2.2vw, 19px);
+  color: rgba(232, 255, 251, 0.92);
 }
 .lock-tagline {
   margin: 0 0 12px;
-  font-size: clamp(13px, 2vw, 16px);
-  color: rgba(255, 255, 255, 0.7);
+  font-size: clamp(12.5px, 1.9vw, 15px);
+  color: rgba(203, 246, 240, 0.66);
   min-height: 1.4em;
 }
 .lock-clock {
-  font-size: clamp(40px, 10vw, 72px);
+  font-size: clamp(38px, 9vw, 66px);
   font-weight: 700;
   font-variant-numeric: tabular-nums;
   line-height: 1;
-  text-shadow: 0 6px 30px rgba(0, 0, 0, 0.5);
+  color: #f2fffd;
+  text-shadow: 0 0 34px rgba(94, 234, 212, 0.5), 0 8px 26px rgba(0, 0, 0, 0.45);
 }
-.lock-sec { font-size: .5em; opacity: .7; vertical-align: super; }
+.lock-sec { font-size: 0.5em; opacity: 0.7; vertical-align: super; }
 .lock-date {
   margin-top: 6px;
-  font-size: 14px;
-  color: rgba(255, 255, 255, 0.65);
+  font-size: 13px;
+  color: rgba(203, 246, 240, 0.62);
   letter-spacing: 1px;
 }
 /* 算术题「密码」表单 */
-.lock-form { margin-top: 18px; user-select: none; }
-.lock-form.shake { animation: lockShake .45s ease; }
+.lock-form { margin-top: 16px; user-select: none; }
+.lock-form.shake { animation: lockShake 0.45s ease; }
 @keyframes lockShake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-8px); }
@@ -2926,14 +2954,14 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
 }
 .lock-prompt {
   margin: 0 0 10px;
-  font-size: 17px;
-  color: rgba(255, 255, 255, 0.92);
+  font-size: 15px;
+  color: rgba(226, 255, 250, 0.9);
 }
 .lock-prompt b {
-  font-size: 22px;
+  font-size: 21px;
   letter-spacing: 1px;
   color: #fff;
-  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+  text-shadow: 0 0 18px rgba(94, 234, 212, 0.45);
 }
 .lock-input-row {
   display: flex;
@@ -2942,66 +2970,95 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   align-items: stretch;
 }
 .lock-input-row input {
-  width: 140px;
+  width: 146px;
   text-align: center;
   font-size: 20px;
   font-variant-numeric: tabular-nums;
   letter-spacing: 2px;
-  color: var(--fg);
-  background: #fff;
-  border: 2px solid rgba(255, 255, 255, 0.7);
-  border-radius: 10px;
+  color: #f2fffd;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1.5px solid rgba(148, 233, 222, 0.4);
+  border-radius: 11px;
   padding: 10px 12px;
   outline: none;
   user-select: text;
-  transition: border-color .15s, box-shadow .15s;
+  transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
 }
-.lock-input-row input::placeholder { color: #bbb; letter-spacing: 0; font-size: 15px; }
+.lock-input-row input::placeholder {
+  color: rgba(226, 255, 250, 0.45);
+  letter-spacing: 0;
+  font-size: 14px;
+}
 .lock-input-row input:focus {
-  border-color: #fff;
-  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.25);
+  border-color: #5eead4;
+  background: rgba(255, 255, 255, 0.15);
+  box-shadow: 0 0 0 4px rgba(94, 234, 212, 0.18);
 }
 .lock-input-row button {
   padding: 10px 20px;
   font-size: 16px;
-  border-radius: 10px;
+  font-weight: 600;
+  border-radius: 11px;
   border: none;
-  background: var(--accent);
-  color: #fff;
+  color: #04262b;
+  background: linear-gradient(135deg, #5eead4 0%, #22d3ee 100%);
   cursor: pointer;
-  transition: transform .12s, filter .12s;
+  box-shadow: 0 8px 22px rgba(34, 211, 238, 0.28);
+  transition: transform 0.12s, filter 0.12s, box-shadow 0.12s;
 }
-.lock-input-row button:hover { filter: brightness(1.1); }
+.lock-input-row button:hover { filter: brightness(1.06); box-shadow: 0 10px 26px rgba(34, 211, 238, 0.4); }
 .lock-input-row button:active { transform: scale(0.96); }
 .lock-error {
   margin: 10px 0 0;
   min-height: 1.2em;
-  font-size: 14px;
+  font-size: 13.5px;
   color: #fca5a5;
+}
+.lock-hint {
+  margin: 2px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: rgba(203, 246, 240, 0.5);
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .lock-screen { animation: none; }
-  .lock-floater { animation: none; opacity: .5; }
+  .tank-live-dot { animation: none; }
   .lock-emoji { animation: none; }
   .lock-form.shake { animation: none; }
 }
 
-/* 锁屏只在首页有意义；≤720px 时遮罩照样全屏覆盖，无需特殊适配 */
+@media (max-width: 720px) {
+  .tank-badge { top: 12px; left: 12px; padding: 5px 10px 5px 9px; font-size: 11px; }
+  /* 手机上把卡片压扁一点，多留些水面给鱼游 */
+  .lock-card { padding: 16px 16px 12px; border-radius: 20px; }
+  .lock-emoji { width: 44px; height: 44px; font-size: 32px; margin-bottom: 0; }
+  .lock-title { font-size: 30px; letter-spacing: 2px; margin-bottom: 5px; }
+  .lock-greet { font-size: 14px; margin-bottom: 4px; }
+  .lock-tagline { font-size: 12.5px; margin-bottom: 6px; }
+  .lock-clock { font-size: clamp(40px, 12vw, 52px); }
+  .lock-date { font-size: 12px; margin-top: 4px; }
+  .lock-form { margin-top: 12px; }
+  .lock-prompt { font-size: 14px; margin-bottom: 8px; }
+  /* 手机上没鼠标，「动动鼠标」的提示没意义 */
+  .lock-hint { display: none; }
+}
 
 /* 矮屏（如横屏手机）缩小锁屏元素，保证算术题表单不被裁切（遮罩本身 overflow:hidden 无滚动条） */
 @media (max-height: 560px) {
-  .lock-emoji { width: 48px; height: 48px; font-size: 40px; margin-bottom: 6px; }
-  .lock-title { font-size: clamp(22px, 7vw, 32px); margin-bottom: 4px; }
-  .lock-greet { font-size: 14px; margin-bottom: 2px; }
-  .lock-tagline { margin-bottom: 8px; }
-  .lock-clock { font-size: clamp(34px, 14vw, 56px); }
-  .lock-date { margin-top: 4px; font-size: 12px; }
-  .lock-form { margin-top: 12px; }
-  .lock-prompt { font-size: 15px; margin-bottom: 8px; }
-  .lock-prompt b { font-size: 18px; }
-  .lock-input-row input { width: 110px; font-size: 17px; }
-  .lock-input-row button { padding: 8px 14px; font-size: 14px; }
+  .lock-card { padding: 14px 20px 10px; }
+  .lock-emoji { width: 40px; height: 40px; font-size: 30px; margin-bottom: 2px; }
+  .lock-title { font-size: clamp(20px, 6vw, 28px); margin-bottom: 3px; }
+  .lock-greet { font-size: 13px; margin-bottom: 2px; }
+  .lock-tagline { margin-bottom: 6px; font-size: 12px; }
+  .lock-clock { font-size: clamp(30px, 12vw, 46px); }
+  .lock-date { margin-top: 2px; font-size: 11.5px; }
+  .lock-form { margin-top: 10px; }
+  .lock-prompt { font-size: 13.5px; margin-bottom: 6px; }
+  .lock-prompt b { font-size: 17px; }
+  .lock-input-row input { width: 108px; font-size: 17px; padding: 7px 10px; }
+  .lock-input-row button { padding: 7px 14px; font-size: 14px; }
+  .lock-error { margin-top: 6px; font-size: 12px; }
+  .lock-hint { display: none; }
 }
 
 /* ===== 顶栏背景风格切换器（🎨） ===== */
