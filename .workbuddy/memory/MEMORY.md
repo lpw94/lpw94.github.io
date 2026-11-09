@@ -39,6 +39,12 @@
     ⚠️ `v20` 前缀（新版 app-bound 加密）此法解不了。
     实测 Profile 2 存有 `lpw94.github.io/admin` → `lpw94@qq.com`。
     实现见 `scripts/publish/extract-password.py`（**只走 stdout 管道**，不落盘不回显）。
+    🔴 **2026-11-09 失效**：Chrome 升级后该条记录的 `password_value` 已是 `v20` 前缀，
+    DPAPI 解密返回 `not-v10`，密码兜底整条链路走不通（另修了该脚本两个真 bug：
+    `import ctypes.wintypes` 没绑定 `wintypes` → NameError；`DATA_BLOB.pbData` 应为 `c_void_p`）。
+    同日三个 leveldb refresh_token 也全是 `refresh_token_not_found`。
+    → **此时只能让用户在浏览器登录一次 `/admin` 换出新 refresh_token，或改用 service_role key**；
+    CI 只有 anon key，RLS 不允许写库，帮不上忙。
   - ⚠️ `api.github.com` 直连也被阻断 → 查 Actions 状态用 **WebFetch**（服务端出口）。
   - 本地 `npm run build` 里 `gh-pages.mjs` 拉文章会 `fetch failed` → **本地没 RSS/Sitemap 很正常**，
     Actions 构建机没这问题。
