@@ -35,6 +35,7 @@
 | `27-meter-data-excel-export.md` | 水表取数与 Excel 导出实战：五个接口契约陷阱，和一份报表该有哪些列 | `meter-data-excel-export` | 后端 |
 | `28-celebrity-recognition-dual-engine.md` | 名人识别实战：CLIP 零样本 + 人脸特征库双引擎，和准确率从 77.8% 提到 90% 的三步 | `celebrity-recognition-dual-engine` | 后端 |
 | `31-canvas-fishtank-lock-screen.md` | 用 Canvas 给锁屏造一只生态鱼缸：分层渲染、鱼群运动与三个真实的坑 | `canvas-fishtank-lock-screen` | 前端 |
+| `32-zoom-vs-scale-screen-adaptation.md` | zoom 与 scale：大屏适配的两把刀，差别比你想的大 | `zoom-vs-scale-screen-adaptation` | 前端 |
 
 > `05` / `06` / `07` / `08` 是本博客**自身**的建站与技术拆解（含真实踩坑），属于"项目自述"型文章，与其他四篇的通用教程定位不同。
 
