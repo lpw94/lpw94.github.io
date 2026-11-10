@@ -89,6 +89,11 @@
   CORS `*`，浏览器可直接 fetch；supabase.co 仍被阻断。
   无头 Chrome 验证 `lpw94.github.io` **不要带 `--proxy-server`**（会 chrome-error），直连即可；
   访问 cctv / bilibili 这类外站才需要代理。
+- **国内热榜数据源（2026-11-10 浏览器实测）**：`https://60s.viki.moe/v2/{baidu/hot|toutiao|weibo|zhihu}`
+  及镜像域 `https://60s-api.viki.moe/v2/...` 可直连、带 CORS、无需 key（开源 vikiboss/60s）；
+  vvhan / imsyy / oioweb / tenapi / pearktrue / qqsuu / 52vmy / 微博知乎官方全挂，
+  人民网 RSS（rss2json）能通但返回 2025 年旧闻。**判断外部 API 能不能用，必须在浏览器
+  CDP 上下文里 fetch，不能只看 WebFetch（服务端出口结果不同）**；60s 端点偶有波动，要多源 fallback。
 - 构建命令用受管 node：`C:/Users/lpw94/.workbuddy/binaries/node/versions/22.22.2-6/npm run build`。
 
 ## 用户偏好
