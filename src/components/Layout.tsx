@@ -5,8 +5,7 @@ import type { User } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import ProfileCard from './ProfileCard'
 import CursorFX from './CursorFX'
-import TimeWidget from './TimeWidget'
-import FortuneWidget from './FortuneWidget'
+import NewsWidget from './NewsWidget'
 import GameCenter from './GameCenter'
 import AdSlot from './AdSlot'
 import DonateWidget from './DonateWidget'
@@ -289,6 +288,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
       {showProfile && (
         <aside className="sidebar sidebar-left">
           <ProfileCard />
+          <VisitorWidget />
           {/* <KonamiCode /> */}
           <DonateWidget />
           {/* <AdSlot /> */}
@@ -345,9 +345,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     </div>
       {showProfile && (
         <aside className="sidebar sidebar-right">
-          <TimeWidget />
-          <VisitorWidget />
-          <FortuneWidget />
+          <NewsWidget />
           <GameCenter />
         </aside>
       )}

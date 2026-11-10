@@ -1294,32 +1294,46 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   .cal-cell, .cal-nav, .tw-hint { transition: none; }
 }
 
-/* 算命组件 */
-.fw-card {
-  border: 1px solid var(--border);
-  border-top: 3px solid var(--accent);
-  border-radius: 8px;
-  padding: 12px;
-  background: #fafafa;
-  animation: fwIn 0.35s ease-out both;
+/* 热点新闻 */
+.news-list { display: flex; flex-direction: column; }
+.news-item {
+  display: flex; align-items: flex-start; gap: 8px;
+  min-width: 0; padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  text-decoration: none; color: var(--fg);
 }
-@keyframes fwIn {
-  from { opacity: 0; transform: translateY(6px); }
-  to { opacity: 1; transform: none; }
+.news-item:last-child { border-bottom: none; }
+.news-rank {
+  flex: 0 0 16px; font-size: 12px; font-weight: 700;
+  color: var(--muted); font-variant-numeric: tabular-nums; line-height: 1.5;
 }
-.fw-sign { font-size: 16px; font-weight: 700; }
-.fw-line { font-size: 13px; margin: 8px 0; color: var(--fg); line-height: 1.5; }
-.fw-meta { display: flex; gap: 12px; font-size: 12px; }
-.fw-yi { color: #16a34a; }
-.fw-ji { color: #dc2626; }
-.fw-color { margin-top: 8px; font-size: 12px; color: var(--muted); display: flex; align-items: center; gap: 6px; }
-.fw-color i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
-.fw-btn {
-  margin-top: 10px; width: 100%; padding: 8px;
-  font-size: 13px; cursor: pointer; transition: border-color .15s, color .15s;
-  border: 1px solid var(--border); border-radius: 8px; background: #fff; color: var(--fg);
+.news-item:nth-child(-n+3) .news-rank { color: var(--accent); }
+/* 右栏只有 220px，标题必须能收缩 + 截断，否则会把整页撑出横向滚动 */
+.news-body { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.news-title {
+  font-size: 12.5px; line-height: 1.45; color: var(--fg);
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden; word-break: break-word;
 }
-.fw-btn:hover { border-color: var(--accent); color: var(--accent); }
+.news-item:hover .news-title { color: var(--accent); }
+.news-meta { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.news-state { padding: 14px 0; font-size: 12px; color: var(--muted); text-align: center; }
+.news-link {
+  border: none; background: none; padding: 0; margin-left: 6px;
+  font-size: 12px; color: var(--accent); cursor: pointer;
+}
+.news-foot {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 10px; padding-top: 8px; border-top: 1px solid var(--border);
+  font-size: 11px; color: var(--muted);
+}
+.news-refresh {
+  border: 1px solid var(--border); background: #fff; color: var(--fg);
+  border-radius: 6px; padding: 3px 8px; font-size: 11px; cursor: pointer;
+  transition: border-color .15s, color .15s;
+}
+.news-refresh:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.news-refresh:disabled { opacity: .55; cursor: default; }
 
 /* 反应力小游戏 */
 .rg-pad {
@@ -2312,6 +2326,20 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
   line-height: 1.8;
   color: var(--muted);
 }
+/* 地图图例：头像 / 城市节点 / 访客足迹 / 飞线说明 */
+.vm-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  margin-top: 8px;
+  font-size: 11px;
+  color: var(--muted);
+}
+.vm-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.vm-lg { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.vm-lg-me { background: #3b82f6; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.25); }
+.vm-lg-city { background: #38bdf8; }
+.vm-lg-visitor { background: #ef4444; }
 
 /* ---------- 游戏中心 ---------- */
 .gc-entries {
