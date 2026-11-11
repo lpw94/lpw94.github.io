@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { Link } from 'react-router-dom'
 import { GAMES, fetchLeaderboard, playerNameStore, submitScore, type GameDef, type ScoreRow } from '../lib/games'
 import SnakeGame from './games/SnakeGame'
 import MinesweeperGame from './games/MinesweeperGame'
@@ -86,6 +87,14 @@ export default function GameCenter() {
           </button>
         ))}
       </div>
+      <Link to="/game/jimao" className="gc-feature" title="打开独立的 3A 游戏页面">
+        <span className="gc-feature-icon">▶</span>
+        <span className="gc-feature-text">
+          <strong>几猫3A大作</strong>
+          <small>独立大屏 · 3D 潜入</small>
+        </span>
+        <span className="gc-feature-arrow">→</span>
+      </Link>
       <p className="gc-tip">摸鱼时刻 · 上榜留名 🏅</p>
 
       {active &&

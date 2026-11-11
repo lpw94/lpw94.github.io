@@ -151,10 +151,12 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     if (pathname === '/admin') navigate('/')
   }
 
-  // 简历页本身就是个人信息详情；文章详情页需要更宽的正文空间（代码块、图片、表格），
-  // 信息栏也没有意义 —— 这几种页面都隐藏左侧栏
+  // 简历页本身就是个人信息详情；文章详情页需要更宽的正文空间（代码块、图片、表格）；
+  // 独立游戏页要把画面撑满 —— 这几种页面都隐藏两侧栏
   const showProfile =
-    pathname !== '/about' && !pathname.startsWith('/post/')
+    pathname !== '/about' &&
+    !pathname.startsWith('/post/') &&
+    !pathname.startsWith('/game/jimao')
 
   return (
     <>
