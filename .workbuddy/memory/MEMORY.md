@@ -90,6 +90,13 @@
     对象其实没删；判断成功要检查 `data.some(o => o.name === path)`。
     现有库缺 `Auth can delete covers`，已在 `post_pdfs.sql` 里幂等补上。
   - 实测 Storage 公开 PDF 无 `X-Frame-Options`/CSP、CORS `*`，可跨域 iframe 内嵌。
+  - 🔴 **SQL 里绝不能写 `delete from storage.objects`**：Supabase 有
+    `storage.protect_delete()` 触发器，直接删表报
+    `42501 Direct deletion from storage tables is not allowed. Use the Storage API instead.`。
+    清理对象只能走 Storage API / Dashboard。
+    ⚠️ **SQL Editor 把整份脚本当一个事务**：末尾一句报错会把前面的
+    `alter table` / `create policy` 一起回滚（2026-11-13 踩过，加列全部没生效）。
+    → SQL 脚本只放 DDL，不放 storage 表 DML；并在头部注明「报权限错时可只跑加列两行」。
 - 悬浮音乐播放器（2026-10-24 重写，提交 1cfc72b）：`aplayer@1.10.1`（npm，不用 CDN）+ 自实现
   Meting 协议（`src/lib/meting.ts`）拉网易云歌单；先探测可播性再建列表，缓存 6 小时。
   歌单 ID 默认 2884035（云音乐原创榜，可播率最高 46%），可用 `VITE_NETEASE_PLAYLIST` 覆盖。
