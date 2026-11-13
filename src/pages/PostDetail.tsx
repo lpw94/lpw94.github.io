@@ -13,6 +13,7 @@ import { CATEGORY_LABEL, type Post, type Comment } from '../types'
 import { profile } from '../profile'
 import GiscusComments from '../components/GiscusComments'
 import SharePoster from '../components/SharePoster'
+import PdfAttachment from '../components/PdfAttachment'
 import { SITE_NAME, SITE_URL } from '../lib/site'
 
 // 发布者的 X / Twitter 账号（用于 twitter:site）；没有或想改就改这里
@@ -521,6 +522,12 @@ export default function PostDetail() {
               </ReactMarkdown>
             )}
           </div>
+
+          {/* PDF 附件：作为文章补充材料，也可只发 PDF 不写正文。
+              组件内部默认折叠，点开才加载 iframe，避免每篇文章都拉大文件。 */}
+          {post.pdf_url && (
+            <PdfAttachment url={post.pdf_url} name={post.pdf_name} />
+          )}
 
           {/* 上一篇 / 下一篇：按发布时间倒序，上一篇是更新的，下一篇是更早的 */}
           <nav className="post-nav">

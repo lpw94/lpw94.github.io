@@ -23,6 +23,10 @@ export interface Post {
   title: string
   content: string
   cover_url: string | null
+  /** PDF 附件（可选）：Storage 公开地址 + 上传时的原始文件名。
+      用可选字段，保证「数据库还没执行 post_pdfs.sql」时旧数据/缓存也不会报错。 */
+  pdf_url?: string | null
+  pdf_name?: string | null
   category: Category
   status: 'draft' | 'published'
   views: number

@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { supabase } from '../lib/supabase'
-import { uploadImage, deleteImage } from '../lib/storage'
+import { uploadImage, uploadPdf, deleteFile } from '../lib/storage'
 import { looksLikeHtml, toPlainText } from '../lib/content'
 import RichTextEditor from '../components/RichTextEditor'
 import LoginModal from '../components/LoginModal'
@@ -18,6 +18,9 @@ type FormState = {
   slug: string
   content: string
   cover_url: string | null
+  /** PDF 附件：Storage 公开地址 + 原始文件名，二者同时有值或同时为 null */
+  pdf_url: string | null
+  pdf_name: string | null
   category: Category
   status: 'published' | 'draft'
 }
@@ -36,6 +39,8 @@ const emptyForm = (): FormState => ({
   slug: makeDefaultSlug(),
   content: '',
   cover_url: null,
+  pdf_url: null,
+  pdf_name: null,
   category: 'frontend',
   status: 'published',
 })
@@ -67,6 +72,8 @@ export default function Admin() {
   /** 正文编辑模式：true = 富文本（存 HTML），false = 纯文本 / Markdown */
   const [richMode, setRichMode] = useState(true)
   const [uploading, setUploading] = useState(false)
+  /** PDF 附件上传中（与封面图分开，避免互相禁用） */
+  const [uploadingPdf, setUploadingPdf] = useState(false)
   const [saving, setSaving] = useState(false)
   /** 文章列表当前页码（从 1 开始）；列表本身仍由 posts 全量驱动，仅显示切片 */
   const [page, setPage] = useState(1)
@@ -88,7 +95,7 @@ export default function Admin() {
     r(ok)
   }
 
-  /** 本次表单会话里新上传的图片公开地址（封面 + 正文图）。
+  /** 本次表单会话里新上传的资源公开地址（封面 + 正文图 + PDF）。
       上传即落盘，但只有保存成功后才真正被文章引用；
       被替换/被删掉/放弃编辑的，都要从 Storage 清掉，避免垃圾文件占额度。 */
   const sessionUploads = useRef<Set<string>>(new Set())
@@ -98,6 +105,8 @@ export default function Admin() {
     coverUrl: null,
     images: [],
   })
+  /** 打开表单时文章原有的 PDF 地址，用于换/删 PDF 后清理旧文件 */
+  const originalPdfUrl = useRef<string | null>(null)
 
   useEffect(() => {
     // 先用本地已有会话恢复一次（普通刷新场景）
@@ -135,13 +144,14 @@ export default function Admin() {
     if (page > tp) setPage(tp)
   }, [posts, page])
 
-  /** 删除不再被引用的图片；失败只记日志（外链地址会被 deleteImage 自动跳过），
-      不阻断保存/关闭流程 —— 图片清理是锦上添花，不能因为它把发文搞挂。 */
+  /** 删除不再被引用的资源（图片 + PDF 都走同一个桶）；
+      失败只记日志（外链地址会被 deleteFile 自动跳过），
+      不阻断保存/关闭流程 —— 清理是锦上添花，不能因为它把发文搞挂。 */
   const cleanupImages = async (urls: Iterable<string>, keep: Set<string>) => {
     for (const url of urls) {
       if (keep.has(url)) continue
-      const ok = await deleteImage(url)
-      if (!ok) console.warn('图片清理失败（可稍后在 Supabase Storage 手动删除）', url)
+      const ok = await deleteFile(url)
+      if (!ok) console.warn('资源清理失败（可稍后在 Supabase Storage 手动删除）', url)
     }
   }
 
@@ -198,6 +208,27 @@ export default function Admin() {
     return url
   }
 
+  /** PDF 附件：上传到同一公开桶的 pdfs/ 子目录。
+      和图片一样纳入 sessionUploads，换文件 / 放弃编辑时会自动清理，不留垃圾。 */
+  const uploadPdfFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setUploadingPdf(true)
+    try {
+      const { url, name, size } = await uploadPdf(file)
+      sessionUploads.current.add(url)
+      setForm((prev) => ({ ...prev, pdf_url: url, pdf_name: name }))
+      toast(`PDF 已上传：${name}（${Math.round(size / 1024)}KB）`, 'success')
+    } catch (err) {
+      console.error('PDF 上传失败', err)
+      toast(`PDF 上传失败：${(err as Error).message}`, 'error')
+    } finally {
+      setUploadingPdf(false)
+      // 清空 value，否则再次选择同一个文件不会触发 change
+      e.target.value = ''
+    }
+  }
+
   const submit = async (status: FormState['status']) => {
     if (saving) return
 
@@ -212,9 +243,10 @@ export default function Admin() {
       return
     }
     // 富文本模式下正文是 contentEditable，不是表单控件，HTML 的 required 对它无效，
-    // 所以两种模式统一在这里兜一道非空校验
-    if (!toPlainText(form.content).trim()) {
-      toast('正文不能为空', 'error')
+    // 所以两种模式统一在这里兜一道非空校验。
+    // 允许「只发一份 PDF 文档」这种文章：正文与 PDF 至少有一项即可。
+    if (!toPlainText(form.content).trim() && !form.pdf_url) {
+      toast('正文和 PDF 至少填写一项', 'error')
       return
     }
 
@@ -222,7 +254,22 @@ export default function Admin() {
 
     // 编辑已发布的文章时沿用原发布时间，否则每次保存都会把它刷成当前时间
     const existing = posts.find((p) => p.id === form.id)
-    const payload = {
+    // PDF 两列只在「用到 PDF」时才写进 payload：
+    // 数据库还没执行 post_pdfs.sql 时，普通发文/编辑仍和以前完全一样，
+    // 不会因为 PostgREST 报 "column posts.pdf_url does not exist" 而把整个后台发文搞挂。
+    // 编辑过带 PDF 的文章（originalPdfUrl 有值）时也要带上，才能把移除操作写成 null。
+    type PostPayload = {
+      title: string
+      slug: string
+      content: string
+      cover_url: string | null
+      category: Category
+      status: FormState['status']
+      published_at: string | null
+      pdf_url?: string | null
+      pdf_name?: string | null
+    }
+    const payload: PostPayload = {
       title: form.title,
       slug: form.slug,
       content: form.content,
@@ -234,6 +281,10 @@ export default function Admin() {
           ? existing?.published_at ?? new Date().toISOString()
           : null,
     }
+    if (form.pdf_url || originalPdfUrl.current) {
+      payload.pdf_url = form.pdf_url
+      payload.pdf_name = form.pdf_name
+    }
 
     const { error } = form.id
       ? await supabase.from('posts').update(payload).eq('id', form.id)
@@ -241,8 +292,12 @@ export default function Admin() {
 
     setSaving(false)
     if (error) {
-      toast(error.message, 'error')
-      // 保存失败：不动已上传的图片，用户改完可直接重试
+      // 没跑 post_pdfs.sql 却挂了 PDF 时，PostgREST 会报 42703，翻成可执行的人话
+      const msg = /42703|pdf_url|pdf_name/.test(error.message)
+        ? '数据库还没有 PDF 相关列，请先在 Supabase SQL Editor 执行 supabase/post_pdfs.sql'
+        : error.message
+      toast(msg, 'error')
+      // 保存失败：不动已上传的资源，用户改完可直接重试
       return
     }
 
@@ -250,18 +305,22 @@ export default function Admin() {
     // keep：保存后的文章实际引用的图片地址
     const keep = new Set<string>()
     if (payload.cover_url) keep.add(payload.cover_url)
+    if (payload.pdf_url) keep.add(payload.pdf_url)
     for (const u of extractImageUrls(payload.content)) keep.add(u)
 
     // removed：需要从 Storage 删掉的
     const removed = new Set<string>()
-    // ① 本次会话上传、最终没被引用的（被替换掉的封面、编辑器里删掉的图）
+    // ① 本次会话上传、最终没被引用的（被替换掉的封面/PDF、编辑器里删掉的图）
     for (const u of sessionUploads.current) removed.add(u)
-    // ② 编辑已有文章时被移除的旧资源（换了封面 / 删了正文图）
+    // ② 编辑已有文章时被移除的旧资源（换了封面 / 换了 PDF / 删了正文图）
     if (
       originalImages.current.coverUrl &&
       !keep.has(originalImages.current.coverUrl)
     ) {
       removed.add(originalImages.current.coverUrl)
+    }
+    if (originalPdfUrl.current && !keep.has(originalPdfUrl.current)) {
+      removed.add(originalPdfUrl.current)
     }
     for (const u of originalImages.current.images) {
       if (!keep.has(u)) removed.add(u)
@@ -283,6 +342,7 @@ export default function Admin() {
     setRichMode(true)
     sessionUploads.current = new Set()
     originalImages.current = { coverUrl: null, images: [] }
+    originalPdfUrl.current = null
     setOpen(true)
   }
 
@@ -295,6 +355,8 @@ export default function Admin() {
       slug: post.slug,
       content: post.content,
       cover_url: post.cover_url,
+      pdf_url: post.pdf_url ?? null,
+      pdf_name: post.pdf_name ?? null,
       category: post.category ?? 'frontend',
       status: post.status,
     })
@@ -304,6 +366,7 @@ export default function Admin() {
       coverUrl: post.cover_url,
       images: extractImageUrls(post.content),
     }
+    originalPdfUrl.current = post.pdf_url ?? null
     setOpen(true)
   }
 
@@ -351,10 +414,12 @@ export default function Admin() {
     for (const p of posts) {
       if (p.id === post.id) continue
       if (p.cover_url) keep.add(p.cover_url)
+      if (p.pdf_url) keep.add(p.pdf_url)
       for (const u of extractImageUrls(p.content)) keep.add(u)
     }
     const removed = new Set<string>()
     if (post.cover_url && !keep.has(post.cover_url)) removed.add(post.cover_url)
+    if (post.pdf_url && !keep.has(post.pdf_url)) removed.add(post.pdf_url)
     for (const u of extractImageUrls(post.content)) {
       if (!keep.has(u)) removed.add(u)
     }
@@ -583,6 +648,39 @@ export default function Admin() {
                     onClick={() => setForm({ ...form, cover_url: null })}
                   >
                     移除封面
+                  </button>
+                </div>
+              )}
+
+              <div className="field pdf-field">
+                <label htmlFor="post-pdf">PDF 文档</label>
+                <input
+                  id="post-pdf"
+                  type="file"
+                  accept="application/pdf,.pdf"
+                  onChange={uploadPdfFile}
+                  disabled={uploadingPdf}
+                />
+              </div>
+              <p className="pdf-field-hint muted">
+                可选 · 单个 PDF，≤20MB；正文可留空，只发 PDF 也可以
+              </p>
+              {uploadingPdf && <p className="muted">PDF 上传中…</p>}
+              {form.pdf_url && (
+                <div className="pdf-attach-preview">
+                  <span className="pdf-attach-name" title={form.pdf_name || 'PDF 文档'}>
+                    📄 {form.pdf_name || 'PDF 文档'}
+                  </span>
+                  <a href={form.pdf_url} target="_blank" rel="noreferrer">
+                    预览
+                  </a>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      setForm({ ...form, pdf_url: null, pdf_name: null })
+                    }
+                  >
+                    移除 PDF
                   </button>
                 </div>
               )}

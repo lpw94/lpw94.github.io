@@ -3415,3 +3415,67 @@ html { -webkit-tap-highlight-color: transparent; }
 @media (prefers-reduced-motion: reduce) {
   .game-promo:hover, .gc-feature:hover { transform: none; }
 }
+
+/* ---------- PDF 附件：后台上传 / 首页徽标 / 文章页在线查看 ---------- */
+.pdf-field input[type='file'] { min-width: 0; max-width: 100%; }
+.pdf-field-hint { font-size: 12px; margin: -6px 0 12px 94px; }
+.pdf-attach-preview {
+  display: flex; align-items: center; flex-wrap: wrap;
+  gap: 10px; font-size: 13px;
+}
+.pdf-attach-name {
+  min-width: 0; max-width: 60%;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pdf-attach-preview a { color: var(--accent); }
+
+.post-pdf-badge {
+  display: inline-block; margin-left: 2px; padding: 1px 6px;
+  font-size: 11px; line-height: 1.5; border-radius: 4px;
+  color: var(--accent); border: 1px solid var(--border); background: #fafafa;
+}
+
+.pdf-attachment {
+  margin: 28px 0; padding: 14px 16px;
+  border: 1px solid var(--border); border-left: 3px solid var(--accent);
+  border-radius: 8px; background: #fafafa;
+}
+.pdf-attachment-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 12px; flex-wrap: wrap;
+}
+.pdf-attachment-info { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.pdf-attachment-icon { font-size: 18px; }
+.pdf-attachment-name {
+  min-width: 0; font-size: 14px; font-weight: 600;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.pdf-attachment-tag {
+  flex: 0 0 auto; padding: 1px 5px;
+  font-size: 11px; color: var(--muted);
+  border: 1px solid var(--border); border-radius: 4px; background: #fff;
+}
+.pdf-attachment-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pdf-attachment-actions button,
+.pdf-attachment-actions a {
+  padding: 5px 10px; font-size: 12px; line-height: 1.5;
+  border: 1px solid var(--border); border-radius: 6px;
+  background: #fff; color: var(--fg); text-decoration: none; cursor: pointer;
+}
+.pdf-attachment-actions button:hover,
+.pdf-attachment-actions a:hover { border-color: var(--accent); color: var(--accent); }
+.pdf-attachment-actions button.active { border-color: var(--accent); color: var(--accent); }
+.pdf-frame {
+  margin-top: 14px; height: min(78vh, 900px); min-height: 420px;
+  border: 1px solid var(--border); border-radius: 6px;
+  overflow: hidden; background: #fff;
+}
+.pdf-frame iframe { width: 100%; height: 100%; border: 0; display: block; }
+.pdf-frame-hint { margin: 8px 0 0; font-size: 12px; }
+
+@media (max-width: 720px) {
+  .pdf-field-hint { margin-left: 0; }
+  .pdf-attachment { padding: 12px; }
+  .pdf-attachment-head { align-items: flex-start; }
+  .pdf-frame { height: 62vh; min-height: 320px; }
+}

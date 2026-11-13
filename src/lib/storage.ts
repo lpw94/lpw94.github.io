@@ -134,6 +134,45 @@ export async function deleteImage(publicUrl: string): Promise<boolean> {
   const path = bucketPathFromUrl(publicUrl)
   if (!path) return true
 
-  const { error } = await supabase.storage.from(BUCKET).remove([path])
-  return !error
+  const { data, error } = await supabase.storage.from(BUCKET).remove([path])
+  if (error) return false
+  // RLS 没放开 DELETE 时，remove() 会「成功」但返回空数组，对象其实还在。
+  // 不能只看 error，否则后台会误以为旧封面/旧 PDF 已清理。
+  return Array.isArray(data) ? data.some((o) => o.name === path) : true
+}
+
+/** 上面这个删除函数其实是「按 URL 删本桶对象」，图片和 PDF 通用；
+    另起一个语义中性的名字给 PDF 清理用，旧调用点保持不变。 */
+export const deleteFile = deleteImage
+
+/** PDF 体积上限：20MB（免费版 Storage 只有 1GB，浏览器内嵌预览太大也会卡） */
+const PDF_LIMIT = 20 * 1024 * 1024
+
+export type PdfUploadResult = {
+  /** 可直接给 <iframe>/<a> 用的公开地址 */
+  url: string
+  /** 原始文件名，对象 key 是随机串，展示要靠它 */
+  name: string
+  size: number
+}
+
+/**
+ * 上传 PDF 到同一个 covers 桶的 pdfs/ 子目录。
+ * 不压缩、不改内容，只做类型与体积校验；路径沿用 makeObjectPath 的随机 key 规则，
+ * 所以中文文件名也不会触发 Storage 的 "Invalid key"。
+ */
+export async function uploadPdf(file: File): Promise<PdfUploadResult> {
+  const isPdf = file.type === 'application/pdf' || /\.pdf$/i.test(file.name)
+  if (!isPdf) throw new Error('请选择 PDF 文件（.pdf）')
+  if (file.size > PDF_LIMIT) throw new Error('PDF 不能超过 20MB')
+
+  const path = makeObjectPath('pdfs', file.name)
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(path, file, { contentType: 'application/pdf' })
+
+  if (error) throw new Error(error.message)
+
+  const url = supabase.storage.from(BUCKET).getPublicUrl(path).data.publicUrl
+  return { url, name: file.name, size: file.size }
 }

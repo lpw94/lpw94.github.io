@@ -15,7 +15,13 @@ export default function PostCard({ post }: { post: Post }) {
           </span>
         )}
         <time className="muted">{formatDate(post.published_at)}</time>
-        <span className="muted">· {readingTime(post.content)} 分钟</span>
+        {/* 纯 PDF 文章没有正文，就不显示「1 分钟」这种无意义的阅读时长 */}
+        {post.content?.trim() && (
+          <span className="muted">· {readingTime(post.content)} 分钟</span>
+        )}
+        {post.pdf_url && (
+          <span className="post-pdf-badge" title="含 PDF 附件">📄 PDF</span>
+        )}
       </div>
       <h2>{post.title}</h2>
     </Link>
