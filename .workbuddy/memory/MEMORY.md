@@ -83,7 +83,7 @@
   Editor 手动执行；本地无 .env/service_role，无法代跑 SQL。
   （注：**发文章**已可自助，见上方「发文可自助完成」；代跑 SQL 仍需用户。）
 - **PDF 附件（2026-11-12）**：`posts.pdf_url/pdf_name` 两列（SQL 见 `supabase/post_pdfs.sql`，
-  **待用户手动执行**）；文件复用 `covers` 公开桶的 `pdfs/` 子目录，不用新建 bucket；
+  **用户已于 2026-11-13 执行成功**）；文件复用 `covers` 公开桶的 `pdfs/` 子目录，不用新建 bucket；
   前台 `PdfAttachment.tsx` 懒加载 iframe 预览。新列没建时后台 payload **不能带这两列**，
   否则 PostgREST 42703 会让所有发文挂掉 —— 已做条件化兼容。
   - ⚠️ `supabase.storage.remove()` 在缺 DELETE policy 时返回 **200 + `[]`**（无 error），
