@@ -3300,7 +3300,7 @@ a.post-nav-item:hover { border-color: var(--accent); text-decoration: none; }
 /* 全站点按高亮块（iOS/Android 点击时的灰色方块） */
 html { -webkit-tap-highlight-color: transparent; }
 
-/* ===== 首页：几猫3A大作入口 ===== */
+/* ===== 首页：九狗3A大作入口 ===== */
 .game-promo {
   display: flex;
   align-items: center;

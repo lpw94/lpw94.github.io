@@ -90,7 +90,7 @@ export default function GameCenter() {
       <Link to="/game/jimao" className="gc-feature" title="打开独立的 3A 游戏页面">
         <span className="gc-feature-icon">▶</span>
         <span className="gc-feature-text">
-          <strong>几猫3A大作</strong>
+          <strong>九狗3A大作</strong>
           <small>独立大屏 · 3D 潜入</small>
         </span>
         <span className="gc-feature-arrow">→</span>

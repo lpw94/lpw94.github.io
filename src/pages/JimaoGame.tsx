@@ -33,20 +33,20 @@ export default function JimaoGame() {
   return (
     <>
       <Helmet>
-        <title>几猫3A大作 · woge博客</title>
+        <title>九狗3A大作 · woge博客</title>
         <meta
           name="description"
-          content="几猫港区潜入行动：切断三处上行中继，避开机械守卫，登船撤离。浏览器里直接开玩的单文件 3D 游戏。"
+          content="九狗港区潜入行动：切断三处上行中继，避开机械守卫，登船撤离。浏览器里直接开玩的单文件 3D 游戏。"
         />
         {/* 游戏页正文只有一个 iframe，搜索引擎抓不到有意义的内容 */}
         <meta name="robots" content="noindex, nofollow" />
       </Helmet>
 
-      <section className="game-embed" aria-label="几猫3A大作">
+      <section className="game-embed" aria-label="九狗3A大作">
         <div className="game-embed-head">
           <div className="game-embed-heading">
-            <h1>几猫3A大作</h1>
-            <p>几猫港区 · 四号泊位 · 切断三处上行中继后撤离</p>
+            <h1>九狗3A大作</h1>
+            <p>九狗港区 · 四号泊位 · 切断三处上行中继后撤离</p>
           </div>
           <div className="game-embed-actions">
             <button type="button" onClick={toggleFullscreen}>全屏</button>
@@ -60,7 +60,7 @@ export default function JimaoGame() {
           <iframe
             key={reloadKey}
             src={GAME_URL}
-            title="几猫3A大作"
+            title="九狗3A大作"
             allow="autoplay; fullscreen; pointer-lock; gamepad"
             allowFullScreen
             referrerPolicy="same-origin"

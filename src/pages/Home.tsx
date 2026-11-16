@@ -94,7 +94,7 @@ export default function Home() {
       <Link to="/game/jimao" className="game-promo">
         <span className="game-promo-badge">NEW</span>
         <span className="game-promo-body">
-          <strong>几猫3A大作</strong>
+          <strong>九狗3A大作</strong>
           <span>港区潜入 · 切断三处中继 · 浏览器里直接开玩</span>
         </span>
         <span className="game-promo-cta">开始游戏 →</span>
