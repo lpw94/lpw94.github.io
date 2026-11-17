@@ -66,7 +66,7 @@ export default function ShenzhenGame() {
         </div>
 
         <p className="game-embed-tip">
-          点击「接单出发」开始 · 方向键 / WASD 驾驶、空格鸣笛、P 暂停；手机用屏幕虚拟按键。开到深圳北站即可结算车费。
+          点击「接单出发」开始 · 方向键 / WASD 驾驶、空格鸣笛、P 暂停；手机用屏幕虚拟按键。留意乘客满意度与路段事件，平稳开到深圳北站结算车费与星级。
         </p>
       </section>
     </>
