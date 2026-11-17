@@ -1,0 +1,1069 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#0a0e1a">
+<title>深漂夜行 · 深圳打工仔</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #05070f; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+    color: #e8f0ff; -webkit-tap-highlight-color: transparent; user-select: none;
+  }
+  #app { position: fixed; inset: 0; display: flex; align-items: center; justify-content: center; background: #05070f; }
+  #view { display: block; width: 100%; height: 100%; touch-action: none; }
+
+  /* ---------- HUD ---------- */
+  #hud { position: absolute; inset: 0; pointer-events: none; font-variant-numeric: tabular-nums; }
+  .hud-top { position: absolute; top: 0; left: 0; right: 0; display: flex; justify-content: space-between;
+    align-items: flex-start; padding: 14px 16px; gap: 12px; }
+  .hud-card { background: rgba(8,14,28,.62); border: 1px solid rgba(120,170,255,.22); border-radius: 10px;
+    padding: 8px 12px; backdrop-filter: blur(6px); box-shadow: 0 4px 18px rgba(0,0,0,.35); }
+  .hud-label { font-size: 10px; letter-spacing: .14em; color: #7fa8d8; text-transform: uppercase; }
+  .hud-value { font-size: 20px; font-weight: 800; line-height: 1.15; color: #fff; }
+  .hud-value small { font-size: 11px; font-weight: 600; color: #9fc0e8; margin-left: 2px; }
+  .hud-right { text-align: right; }
+  .hud-right .hud-value { color: #ffd76a; }
+
+  .progress-wrap { position: absolute; top: 74px; left: 50%; transform: translateX(-50%);
+    width: min(520px, 62vw); text-align: center; }
+  .progress-track { height: 7px; border-radius: 99px; background: rgba(255,255,255,.13);
+    border: 1px solid rgba(160,200,255,.25); overflow: hidden; }
+  .progress-fill { height: 100%; width: 0%; border-radius: 99px;
+    background: linear-gradient(90deg, #38bdf8, #818cf8, #f472b6); box-shadow: 0 0 12px rgba(129,140,248,.8);
+    transition: width .25s linear; }
+  .progress-label { margin-top: 5px; font-size: 11px; color: #b9d2f0; text-shadow: 0 1px 3px #000; }
+  .progress-label b { color: #fff; }
+
+  .hud-bottom { position: absolute; bottom: 14px; left: 50%; transform: translateX(-50%);
+    display: flex; align-items: center; gap: 16px; padding: 8px 18px; border-radius: 12px;
+    background: rgba(8,14,28,.6); border: 1px solid rgba(120,170,255,.2); backdrop-filter: blur(6px); }
+  .stat { text-align: center; min-width: 54px; }
+  .stat .k { font-size: 10px; color: #89a9d0; }
+  .stat .v { font-size: 15px; font-weight: 700; }
+
+  .speedo { position: absolute; right: 18px; bottom: 18px; width: 116px; height: 116px; }
+  .speedo svg { width: 100%; height: 100%; transform: rotate(-90deg); }
+  .speedo-num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center;
+    justify-content: center; }
+  .speedo-num b { font-size: 30px; line-height: 1; text-shadow: 0 2px 8px #000; }
+  .speedo-num span { font-size: 10px; color: #9fc0e8; letter-spacing: .12em; }
+
+  .toast-msg { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    padding: 12px 22px; border-radius: 10px; background: rgba(6,10,22,.82);
+    border: 1px solid rgba(255,120,120,.5); color: #ffb4b4; font-weight: 700; font-size: 15px;
+    opacity: 0; transition: opacity .18s; }
+  .toast-msg.show { opacity: 1; }
+
+  /* ---------- 剧情卡 ---------- */
+  #story { position: absolute; inset: 0; display: none; align-items: flex-end; justify-content: center;
+    padding: 0 16px 88px; background: linear-gradient(transparent 35%, rgba(3,6,16,.82)); pointer-events: none; }
+  #story.show { display: flex; animation: fadeIn .45s ease-out; }
+  .story-card { width: min(640px, 92vw); background: rgba(9,15,30,.9); border: 1px solid rgba(150,180,255,.28);
+    border-left: 4px solid #f472b6; border-radius: 12px; padding: 16px 20px; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  .story-id { font-size: 11px; letter-spacing: .2em; color: #f472b6; font-weight: 700; }
+  .story-title { font-size: 19px; font-weight: 800; margin: 6px 0 8px; }
+  .story-text { font-size: 14px; line-height: 1.7; color: #c9d8f0; }
+
+  /* ---------- 弹层：开始 / 结算 ---------- */
+  .screen { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    padding: 20px; background: radial-gradient(ellipse at 50% 30%, rgba(24,40,80,.72), rgba(3,6,16,.94));
+    overflow-y: auto; }
+  .screen.hidden { display: none; }
+  .panel { width: min(760px, 94vw); background: rgba(10,16,32,.94); border: 1px solid rgba(140,180,255,.28);
+    border-radius: 18px; padding: clamp(20px,4vw,36px); box-shadow: 0 24px 80px rgba(0,0,0,.65); }
+  .eyebrow { font-size: 11px; letter-spacing: .26em; color: #7dd3fc; font-weight: 800; text-transform: uppercase; }
+  .title { font-size: clamp(28px,5vw,44px); font-weight: 900; line-height: 1.15; margin: 10px 0 6px;
+    background: linear-gradient(90deg,#fff,#a5b4fc 55%,#f472b6); -webkit-background-clip: text;
+    background-clip: text; color: transparent; }
+  .subtitle { color: #a9bde0; font-size: 14px; line-height: 1.7; margin: 0 0 20px; }
+  .story-intro { border-left: 3px solid #f472b6; padding: 10px 14px; margin: 0 0 20px;
+    background: rgba(244,114,182,.07); border-radius: 0 8px 8px 0; font-size: 13px; line-height: 1.8; color: #d7c4e4; }
+
+  .section-k { font-size: 11px; letter-spacing: .18em; color: #7fa8d8; font-weight: 700; margin: 0 0 10px; }
+  .cars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+  .car { border: 1px solid rgba(140,180,255,.22); border-radius: 12px; padding: 14px; cursor: pointer;
+    background: rgba(255,255,255,.03); transition: border-color .18s, background .18s, transform .18s; }
+  .car:hover { transform: translateY(-2px); border-color: rgba(125,211,252,.6); }
+  .car.sel { border-color: #7dd3fc; background: rgba(56,189,248,.12); box-shadow: 0 0 0 1px rgba(125,211,252,.35); }
+  .car-color { width: 100%; height: 34px; border-radius: 7px; margin-bottom: 10px; position: relative; overflow: hidden; }
+  .car-color::after { content: ""; position: absolute; left: 18%; right: 18%; bottom: 6px; height: 8px;
+    border-radius: 3px; background: rgba(0,0,0,.35); }
+  .car-name { font-weight: 800; font-size: 15px; }
+  .car-tag { font-size: 11px; color: #7dd3fc; margin: 3px 0 8px; }
+  .car-desc { font-size: 12px; color: #9fb6d8; line-height: 1.6; min-height: 38px; }
+  .bars { margin-top: 10px; display: grid; gap: 5px; }
+  .bar { display: flex; align-items: center; gap: 8px; font-size: 10px; color: #89a9d0; }
+  .bar i { flex: none; width: 28px; font-style: normal; }
+  .bar span { flex: 1; height: 4px; border-radius: 99px; background: rgba(255,255,255,.12); overflow: hidden; }
+  .bar span b { display: block; height: 100%; background: linear-gradient(90deg,#38bdf8,#818cf8); }
+
+  .keys { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12px; color: #9fb6d8; margin-bottom: 20px; }
+  .keys kbd { display: inline-block; min-width: 24px; padding: 2px 6px; margin-right: 5px; text-align: center;
+    border: 1px solid rgba(160,190,240,.35); border-bottom-width: 2px; border-radius: 5px;
+    background: rgba(255,255,255,.06); color: #e8f0ff; font: inherit; font-weight: 700; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; cursor: pointer;
+    border: none; border-radius: 11px; padding: 13px 28px; font-size: 16px; font-weight: 800; color: #061022;
+    background: linear-gradient(90deg,#7dd3fc,#a5b4fc); box-shadow: 0 8px 24px rgba(56,189,248,.3);
+    transition: transform .16s, box-shadow .16s; }
+  .btn:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(56,189,248,.45); }
+  .btn.ghost { background: rgba(255,255,255,.08); color: #dce9ff; border: 1px solid rgba(160,190,240,.3); box-shadow: none; }
+  .actions { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+  .result-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 12px; margin: 20px 0; }
+  .result-grid > div { background: rgba(255,255,255,.04); border: 1px solid rgba(140,180,255,.18);
+    border-radius: 10px; padding: 12px; text-align: center; }
+  .result-grid .k { font-size: 11px; color: #89a9d0; }
+  .result-grid .v { font-size: 22px; font-weight: 800; margin-top: 4px; }
+  .grade { font-size: 56px; font-weight: 900; line-height: 1; text-align: center; margin: 8px 0;
+    background: linear-gradient(90deg,#fde047,#fb923c,#f472b6); -webkit-background-clip: text;
+    background-clip: text; color: transparent; }
+  .grade-note { text-align: center; color: #b9cdea; font-size: 13px; margin-bottom: 18px; }
+
+  /* ---------- 触摸控制 ---------- */
+  #touch { position: absolute; inset: 0; pointer-events: none; display: none; }
+  #touch.show { display: block; }
+  .tbtn { position: absolute; pointer-events: auto; width: 62px; height: 62px; border-radius: 16px;
+    background: rgba(10,18,36,.55); border: 1px solid rgba(150,190,255,.35); color: #e8f0ff;
+    font-size: 24px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    backdrop-filter: blur(4px); }
+  .tbtn:active { background: rgba(56,189,248,.4); }
+  .tbtn.l { left: 18px; bottom: 92px; } .tbtn.r { left: 92px; bottom: 92px; }
+  .tbtn.gas { right: 18px; bottom: 150px; border-color: rgba(74,222,128,.5); }
+  .tbtn.brake { right: 18px; bottom: 78px; border-color: rgba(248,113,113,.5); }
+
+  #sound { position: absolute; right: 16px; top: 16px; pointer-events: auto; cursor: pointer;
+    width: 34px; height: 34px; border-radius: 9px; border: 1px solid rgba(150,190,255,.3);
+    background: rgba(8,14,28,.6); color: #cfe2ff; font-size: 16px; display: flex; align-items: center;
+    justify-content: center; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: none; } }
+  @media (max-width: 640px) {
+    .hud-top { padding: 10px; }
+    .hud-card { padding: 6px 9px; }
+    .hud-value { font-size: 16px; }
+    .progress-wrap { top: 64px; width: 74vw; }
+    .speedo { width: 84px; height: 84px; right: 10px; bottom: 12px; }
+    .speedo-num b { font-size: 22px; }
+    .hud-bottom { bottom: 10px; gap: 8px; padding: 6px 10px; }
+    .stat { min-width: 42px; } .stat .v { font-size: 13px; }
+    .cars { grid-template-columns: 1fr; }
+    .car { display: grid; grid-template-columns: 60px 1fr; gap: 0 12px; padding: 10px; }
+    .car-color { grid-row: span 3; height: 52px; margin: 0; }
+    .car-desc { min-height: 0; }
+    .bars { grid-column: span 2; }
+    .result-grid { grid-template-columns: repeat(2,1fr); }
+  }
+</style>
+</head>
+<body>
+<div id="app">
+  <canvas id="view"></canvas>
+
+  <div id="hud">
+    <div class="hud-top">
+      <div class="hud-card">
+        <div class="hud-label">本单车费</div>
+        <div class="hud-value">¥<span id="fare">0</span></div>
+      </div>
+      <div class="hud-card hud-right">
+        <div class="hud-label">剩余路程</div>
+        <div class="hud-value"><span id="remain">24.0</span><small>km</small></div>
+      </div>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-track"><div class="progress-fill" id="progress"></div></div>
+      <div class="progress-label"><b id="area">坪洲地铁站</b> · 前往 深圳北站</div>
+    </div>
+    <div class="hud-bottom">
+      <div class="stat"><div class="k">用时</div><div class="v" id="time">00:00</div></div>
+      <div class="stat"><div class="k">已行驶</div><div class="v"><span id="km">0.0</span> km</div></div>
+      <div class="stat"><div class="k">剐蹭</div><div class="v" id="hits">0</div></div>
+    </div>
+    <div class="speedo">
+      <svg viewBox="0 0 100 100">
+        <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,.12)" stroke-width="6"/>
+        <circle id="speedarc" cx="50" cy="50" r="44" fill="none" stroke="#7dd3fc" stroke-width="6"
+          stroke-linecap="round" stroke-dasharray="276.5" stroke-dashoffset="276.5"/>
+      </svg>
+      <div class="speedo-num"><b id="speed">0</b><span>KM/H</span></div>
+    </div>
+    <div class="toast-msg" id="toast">注意车距！</div>
+    <div id="story">
+      <div class="story-card">
+        <div class="story-id" id="storyId">01 / 昨日</div>
+        <div class="story-title" id="storyTitle">曾经，写代码的人。</div>
+        <div class="story-text" id="storyText"></div>
+      </div>
+    </div>
+  </div>
+
+  <button id="sound" title="开关声音" aria-label="开关声音">🔊</button>
+
+  <div id="touch">
+    <div class="tbtn l" data-key="left">◀</div>
+    <div class="tbtn r" data-key="right">▶</div>
+    <div class="tbtn gas" data-key="up">▲</div>
+    <div class="tbtn brake" data-key="down">▼</div>
+  </div>
+
+  <!-- 开始界面 -->
+  <div class="screen" id="startScreen">
+    <div class="panel">
+      <div class="eyebrow">GTA 2.5 · 深圳特别版</div>
+      <div class="title">深漂夜行 · 深圳打工仔</div>
+      <p class="subtitle">凌晨两点，从坪洲地铁站出发，把乘客送到深圳北站。<br>路上没有回头路，只有下一单。</p>
+      <div class="story-intro">
+        你曾经是大厂 OD。屏幕亮到凌晨，以为人生也会一直亮下去。<br>
+        后来账号被停用、工位上没了你的名字；做过独立开发、跑过跨境、炒过股。<br>
+        今晚，你握住了方向盘 —— <strong>这次，换你掌握方向。</strong>
+      </div>
+      <div class="section-k">选择今晚的座驾</div>
+      <div class="cars" id="cars"></div>
+      <div class="section-k">操作</div>
+      <div class="keys">
+        <span><kbd>←</kbd><kbd>→</kbd> 转向</span>
+        <span><kbd>↑</kbd> 油门</span>
+        <span><kbd>↓</kbd> 刹车</span>
+        <span><kbd>空格</kbd> 喇叭</span>
+        <span><kbd>P</kbd> 暂停</span>
+      </div>
+      <div class="actions">
+        <button class="btn" id="startBtn">接单出发 →</button>
+        <span style="font-size:12px;color:#7f9ac0">手机可用屏幕下方的虚拟按键</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 结算界面 -->
+  <div class="screen hidden" id="endScreen">
+    <div class="panel">
+      <div class="eyebrow">订单完成 · 深圳北站落客区</div>
+      <div class="title">到了。明天继续。</div>
+      <div class="grade" id="grade">A</div>
+      <div class="grade-note" id="gradeNote">稳稳落地，乘客给了五星。</div>
+      <div class="result-grid">
+        <div><div class="k">用时</div><div class="v" id="rTime">00:00</div></div>
+        <div><div class="k">车费</div><div class="v" id="rFare">¥0</div></div>
+        <div><div class="k">剐蹭</div><div class="v" id="rHits">0</div></div>
+        <div><div class="k">平均时速</div><div class="v" id="rAvg">0</div></div>
+      </div>
+      <div class="story-intro" id="rStory">明天你从坪洲出发，我从深圳北出发，看谁接的特惠单多。晚上，星星充电站见。</div>
+      <div class="actions">
+        <button class="btn" id="againBtn">再跑一单 →</button>
+        <button class="btn ghost" id="backBtn">返回首页</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  /* ============ 调试全局（供自动化验证） ============ */
+  window.__errors = [];
+  window.__frames = 0;
+  window.__ready = false;
+  window.__fatal = null;
+  window.addEventListener('error', function (e) { window.__errors.push(String(e.message)); });
+  window.addEventListener('unhandledrejection', function (e) { window.__errors.push(String(e.reason)); });
+
+  /* ============ 常量 ============ */
+  var canvas = document.getElementById('view');
+  var ctx = canvas.getContext('2d', { alpha: false });
+  var W = 960, H = 540, DPR = 1;
+
+  var segmentLength = 70;
+  var rumbleLength = 3;
+  var roadWidth = 2200;
+  var lanes = 3;
+  var drawDistance = 240;
+  var fieldOfView = 100;
+  var cameraHeight = 1050;
+  var cameraDepth = 1 / Math.tan((fieldOfView / 2) * Math.PI / 180);
+  var playerZ = cameraHeight * cameraDepth;
+  var fogDensity = 4.2;
+  var totalKm = 24;
+  var TRACK_LENGTH = totalKm * 1000;
+
+  var COLORS = {
+    sky0: '#050814', sky1: '#0d1630', sky2: '#1b2350',
+    fog: '#101a38',
+    light: { road: '#303343', grass: '#101a2a', rumble: '#e0483f', lane: '#e8eefa' },
+    dark:  { road: '#2b2e3d', grass: '#0d1726', rumble: '#f2f4fa', lane: null }
+  };
+
+  var CARS = [
+    { id: 'qin', name: '比亚迪 秦 PLUS', tag: '均衡之选 · 省电', desc: '熟悉的白色车身。今晚，换你掌握方向。',
+      color: '#e8edf5', accent: '#8ab4f8', speed: 220, accel: 92, handling: 3.5, cost: 1.0 },
+    { id: 'aion', name: '广汽埃安 AION S', tag: '电耗高 · 提速快', desc: '经典尾灯，城市记忆。每一道弯，都有出路。',
+      color: '#c9d6e8', accent: '#38bdf8', speed: 258, accel: 112, handling: 3.1, cost: 1.18 },
+    { id: 'moto', name: '深圳男摩 · 乌萨奇', tag: '街巷自由 · 灵活', desc: '靓仔上车。纸片兄弟坐后座，一起跑向深圳北站。',
+      color: '#f4b942', accent: '#f472b6', speed: 196, accel: 130, handling: 5.2, cost: 0.9 }
+  ];
+
+  var STORY = [
+    { at: 0.00, id: '01 / 昨日', title: '曾经，写代码的人。',
+      text: '你曾经是大厂 OD。屏幕亮到凌晨，觉得人生也会一直亮下去。提交成功。未来，待发布。' },
+    { at: 0.13, id: '02 / 裁员', title: '你的账号，已被停用。',
+      text: '你被优化，权限回收，门禁刷不开。工位还在，你的名字消失了。' },
+    { at: 0.31, id: '03 / 独立开发', title: '十倍效率。零个用户。',
+      text: '有了 AI，一个月能做十个没人用的 App。月产能 ×10，活跃用户，还是 0。' },
+    { at: 0.50, id: '04 / 转行', title: '远方的订单，也没救你。',
+      text: '失业首选跨境电商：平台笑了，货代富了，卖家熬秃了。仓库比钱包更满。' },
+    { at: 0.70, id: '05 / 爆仓', title: '最后一根线，也断了。',
+      text: '炒股炒到只求回本。本金归零。生活，还要继续。' },
+    { at: 0.89, id: '06 / 今晚', title: '这次，握住方向盘。',
+      text: '南山科技园的灯还亮着，只是不再为你而亮。踩下油门 —— 明天继续，晚上星星充电站见。' }
+  ];
+
+  var AREAS = [
+    { name: '坪洲地铁站', at: 0 }, { name: '宝安大道', at: 0.12 },
+    { name: '南山科技园', at: 0.28 }, { name: '城市高架', at: 0.42 },
+    { name: '城中村街巷', at: 0.55 }, { name: '龙华隧道', at: 0.7 },
+    { name: '深圳北站快速路', at: 0.85 }, { name: '深圳北站落客区', at: 0.97 }
+  ];
+
+  /* ============ 工具 ============ */
+  function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+  function lerp(a, b, t) { return a + (b - a) * t; }
+  function easeIn(a, b, p) { return a + (b - a) * Math.pow(p, 2); }
+  function easeOut(a, b, p) { return a + (b - a) * (1 - Math.pow(1 - p, 2)); }
+  function easeInOut(a, b, p) { return a + (b - a) * (-Math.cos(p * Math.PI) / 2 + 0.5); }
+  function percentRemaining(n, total) { return (n % total) / total; }
+  function interpolate(a, b, p) { return a + (b - a) * p; }
+  function exponentialFog(distance, density) { return 1 / Math.pow(Math.E, distance * distance * density); }
+  function fmtTime(s) {
+    var m = Math.floor(s / 60), ss = Math.floor(s % 60);
+    return (m < 10 ? '0' : '') + m + ':' + (ss < 10 ? '0' : '') + ss;
+  }
+  function polygon(x1,y1,x2,y2,x3,y3,x4,y4,color) {
+    ctx.fillStyle = color; ctx.beginPath();
+    ctx.moveTo(x1,y1); ctx.lineTo(x2,y2); ctx.lineTo(x3,y3); ctx.lineTo(x4,y4);
+    ctx.closePath(); ctx.fill();
+  }
+  function rgba(hex, a) {
+    var n = parseInt(hex.slice(1), 16);
+    return 'rgba(' + ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255) + ',' + a + ')';
+  }
+
+  /* ============ 赛道生成（程序化，单程到深圳北站） ============ */
+  var segments = [];
+  function lastY() { return segments.length === 0 ? 0 : segments[segments.length - 1].p2.world.y; }
+  function addSegment(curve, y) {
+    var n = segments.length;
+    segments.push({
+      index: n,
+      p1: { world: { x: 0, y: lastY(), z: n * segmentLength }, camera: {}, screen: {} },
+      p2: { world: { x: 0, y: y, z: (n + 1) * segmentLength }, camera: {}, screen: {} },
+      curve: curve,
+      color: Math.floor(n / rumbleLength) % 2 ? COLORS.dark : COLORS.light,
+      sprites: [], cars: [], tunnel: false, clip: 0, fog: 0
+    });
+  }
+  function addRoad(enter, hold, leave, curve, y) {
+    var startY = lastY(), endY = startY + y * segmentLength;
+    var total = enter + hold + leave;
+    for (var i = 0; i < enter; i++) addSegment(easeIn(0, curve, i / enter), easeInOut(startY, endY, i / total));
+    for (var j = 0; j < hold; j++) addSegment(curve, easeInOut(startY, endY, (enter + j) / total));
+    for (var k = 0; k < leave; k++) addSegment(easeInOut(curve, 0, k / leave), easeInOut(startY, endY, (enter + hold + k) / total));
+  }
+  var ROAD = {
+    length: { NONE: 0, SHORT: 3, MEDIUM: 5, LONG: 10 },
+    curve: { NONE: 0, EASY: 2, MEDIUM: 4, HARD: 6 },
+    hill:  { NONE: 0, LOW: 10, MEDIUM: 20, HIGH: 35 }
+  };
+  function addStraight(n) { addRoad(n, n, n, 0, 0); }
+  function addCurve(n, curve, hill) { addRoad(n, n, n, curve, hill || 0); }
+  function addSCurves() {
+    addRoad(ROAD.length.MEDIUM, ROAD.length.MEDIUM, ROAD.length.MEDIUM, -ROAD.curve.EASY, ROAD.hill.NONE);
+    addRoad(ROAD.length.MEDIUM, ROAD.length.MEDIUM, ROAD.length.MEDIUM, ROAD.curve.MEDIUM, ROAD.hill.MEDIUM);
+    addRoad(ROAD.length.MEDIUM, ROAD.length.MEDIUM, ROAD.length.MEDIUM, ROAD.curve.EASY, -ROAD.hill.LOW);
+    addRoad(ROAD.length.SHORT, ROAD.length.SHORT, ROAD.length.SHORT, -ROAD.curve.EASY, ROAD.hill.HIGH);
+    addRoad(ROAD.length.MEDIUM, ROAD.length.MEDIUM, ROAD.length.MEDIUM, -ROAD.curve.MEDIUM, -ROAD.hill.MEDIUM);
+  }
+  function addLowRollingHills(n, hill) {
+    addRoad(n, n, n, 0, hill || ROAD.hill.LOW);
+    addRoad(n, n, n, 0, -hill || -ROAD.hill.LOW);
+    addRoad(n, n, n, ROAD.curve.EASY, ROAD.hill.LOW);
+    addRoad(n, n, n, -ROAD.curve.EASY, 0);
+    addRoad(n, n, n, 0, hill || ROAD.hill.MEDIUM);
+    addRoad(n, n, n, 0, -hill || -ROAD.hill.LOW);
+  }
+  function buildTrack() {
+    segments = [];
+    addStraight(ROAD.length.LONG);            // 坪洲地铁站周边
+    addLowRollingHills(ROAD.length.MEDIUM, ROAD.hill.LOW);
+    addStraight(ROAD.length.MEDIUM);
+    addSCurves();                              // 南山科技园
+    addCurve(ROAD.length.LONG, ROAD.curve.MEDIUM, ROAD.hill.MEDIUM);
+    addStraight(ROAD.length.LONG);             // 城市高架
+    addSCurves();
+    addCurve(ROAD.length.LONG, -ROAD.curve.HARD, ROAD.hill.NONE);
+    addLowRollingHills(ROAD.length.MEDIUM, ROAD.hill.MEDIUM);
+    addStraight(ROAD.length.LONG * 1.3);       // 城中村 → 龙华
+    addSCurves();
+    addCurve(ROAD.length.MEDIUM, ROAD.curve.HARD, -ROAD.hill.LOW);
+    addStraight(ROAD.length.LONG * 1.4);       // 北站快速路 + 落客区
+    // 标记隧道段（约 58%~74%）
+    var lo = Math.floor(segments.length * 0.58), hi = Math.floor(segments.length * 0.74);
+    for (var i = lo; i < hi; i++) segments[i].tunnel = true;
+    // 路边 sprite
+    var start = 4, end = segments.length - 4;
+    for (var s = start; s < end; s += 4) {
+      var seg = segments[s];
+      var prog = s / segments.length;
+      var kind = 'lamp';
+      if (s % 12 === 0) kind = 'building';
+      else if (s % 12 === 4) kind = 'sign';
+      else if (s % 12 === 8) kind = 'tree';
+      if (seg.tunnel) kind = 'tunnelLamp';
+      var density = prog > 0.85 ? 0.55 : (seg.tunnel ? 0.75 : 1);
+      if (Math.random() < density) {
+        seg.sprites.push({ offset: -1.32, kind: kind, seed: Math.random(), side: -1 });
+        seg.sprites.push({ offset: 1.32, kind: kind, seed: Math.random(), side: 1 });
+      }
+    }
+    segments[segments.length - 1].color = COLORS.light;
+  }
+  buildTrack();
+  TRACK_LENGTH = segments.length * segmentLength;
+
+  function findSegment(z) {
+    var n = Math.floor(z / segmentLength) % segments.length;
+    return segments[(n + segments.length) % segments.length];
+  }
+  function project(p, cameraX, cameraY, cameraZ) {
+    p.camera.x = (p.world.x || 0) - cameraX;
+    p.camera.y = (p.world.y || 0) - cameraY;
+    p.camera.z = (p.world.z || 0) - cameraZ;
+    p.screen.scale = cameraDepth / Math.max(p.camera.z, 1);
+    p.screen.x = Math.round(W / 2 + p.screen.scale * p.camera.x * W / 2);
+    p.screen.y = Math.round(H / 2 - p.screen.scale * p.camera.y * H / 2);
+    p.screen.w = Math.round(p.screen.scale * roadWidth * W / 2);
+  }
+
+  /* ============ 车流 ============ */
+  var traffic = [];
+  function resetTraffic() {
+    traffic = [];
+    for (var i = 0; i < 46; i++) spawnCar(i * 0.021 + 0.02);
+  }
+  function spawnCar(offsetRatio) {
+    var z = (offsetRatio % 1) * TRACK_LENGTH;
+    var laneOffset = [-0.66, 0, 0.66][Math.floor(Math.random() * 3)] + (Math.random() - 0.5) * 0.08;
+    var slow = Math.random() < 0.35;
+    var palette = ['#e2e8f0','#f59e0b','#22d3ee','#f472b6','#a3e635','#94a3b8','#fb7185','#60a5fa'];
+    traffic.push({
+      z: z, offset: laneOffset, target: laneOffset,
+      speed: slow ? 70 + Math.random() * 40 : 110 + Math.random() * 75,
+      color: palette[Math.floor(Math.random() * palette.length)],
+      wobble: Math.random() * Math.PI * 2, kind: Math.random() < 0.12 ? 'moto' : 'car',
+      horn: false
+    });
+  }
+  function updateTraffic(dt, playerZAbs) {
+    for (var i = 0; i < traffic.length; i++) {
+      var c = traffic[i];
+      c.z += c.speed * dt;
+      if (c.z > TRACK_LENGTH - 200) c.z = 80 + Math.random() * 400;
+      if (c.z < playerZAbs - 400) c.z = playerZAbs + 5000 + Math.random() * 12000;
+      // 前方玩家接近时，偶尔变道（给出提示）
+      var dz = c.z - playerZAbs;
+      if (dz > 0 && dz < 3800 && !c.horn && Math.random() < dt * 0.35) {
+        c.horn = true;
+        if (Math.random() < 0.5) c.target = c.offset > 0 ? -0.66 : 0.66;
+        showToast(Math.random() < 0.5 ? '前车准备变道 · 留意车距' : '有车从后方超越 · 留意侧后方');
+      }
+      if (Math.abs(c.z - playerZAbs) > 6000) c.horn = false;
+      c.wobble += dt * 2;
+      c.offset = lerp(c.offset, c.target, Math.min(1, dt * 0.7));
+    }
+  }
+
+  /* ============ 输入 ============ */
+  var keys = { left: false, right: false, up: false, down: false };
+  function bindKey(code, down) {
+    if (code === 'ArrowLeft' || code === 'KeyA') keys.left = down;
+    else if (code === 'ArrowRight' || code === 'KeyD') keys.right = down;
+    else if (code === 'ArrowUp' || code === 'KeyW') keys.up = down;
+    else if (code === 'ArrowDown' || code === 'KeyS') keys.down = down;
+    else if (down && code === 'Space') { honk(); return true; }
+    else if (down && code === 'KeyP') { togglePause(); return true; }
+    return false;
+  }
+  window.addEventListener('keydown', function (e) {
+    if (bindKey(e.code, true)) e.preventDefault();
+    if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].indexOf(e.code) >= 0) e.preventDefault();
+  });
+  window.addEventListener('keyup', function (e) { bindKey(e.code, false); });
+  function setupTouch() {
+    var box = document.getElementById('touch');
+    if (window.matchMedia('(pointer: coarse)').matches) box.classList.add('show');
+    Array.prototype.forEach.call(box.querySelectorAll('.tbtn'), function (btn) {
+      var key = btn.getAttribute('data-key');
+      var on = function (e) { e.preventDefault(); keys[key] = true; };
+      var off = function (e) { e.preventDefault(); keys[key] = false; };
+      btn.addEventListener('pointerdown', on);
+      btn.addEventListener('pointerup', off);
+      btn.addEventListener('pointercancel', off);
+      btn.addEventListener('pointerleave', off);
+    });
+  }
+  setupTouch();
+
+  /* ============ 音效（WebAudio 合成，零外部资源） ============ */
+  var audio = null, engineOsc = null, engineGain = null, engineFilter = null, soundOn = true;
+  function initAudio() {
+    if (audio) return;
+    try {
+      var AC = window.AudioContext || window.webkitAudioContext;
+      if (!AC) return;
+      audio = new AC();
+      engineOsc = audio.createOscillator(); engineOsc.type = 'sawtooth';
+      engineFilter = audio.createBiquadFilter(); engineFilter.type = 'lowpass'; engineFilter.frequency.value = 700;
+      engineGain = audio.createGain(); engineGain.gain.value = 0;
+      engineOsc.connect(engineFilter); engineFilter.connect(engineGain); engineGain.connect(audio.destination);
+      engineOsc.start();
+    } catch (e) { audio = null; }
+  }
+  function updateEngine(speedRatio, running) {
+    if (!audio || !engineGain) return;
+    var t = audio.currentTime;
+    engineOsc.frequency.setTargetAtTime(48 + speedRatio * 150, t, 0.08);
+    engineFilter.frequency.setTargetAtTime(500 + speedRatio * 1400, t, 0.1);
+    engineGain.gain.setTargetAtTime(running && soundOn ? 0.035 + speedRatio * 0.045 : 0, t, 0.12);
+  }
+  function beep(freq, dur, type, vol) {
+    if (!audio || !soundOn) return;
+    try {
+      var o = audio.createOscillator(), g = audio.createGain();
+      o.type = type || 'square'; o.frequency.value = freq;
+      g.gain.setValueAtTime(vol || 0.08, audio.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.001, audio.currentTime + dur);
+      o.connect(g); g.connect(audio.destination); o.start(); o.stop(audio.currentTime + dur);
+    } catch (e) {}
+  }
+  function honk() { beep(392, 0.16, 'square', 0.05); setTimeout(function () { beep(330, 0.2, 'square', 0.05); }, 130); }
+  function crashSound() {
+    if (!audio || !soundOn) return;
+    try {
+      var len = Math.floor(audio.sampleRate * 0.18);
+      var buf = audio.createBuffer(1, len, audio.sampleRate), d = buf.getChannelData(0);
+      for (var i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / len);
+      var src = audio.createBufferSource(), g = audio.createGain();
+      src.buffer = buf; g.gain.value = 0.16; src.connect(g); g.connect(audio.destination); src.start();
+    } catch (e) {}
+  }
+  document.getElementById('sound').addEventListener('click', function () {
+    soundOn = !soundOn;
+    this.textContent = soundOn ? '🔊' : '🔇';
+    if (!soundOn && engineGain && audio) engineGain.gain.setTargetAtTime(0, audio.currentTime, 0.05);
+  });
+
+  /* ============ 游戏状态 ============ */
+  var state = 'menu'; // menu | running | paused | ended
+  var selectedCar = CARS[0];
+  var pos = 0, speed = 0, playerX = 0, skid = 0, elapsed = 0, hits = 0, fare = 0;
+  var storyIndex = 0, lastTime = 0, pausedAt = 0, toastTimer = null;
+  var bgCanvas = null, bgKey = '';
+
+  function resetGame() {
+    pos = 0; speed = 0; playerX = 0; skid = 0; elapsed = 0; hits = 0; fare = 0; storyIndex = 0;
+    resetTraffic();
+    document.getElementById('story').classList.remove('show');
+    document.getElementById('toast').classList.remove('show');
+    updateHUD();
+  }
+  function startGame() {
+    initAudio();
+    if (audio && audio.state === 'suspended') audio.resume();
+    resetGame();
+    state = 'running';
+    document.getElementById('startScreen').classList.add('hidden');
+    document.getElementById('endScreen').classList.add('hidden');
+    lastTime = performance.now();
+    showStory(0);
+  }
+  function togglePause() {
+    if (state === 'running') { state = 'paused'; showToast('已暂停 · 按 P 继续', 1200); }
+    else if (state === 'paused') { state = 'running'; lastTime = performance.now(); }
+  }
+  function endGame() {
+    state = 'ended';
+    speed = 0;
+    updateEngine(0, false);
+    var avg = totalKm / Math.max(elapsed / 3600, 0.001);
+    var score = 100 - hits * 12 - Math.max(0, elapsed - 150) * 0.12;
+    var grade = score > 88 ? 'S' : score > 72 ? 'A' : score > 55 ? 'B' : score > 35 ? 'C' : 'D';
+    var notes = { S:'教科书般的接送，乘客当场续了三单。', A:'稳稳落地，乘客给了五星。',
+      B:'有惊无险。深圳的夜，从来不缺故事。', C:'车漆花了点，好在人平安到站。', D:'这单…乘客没说话，下车时看了你一眼。' };
+    document.getElementById('grade').textContent = grade;
+    document.getElementById('gradeNote').textContent = notes[grade];
+    document.getElementById('rTime').textContent = fmtTime(elapsed);
+    document.getElementById('rFare').textContent = '¥' + Math.round(fare);
+    document.getElementById('rHits').textContent = hits;
+    document.getElementById('rAvg').textContent = Math.round(avg);
+    document.getElementById('endScreen').classList.remove('hidden');
+    beep(523, 0.18, 'sine', 0.09);
+    setTimeout(function () { beep(659, 0.18, 'sine', 0.09); }, 160);
+    setTimeout(function () { beep(784, 0.3, 'sine', 0.09); }, 320);
+  }
+
+  function showToast(msg, ms) {
+    var el = document.getElementById('toast');
+    el.textContent = msg; el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { el.classList.remove('show'); }, ms || 1500);
+  }
+  function showStory(i) {
+    if (i >= STORY.length) return;
+    var s = STORY[i];
+    document.getElementById('storyId').textContent = s.id;
+    document.getElementById('storyTitle').textContent = s.title;
+    document.getElementById('storyText').textContent = s.text;
+    var box = document.getElementById('story');
+    box.classList.remove('show'); void box.offsetWidth; box.classList.add('show');
+    setTimeout(function () { box.classList.remove('show'); }, 5200);
+  }
+
+  /* ============ 更新 ============ */
+  function update(dt) {
+    if (state !== 'running') return;
+    var car = selectedCar;
+    var speedRatio = speed / car.speed;
+    var accel = car.accel * (1 - speedRatio * 0.85);
+    if (keys.up) speed += accel * dt;
+    else if (keys.down) speed -= 180 * dt;
+    else speed -= 34 * dt;
+    speed = clamp(speed, 0, car.speed);
+
+    var dx = dt * 2 * speedRatio;
+    if (keys.left) playerX -= dx * (car.handling / 3.5);
+    if (keys.right) playerX += dx * (car.handling / 3.5);
+    // 弯道离心力
+    var seg = findSegment(pos + playerZ);
+    playerX -= dx * speedRatio * seg.curve * 0.32;
+    if (Math.abs(playerX) > 1.6) { speed *= 0.965; showToast('压到路肩了！'); }
+    playerX = clamp(playerX, -2.1, 2.1);
+
+    var before = pos;
+    pos = Math.min(TRACK_LENGTH - 1, pos + speed * dt);
+    elapsed += dt;
+    fare += speed * dt / 1000 * 2.6 * car.cost;
+
+    // 车流碰撞
+    var playerAbs = pos + playerZ;
+    updateTraffic(dt, playerAbs);
+    for (var i = 0; i < traffic.length; i++) {
+      var c = traffic[i];
+      if (Math.abs(c.z - playerAbs) < 320 && Math.abs(c.offset - playerX) < 0.34 && c.z > playerAbs - 120) {
+        if (speed > 40) {
+          speed *= 0.45; hits++; crashSound();
+          showToast('剐蹭！车费要扣了');
+          playerX += (playerX > c.offset ? 0.12 : -0.12);
+        }
+        c.z -= 500;
+      }
+    }
+
+    // 剧情触发
+    var prog = pos / TRACK_LENGTH;
+    while (storyIndex < STORY.length && prog >= STORY[storyIndex].at) { showStory(storyIndex); storyIndex++; }
+
+    skid += speed * dt * 0.01;
+    updateEngine(speedRatio, true);
+    updateHUD();
+    if (pos >= TRACK_LENGTH - 2) endGame();
+  }
+
+  function updateHUD() {
+    var prog = clamp(pos / TRACK_LENGTH, 0, 1);
+    document.getElementById('speed').textContent = Math.round(speed * 0.62);
+    document.getElementById('speedarc').style.strokeDashoffset = String(276.5 * (1 - clamp(speed / selectedCar.speed, 0, 1)));
+    document.getElementById('progress').style.width = (prog * 100).toFixed(1) + '%';
+    document.getElementById('remain').textContent = (totalKm * (1 - prog)).toFixed(1);
+    document.getElementById('km').textContent = (totalKm * prog).toFixed(1);
+    document.getElementById('time').textContent = fmtTime(elapsed);
+    document.getElementById('hits').textContent = hits;
+    document.getElementById('fare').textContent = Math.round(fare);
+    var area = AREAS[0].name;
+    for (var i = 0; i < AREAS.length; i++) if (prog >= AREAS[i].at) area = AREAS[i].name;
+    document.getElementById('area').textContent = area;
+  }
+
+  /* ============ 背景：程序化深圳夜景 ============ */
+  function drawBackground(prog, curve) {
+    var key = Math.floor(prog * 24);
+    if (!bgCanvas || bgKey !== String(key)) {
+      bgKey = String(key);
+      bgCanvas = document.createElement('canvas');
+      bgCanvas.width = W; bgCanvas.height = H;
+      var g = bgCanvas.getContext('2d');
+      var grad = g.createLinearGradient(0, 0, 0, H * 0.72);
+      grad.addColorStop(0, COLORS.sky0); grad.addColorStop(0.55, COLORS.sky1); grad.addColorStop(1, COLORS.sky2);
+      g.fillStyle = grad; g.fillRect(0, 0, W, H);
+      // 星星
+      var seed = key * 9301 + 49297;
+      function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
+      g.fillStyle = 'rgba(255,255,255,.75)';
+      for (var s = 0; s < 70; s++) {
+        var sx = rnd() * W, sy = rnd() * H * 0.42, sr = rnd() * 1.3 + 0.3;
+        g.globalAlpha = 0.3 + rnd() * 0.7; g.beginPath(); g.arc(sx, sy, sr, 0, Math.PI * 2); g.fill();
+      }
+      g.globalAlpha = 1;
+      // 月亮
+      g.fillStyle = 'rgba(226,240,255,.92)';
+      g.beginPath(); g.arc(W * 0.78, H * 0.16, 24, 0, Math.PI * 2); g.fill();
+      g.fillStyle = COLORS.sky1;
+      g.beginPath(); g.arc(W * 0.78 + 10, H * 0.16 - 6, 22, 0, Math.PI * 2); g.fill();
+      // 城市天际线三层视差
+      var layers = [
+        { y: 0.66, h: 0.13, col: '#0b1630', win: 'rgba(120,170,255,.22)', step: 26 },
+        { y: 0.70, h: 0.16, col: '#0a1228', win: 'rgba(160,200,255,.3)', step: 34 },
+        { y: 0.75, h: 0.14, col: '#080f20', win: 'rgba(255,210,140,.38)', step: 46 }
+      ];
+      for (var L = 0; L < layers.length; L++) {
+        var lay = layers[L], x = -60;
+        g.fillStyle = lay.col;
+        while (x < W + 60) {
+          var bw = lay.step * (0.7 + rnd() * 0.9);
+          var bh = H * lay.h * (0.45 + rnd() * 0.95);
+          var by = H * lay.y - bh;
+          g.fillRect(x, by, bw, bh);
+          if (rnd() > 0.86) { g.fillRect(x + bw * 0.45, by - 14, 2, 14); }
+          g.fillStyle = lay.win;
+          for (var wy = by + 7; wy < H * lay.y - 4; wy += 9) {
+            for (var wx = x + 5; wx < x + bw - 3; wx += 8) {
+              if (rnd() > 0.55) g.fillRect(wx, wy, 3, 3);
+            }
+          }
+          g.fillStyle = lay.col;
+          x += bw + 3 + rnd() * 8;
+        }
+      }
+      // 地面雾带
+      var gg = g.createLinearGradient(0, H * 0.68, 0, H * 0.86);
+      gg.addColorStop(0, 'rgba(20,34,72,.0)'); gg.addColorStop(1, 'rgba(12,20,46,.95)');
+      g.fillStyle = gg; g.fillRect(0, H * 0.68, W, H * 0.2);
+    }
+    var shift = Math.round(curve * 2 + Math.sin(skid * 0.01) * 4);
+    ctx.drawImage(bgCanvas, shift, 0);
+  }
+
+  /* ============ sprite 绘制 ============ */
+  function drawSprite(sprite, destX, destY, scale, fog) {
+    if (destY > H + 100 || destY < -200 || scale <= 0) return;
+    var alpha = clamp(1 - fog, 0, 1);
+    if (alpha <= 0.02) return;
+    ctx.globalAlpha = alpha;
+    var base = 60 * scale * (W / 1000);
+    if (sprite.kind === 'lamp' || sprite.kind === 'tunnelLamp') {
+      var poleH = base * 6.2;
+      ctx.fillStyle = '#42526e';
+      ctx.fillRect(destX - base * 0.06, destY - poleH, base * 0.12, poleH);
+      ctx.fillStyle = sprite.kind === 'tunnelLamp' ? '#fde68a' : '#ffe9a8';
+      ctx.beginPath(); ctx.moveTo(destX, destY - poleH);
+      ctx.lineTo(destX - base * 0.7, destY - poleH + base * 0.5);
+      ctx.lineTo(destX + base * 0.7, destY - poleH + base * 0.5); ctx.closePath(); ctx.fill();
+      if (base > 1.4) {
+        var glow = ctx.createRadialGradient(destX, destY - poleH + base * 0.5, 0, destX, destY - poleH + base * 0.5, base * 3.4);
+        glow.addColorStop(0, 'rgba(255,225,150,.32)'); glow.addColorStop(1, 'rgba(255,225,150,0)');
+        ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(destX, destY - poleH + base * 0.5, base * 3.4, 0, Math.PI * 2); ctx.fill();
+      }
+    } else if (sprite.kind === 'building') {
+      var bw = base * 4.4, bh = base * (7 + sprite.seed * 9);
+      ctx.fillStyle = sprite.seed > 0.5 ? '#111c36' : '#0e1830';
+      ctx.fillRect(destX - bw / 2, destY - bh, bw, bh);
+      ctx.fillStyle = 'rgba(255,205,130,.5)';
+      for (var wy = destY - bh + base; wy < destY - base; wy += base * 1.4)
+        for (var wx = destX - bw / 2 + base * 0.5; wx < destX + bw / 2 - base; wx += base)
+          if (((wx + wy) | 0) % 3) ctx.fillRect(wx, wy, base * 0.4, base * 0.5);
+    } else if (sprite.kind === 'sign') {
+      var sw = base * 3, sh = base * 1.9;
+      ctx.fillStyle = '#0b1224'; ctx.fillRect(destX - base * 0.05, destY - base * 6, base * 0.1, base * 6);
+      ctx.fillStyle = sprite.seed > 0.5 ? '#1d4ed8' : '#be185d';
+      ctx.fillRect(destX - sw / 2, destY - base * 7.9, sw, sh);
+      ctx.fillStyle = 'rgba(255,255,255,.85)';
+      ctx.fillRect(destX - sw * 0.34, destY - base * 7.2, sw * 0.68, base * 0.22);
+      ctx.fillRect(destX - sw * 0.34, destY - base * 6.8, sw * 0.45, base * 0.17);
+    } else {
+      // 树 / 绿化
+      ctx.fillStyle = '#22303a';
+      ctx.fillRect(destX - base * 0.09, destY - base * 2.4, base * 0.18, base * 2.4);
+      ctx.fillStyle = '#1c4a3a';
+      ctx.beginPath(); ctx.arc(destX, destY - base * 2.9, base * 1.1, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#276149';
+      ctx.beginPath(); ctx.arc(destX - base * 0.4, destY - base * 3.2, base * 0.7, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  function drawTrafficCar(destX, destY, destW, c, fog) {
+    var alpha = clamp(1 - fog, 0, 1);
+    if (alpha <= 0.02 || destW < 1) return;
+    ctx.globalAlpha = alpha;
+    var w = destW * 0.62, h = w * 0.62;
+    var x = destX - w / 2, y = destY - h;
+    // 车身
+    ctx.fillStyle = c.color;
+    roundRect(ctx, x, y + h * 0.22, w, h * 0.72, h * 0.16); ctx.fill();
+    // 车顶
+    ctx.fillStyle = rgba(c.color, 1);
+    roundRect(ctx, x + w * 0.14, y, w * 0.72, h * 0.46, h * 0.14); ctx.fill();
+    // 玻璃
+    ctx.fillStyle = '#0e1a30';
+    ctx.fillRect(x + w * 0.2, y + h * 0.08, w * 0.6, h * 0.3);
+    // 尾灯
+    ctx.fillStyle = '#ff4d4d';
+    ctx.fillRect(x + w * 0.1, y + h * 0.7, w * 0.2, h * 0.13);
+    ctx.fillRect(x + w * 0.7, y + h * 0.7, w * 0.2, h * 0.13);
+    if (c.kind === 'moto') {
+      ctx.fillStyle = '#111'; ctx.fillRect(x + w * 0.45, y + h * 0.55, w * 0.12, h * 0.4);
+    }
+    ctx.globalAlpha = 1;
+  }
+  function roundRect(c, x, y, w, h, r) {
+    r = Math.min(r, w / 2, h / 2);
+    c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r);
+    c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r);
+    c.arcTo(x, y, x + w, y, r); c.closePath();
+  }
+
+  function drawPlayer() {
+    var bounce = Math.sin(skid) * Math.min(3, speed * 0.012);
+    var x = W / 2 + playerX * W * 0.045, y = H * 0.9 + bounce;
+    var w = selectedCar.id === 'moto' ? 78 : 132, h = selectedCar.id === 'moto' ? 74 : 84;
+    // 影子
+    ctx.fillStyle = 'rgba(0,0,0,.42)';
+    ctx.beginPath(); ctx.ellipse(x, y + 8, w * 0.55, h * 0.16, 0, 0, Math.PI * 2); ctx.fill();
+    if (selectedCar.id === 'moto') {
+      ctx.fillStyle = '#151a28';
+      roundRect(ctx, x - 8, y - h * 0.55, 16, h * 0.7, 5); ctx.fill();
+      ctx.fillStyle = selectedCar.color;
+      ctx.beginPath(); ctx.arc(x, y - h * 0.6, 13, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#f472b6';
+      ctx.fillRect(x - 4, y - h * 0.55, 8, 5);
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(x - 22, y - h * 0.62, 10, 4); ctx.fillRect(x + 12, y - h * 0.62, 10, 4);
+    } else {
+      // 车身
+      ctx.fillStyle = selectedCar.color;
+      roundRect(ctx, x - w / 2, y - h * 0.72, w, h * 0.72, 12); ctx.fill();
+      // 车顶/后窗
+      ctx.fillStyle = selectedCar.accent;
+      roundRect(ctx, x - w * 0.36, y - h * 1.02, w * 0.72, h * 0.42, 10); ctx.fill();
+      ctx.fillStyle = '#0d1730';
+      roundRect(ctx, x - w * 0.3, y - h * 0.96, w * 0.6, h * 0.3, 6); ctx.fill();
+      // 尾灯
+      ctx.fillStyle = '#ff3b3b';
+      roundRect(ctx, x - w * 0.44, y - h * 0.42, w * 0.24, h * 0.11, 3); ctx.fill();
+      roundRect(ctx, x + w * 0.2, y - h * 0.42, w * 0.24, h * 0.11, 3); ctx.fill();
+      // 车牌
+      ctx.fillStyle = '#e8eefc'; ctx.fillRect(x - w * 0.14, y - h * 0.28, w * 0.28, h * 0.1);
+      ctx.fillStyle = '#1d4ed8'; ctx.fillRect(x - w * 0.12, y - h * 0.26, w * 0.24, h * 0.06);
+    }
+    // 刹车灯
+    if (keys.down && speed > 5) {
+      ctx.fillStyle = 'rgba(255,60,60,.55)';
+      ctx.beginPath(); ctx.ellipse(x, y - h * 0.25, w * 0.6, h * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  /* ============ 渲染 ============ */
+  function render() {
+    var baseSeg = findSegment(pos);
+    var basePercent = percentRemaining(pos, segmentLength);
+    var pSeg = findSegment(pos + playerZ);
+    var pPercent = percentRemaining(pos + playerZ, segmentLength);
+    var playerY = interpolate(pSeg.p1.world.y, pSeg.p2.world.y, pPercent);
+    var maxy = H;
+    var x = 0, dx = -(baseSeg.curve * basePercent);
+    var prog = pos / TRACK_LENGTH;
+
+    drawBackground(prog, baseSeg.curve);
+
+    // 隧道顶部
+    if (pSeg.tunnel) {
+      ctx.fillStyle = 'rgba(4,8,18,.92)';
+      ctx.fillRect(0, 0, W, H * 0.42);
+      ctx.fillStyle = 'rgba(250,220,140,.5)';
+      for (var tl = 0; tl < 6; tl++) ctx.fillRect(W * (tl + 0.5) / 6 - 20, H * 0.4, 40, 4);
+    }
+
+    // 路面从远到近
+    for (var n = 0; n < drawDistance; n++) {
+      var seg = segments[(baseSeg.index + n) % segments.length];
+      seg.fog = exponentialFog(n / drawDistance, fogDensity);
+      seg.clip = maxy;
+      project(seg.p1, (playerX * roadWidth) - x, playerY + cameraHeight, pos);
+      project(seg.p2, (playerX * roadWidth) - x - dx, playerY + cameraHeight, pos);
+      x += dx; dx += seg.curve;
+      if (seg.p1.camera.z <= cameraDepth || seg.p2.screen.y >= seg.p1.screen.y || seg.p2.screen.y >= maxy) continue;
+      renderSegment(seg, n);
+      maxy = seg.p2.screen.y;
+    }
+
+    // sprite 与车流从远到近
+    for (var m = drawDistance - 1; m > 0; m--) {
+      var s2 = segments[(baseSeg.index + m) % segments.length];
+      var sc = s2.p1.screen.scale;
+      var sx = s2.p1.screen.x, sy = s2.p1.screen.y, sw = s2.p1.screen.w;
+      for (var k = 0; k < s2.sprites.length; k++) {
+        var sp = s2.sprites[k];
+        drawSprite(sp, sx + sc * sp.offset * sw, sy, sc, s2.fog);
+      }
+      var playerAbs = pos + playerZ;
+      for (var t = 0; t < traffic.length; t++) {
+        var car = traffic[t];
+        if (Math.floor(car.z / segmentLength) % segments.length !== s2.index) continue;
+        var carSeg = findSegment(car.z);
+        var cp = percentRemaining(car.z, segmentLength);
+        var cScale = interpolate(carSeg.p1.screen.scale, carSeg.p2.screen.scale, cp);
+        var cx = interpolate(carSeg.p1.screen.x, carSeg.p2.screen.x, cp) + cScale * car.offset * sw;
+        var cy = interpolate(carSeg.p1.screen.y, carSeg.p2.screen.y, cp);
+        var cw = cScale * roadWidth * W / 2;
+        drawTrafficCar(cx, cy, cw * 0.28, car, carSeg.fog);
+      }
+    }
+
+    drawPlayer();
+
+    // 速度感：屏幕边缘暗角 + 速度线
+    var vig = ctx.createRadialGradient(W / 2, H / 2, H * 0.3, W / 2, H / 2, H * 0.85);
+    vig.addColorStop(0, 'rgba(0,0,0,0)'); vig.addColorStop(1, 'rgba(2,5,14,.58)');
+    ctx.fillStyle = vig; ctx.fillRect(0, 0, W, H);
+    if (speed > 140) {
+      ctx.strokeStyle = 'rgba(180,215,255,' + Math.min(0.18, (speed - 140) / 900) + ')';
+      ctx.lineWidth = 1;
+      for (var ln = 0; ln < 8; ln++) {
+        var a = (ln / 8) * Math.PI * 2 + skid * 0.02;
+        var rx = W / 2 + Math.cos(a) * W * 0.48, ry = H / 2 + Math.sin(a) * H * 0.48;
+        ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + Math.cos(a) * 30, ry + Math.sin(a) * 30); ctx.stroke();
+      }
+    }
+  }
+
+  function renderSegment(seg, n) {
+    var p1 = seg.p1.screen, p2 = seg.p2.screen;
+    var r1 = p1.w / Math.pow(lanes, 1.4), r2 = p2.w / Math.pow(lanes, 1.4);
+    var l1 = p1.w / lanes * 0.035, l2 = p2.w / lanes * 0.035;
+    // 地面底色
+    ctx.fillStyle = seg.color.grass;
+    ctx.fillRect(0, p2.y, W, p1.y - p2.y + 1);
+    // 路肩
+    polygon(p1.x - p1.w - r1, p1.y, p1.x - p1.w, p1.y, p2.x - p2.w, p2.y, p2.x - p2.w - r2, p2.y, seg.color.rumble);
+    polygon(p1.x + p1.w + r1, p1.y, p1.x + p1.w, p1.y, p2.x + p2.w, p2.y, p2.x + p2.w + r2, p2.y, seg.color.rumble);
+    // 路面
+    polygon(p1.x - p1.w, p1.y, p1.x + p1.w, p1.y, p2.x + p2.w, p2.y, p2.x - p2.w, p2.y, seg.color.road);
+    // 车道线
+    if (seg.color.lane) {
+      var laneW1 = p1.w * 2 / lanes, laneW2 = p2.w * 2 / lanes;
+      for (var lane = 1; lane < lanes; lane++) {
+        var lx1 = p1.x - p1.w + laneW1 * lane, lx2 = p2.x - p2.w + laneW2 * lane;
+        polygon(lx1 - l1, p1.y, lx1 + l1, p1.y, lx2 + l2, p2.y, lx2 - l2, p2.y, seg.color.lane);
+      }
+    }
+    // 雾
+    if (seg.fog < 1) {
+      ctx.globalAlpha = 1 - seg.fog;
+      ctx.fillStyle = COLORS.fog;
+      ctx.fillRect(0, p2.y, W, p1.y - p2.y + 1);
+      ctx.globalAlpha = 1;
+    }
+    // 隧道侧墙
+    if (seg.tunnel) {
+      ctx.fillStyle = 'rgba(6,10,22,.88)';
+      ctx.fillRect(0, p2.y, Math.max(0, p2.x - p2.w - r2), p1.y - p2.y + 1);
+      ctx.fillRect(Math.min(W, p2.x + p2.w + r2), p2.y, W, p1.y - p2.y + 1);
+    }
+  }
+
+  /* ============ 主循环 ============ */
+  function resize() {
+    var rect = canvas.getBoundingClientRect();
+    DPR = Math.min(window.devicePixelRatio || 1, 2);
+    canvas.width = Math.round(rect.width * DPR);
+    canvas.height = Math.round(rect.height * DPR);
+    W = rect.width || 960; H = rect.height || 540;
+    ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+    bgCanvas = null; bgKey = '';
+  }
+  window.addEventListener('resize', resize);
+
+  function loop(now) {
+    var dt = Math.max(0, Math.min(0.05, (now - lastTime) / 1000 || 0));
+    lastTime = now;
+    try {
+      if (state === 'running') update(dt);
+      render();
+      window.__frames++;
+      if (!window.__ready) window.__ready = true;
+    } catch (e) {
+      window.__fatal = String(e && e.stack || e);
+      window.__errors.push(String(e));
+    }
+    requestAnimationFrame(loop);
+  }
+  document.addEventListener('visibilitychange', function () {
+    if (document.hidden && state === 'running') togglePause();
+  });
+
+  /* ============ UI 绑定 ============ */
+  function buildCarPicker() {
+    var box = document.getElementById('cars');
+    box.innerHTML = '';
+    CARS.forEach(function (car, i) {
+      var el = document.createElement('div');
+      el.className = 'car' + (i === 0 ? ' sel' : '');
+      el.innerHTML =
+        '<div class="car-color" style="background:linear-gradient(160deg,' + car.accent + ',' + car.color + ' 65%,#0b1224)"></div>' +
+        '<div><div class="car-name">' + car.name + '</div>' +
+        '<div class="car-tag">' + car.tag + '</div>' +
+        '<div class="car-desc">' + car.desc + '</div></div>' +
+        '<div class="bars">' +
+          '<div class="bar"><i>极速</i><span><b style="width:' + (car.speed / 260 * 100) + '%"></b></span></div>' +
+          '<div class="bar"><i>加速</i><span><b style="width:' + (car.accel / 130 * 100) + '%"></b></span></div>' +
+          '<div class="bar"><i>操控</i><span><b style="width:' + (car.handling / 5.2 * 100) + '%"></b></span></div>' +
+        '</div>';
+      el.addEventListener('click', function () {
+        selectedCar = car;
+        Array.prototype.forEach.call(box.children, function (c) { c.classList.remove('sel'); });
+        el.classList.add('sel');
+      });
+      box.appendChild(el);
+    });
+  }
+  buildCarPicker();
+  document.getElementById('startBtn').addEventListener('click', startGame);
+  document.getElementById('againBtn').addEventListener('click', startGame);
+  document.getElementById('backBtn').addEventListener('click', function () { location.href = '/'; });
+
+  /* ============ 启动 ============ */
+  resize();
+  resetTraffic();
+  updateHUD();
+  // 菜单背景也渲染一帧，避免黑屏
+  render();
+  window.__game = {
+    get state() { return state; },
+    get pos() { return pos; },
+    get speed() { return speed; },
+    get playerX() { return playerX; },
+    get hits() { return hits; },
+    get elapsed() { return elapsed; },
+    get storyIndex() { return storyIndex; },
+    get totalKm() { return totalKm; },
+    start: startGame,
+    press: function (k, v) { if (k in keys) keys[k] = v; }
+  };
+  lastTime = performance.now();
+  requestAnimationFrame(loop);
+})();
+</script>
+</body>
+</html>

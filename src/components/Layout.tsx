@@ -156,7 +156,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   const showProfile =
     pathname !== '/about' &&
     !pathname.startsWith('/post/') &&
-    !pathname.startsWith('/game/jimao')
+    !pathname.startsWith('/game/')
 
   return (
     <>

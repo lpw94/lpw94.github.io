@@ -3357,6 +3357,22 @@ html { -webkit-tap-highlight-color: transparent; }
 .gc-feature-text small { font-size: 11px; color: rgba(232, 228, 218, 0.7); }
 .gc-feature-arrow { flex: 0 0 auto; color: #ffc977; font-size: 14px; }
 
+/* 深漂夜行入口：冷蓝配色，和其它游戏的暖橙入口区分 */
+.game-promo-blue {
+  border-color: rgba(125, 211, 252, 0.4);
+  background: linear-gradient(105deg, #070d1c 0%, #10203a 62%, #1c1840 100%);
+  box-shadow: 0 8px 22px rgba(8, 18, 42, 0.22);
+}
+.game-promo-blue:hover { border-color: #7dd3fc; box-shadow: 0 12px 28px rgba(8, 18, 42, 0.35); }
+.game-promo-blue .game-promo-badge { background: #7dd3fc; color: #071228; }
+.game-promo-blue .game-promo-cta { color: #a5d8ff; }
+.gc-feature-blue {
+  border-color: rgba(125, 211, 252, 0.4);
+  background: linear-gradient(105deg, #0b1224, #161d3a);
+}
+.gc-feature-blue:hover { border-color: #7dd3fc; }
+.gc-feature-blue .gc-feature-icon, .gc-feature-blue .gc-feature-arrow { color: #a5d8ff; }
+
 /* ===== 独立游戏页：iframe 嵌入自包含 HTML ===== */
 .game-embed { padding: 4px 0 8px; }
 .game-embed-head {

@@ -95,6 +95,14 @@ export default function GameCenter() {
         </span>
         <span className="gc-feature-arrow">→</span>
       </Link>
+      <Link to="/game/shenzhen" className="gc-feature gc-feature-blue" title="打开深漂夜行驾驶游戏">
+        <span className="gc-feature-icon">🚗</span>
+        <span className="gc-feature-text">
+          <strong>深漂夜行</strong>
+          <small>深圳打工仔 · 深夜驾驶</small>
+        </span>
+        <span className="gc-feature-arrow">→</span>
+      </Link>
       <p className="gc-tip">摸鱼时刻 · 上榜留名 🏅</p>
 
       {active &&

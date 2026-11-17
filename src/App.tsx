@@ -12,6 +12,7 @@ import Notes from './pages/Notes'
 import Admin from './pages/Admin'
 import ResetPassword from './pages/ResetPassword'
 import JimaoGame from './pages/JimaoGame'
+import ShenzhenGame from './pages/ShenzhenGame'
 import ToastHost from './components/Toast'
 
 export default function App() {
@@ -34,6 +35,7 @@ export default function App() {
           <Route path="/gallery" element={<Gallery />} />
           {/* 独立游戏页：iframe 嵌入 public/games/jimao-3a.html，隐藏两侧栏给画面让空间 */}
           <Route path="/game/jimao" element={<JimaoGame />} />
+          <Route path="/game/shenzhen" element={<ShenzhenGame />} />
           <Route path="/cinema" element={<Cinema />} />
           <Route path="/tools" element={<Tools />} />
           <Route path="/toolbox" element={<Toolbox />} />
