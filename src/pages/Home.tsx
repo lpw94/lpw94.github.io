@@ -99,15 +99,6 @@ export default function Home() {
         </span>
         <span className="game-promo-cta">开始游戏 →</span>
       </Link>
-      <Link to="/game/shenzhen" className="game-promo game-promo-blue">
-        <span className="game-promo-badge">夜驾</span>
-        <span className="game-promo-body">
-          <strong>深漂夜行 · 深圳打工仔</strong>
-          <span>坪洲 → 深圳北站 · 24km 深夜驾驶，路上有你的故事</span>
-        </span>
-        <span className="game-promo-cta">接单出发 →</span>
-      </Link>
-
       <nav className="category-filter">
         <button
           type="button"
